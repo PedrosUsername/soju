@@ -41,9 +41,15 @@ def getFile():
 
 
 
-# get file
+# get action
 def getAction():
     return sys.argv[2] if len(sys.argv) > 2 else None
+
+
+
+# get file
+def getTerm():
+    return sys.argv[3] if len(sys.argv) > 3 else None
 
 
 
@@ -65,13 +71,12 @@ def voskTranscribe(fil, mod):
 
 
 
-def voskDetail(fil, mod):
+def voskDetail(fil, mod, term = None):
     model = Model(mod)
     wf = wave.open(fil, "rb")
     rec = KaldiRecognizer(model, wf.getframerate())
     rec.SetWords(True)
 
-    # get the list of JSON dictionaries
     results = []
     # recognize speech using vosk model
     while True:
@@ -97,7 +102,7 @@ def voskDetail(fil, mod):
             wordList.append(w)  # and add it to list
 
     wf.close()  # close audiofile
-    return wordList
+    return wordList if term is None else filter(lambda e: e.word == term, wordList)
 
 
 
@@ -109,15 +114,19 @@ def voskDetail(fil, mod):
 
 
 
-model_path = "model"
+model_path = "model2"
+term_to_find = getTerm()
 audio_filename = getFile()
 
 action = getAction()
 if (action == 'transcribe' or action == 't'):
     print(voskTranscribe(audio_filename, model_path))
 elif (action == 'detail' or action == 'd'):
-    list_of_words = voskDetail(audio_filename, model_path)
+    list_of_words = voskDetail(audio_filename, model_path, term_to_find)
     for word in list_of_words:
-        print(word.to_string())
+        print(word.start)
+
+    if(len(list_of_words) < 1):
+        print('no word was found')
 else:
     print('no action selected')
