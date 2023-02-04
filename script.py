@@ -102,7 +102,7 @@ def voskDetail(fil, mod, term = None):
             wordList.append(w)  # and add it to list
 
     wf.close()  # close audiofile
-    return wordList if term is None else filter(lambda e: e.word == term, wordList)
+    return wordList if term is None else [e for e in wordList if e.word == term]
 
 
 
