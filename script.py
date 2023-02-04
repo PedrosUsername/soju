@@ -9,6 +9,10 @@ from vosk import Model, KaldiRecognizer, SetLogLevel
 
 
 
+MODEL_PATH = "./models/en-model"
+
+
+
 def convertMp3ToWav(f):
     song = AudioSegment.from_file(f, format='mp3')
     return song.export(format='wav')
@@ -88,11 +92,11 @@ def voskDetail(fil, mod, term = None):
 
 def main(fil, act, term):
     audio_filename = validateFile(fil)
-    model_path = "model2"
+    model_path = MODEL_PATH
 
     if (act == 'transcribe' or act == 't'):
         print(voskTranscribe(audio_filename, model_path))
-        return None
+        return []
     elif (act == 'detail' or act == 'd'):
         return voskDetail(audio_filename, model_path, term)
     else:

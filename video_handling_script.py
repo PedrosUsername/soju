@@ -4,9 +4,12 @@ import script
 from moviepy.editor import *
 
 
+
+ASSETS_PATH = "./assets"
+
 # soju will need you to give the file path to it 
 def getFile():
-    return sys.argv[1] if len(sys.argv) > 1 else None
+    return "{0}/video/{1}".format(ASSETS_PATH, sys.argv[1]) if len(sys.argv) > 1 else None
 
 
 
@@ -22,14 +25,28 @@ def getTerm():
 
 
 
+
+
+
+
+
+
+
+
+
+
+
 video_filename = getFile()
 action = getAction()
 term_to_find = getTerm()
 
-if(video_filename is not None):
-    audio_filename = video_filename + '.wav'
 
-    clip = VideoFileClip(video_filename)
+
+list_of_words = []
+if(video_filename is not None):
+    audio_filename = "temp.wav"
+
+    clip = VideoFileClip(video_filename, target_resolution=(1080, 1920))
 
     clipAudio = clip.audio
     clipAudio.write_audiofile(audio_filename, ffmpeg_params=["-ac", "1"])
@@ -37,11 +54,26 @@ if(video_filename is not None):
     list_of_words = script.main(audio_filename, action, term_to_find)
     os.remove(audio_filename)
 
-    for word in list_of_words:
-        print(word.to_string())
 
-    if((list_of_words is not None) and (len(list_of_words) < 1)):
-        print('no word was found')
 
+if((len(list_of_words) < 1)):
+    print('no word was found or transcription completed')
 else:
-    print('video file not found')
+    image = ImageClip("{0}/image/vibecheckemoji.png".format(ASSETS_PATH), duration=.7)
+    image = image.subclip(0, image.end).set_pos(("center","center")).resize((1920,1080)).crossfadeout(.5)
+
+    goofyass_clip = clip
+    for word in list_of_words:
+        uppper_half = goofyass_clip.subclip(word.end, goofyass_clip.end)
+        bottom_half = goofyass_clip.subclip(goofyass_clip.start, word.end)
+        uppper_half = CompositeVideoClip([uppper_half, image])
+        goofyass_clip = concatenate_videoclips([bottom_half, uppper_half])
+
+    goofyass_clip.write_videofile(
+        'output.mp4',
+        fps=30,
+        remove_temp=True,
+        codec="libx264",
+        audio_codec="aac",
+        threads = 6,
+    )
