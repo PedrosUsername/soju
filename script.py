@@ -1,6 +1,5 @@
 import filetype
 import json
-import sys
 import wave
 import Word as custom_word
 import speech_recognition as sr
@@ -31,25 +30,6 @@ def validateFile(f):
             raise Exception('unsupported file type')
     except FileNotFoundError:
         raise Exception('File not found')
-
-
-
-# get file
-def getFile():
-    rawFile = sys.argv[1] if len(sys.argv) > 1 else None
-    return validateFile(rawFile)
-
-
-
-# get action
-def getAction():
-    return sys.argv[2] if len(sys.argv) > 2 else None
-
-
-
-# get file
-def getTerm():
-    return sys.argv[3] if len(sys.argv) > 3 else None
 
 
 
@@ -106,27 +86,15 @@ def voskDetail(fil, mod, term = None):
 
 
 
+def main(fil, act, term):
+    audio_filename = validateFile(fil)
+    model_path = "model2"
 
-
-
-
-
-
-
-
-model_path = "model2"
-term_to_find = getTerm()
-audio_filename = getFile()
-
-action = getAction()
-if (action == 'transcribe' or action == 't'):
-    print(voskTranscribe(audio_filename, model_path))
-elif (action == 'detail' or action == 'd'):
-    list_of_words = voskDetail(audio_filename, model_path, term_to_find)
-    for word in list_of_words:
-        print(word.start)
-
-    if(len(list_of_words) < 1):
-        print('no word was found')
-else:
-    print('no action selected')
+    if (act == 'transcribe' or act == 't'):
+        print(voskTranscribe(audio_filename, model_path))
+        return None
+    elif (act == 'detail' or act == 'd'):
+        return voskDetail(audio_filename, model_path, term)
+    else:
+        print('no action selected')
+        return []
