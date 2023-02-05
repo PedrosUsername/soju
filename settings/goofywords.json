@@ -1,0 +1,35 @@
+{
+	"data": [
+		{"word": "look", "start": 0.42, "end": 0.65989, "conf": 0.828685},
+		{"word": "lady", "start": 0.93, "end": 1.23, "conf": 0.998643},
+		{"word": "whatever", "start": 1.29, "end": 1.620026, "conf": 0.917248},
+		{"word": "you're", "start": 1.620026, "end": 1.68, "conf": 0.950289},
+		{"word": "selling", "start": 1.68, "end": 2.1, "conf": 1.0},
+		{"word": "i", "start": 2.1, "end": 2.31, "conf": 1.0},
+		{"word": "ain't", "start": 2.31, "end": 2.49, "conf": 0.992531},
+		{"word": "buying", "start": 2.49, "end": 2.877247, "conf": 0.904251},
+		{"word": "you", "start": 2.877247, "end": 2.939835, "conf": 0.843912},
+		{"word": "know", "start": 2.939835, "end": 3.15, "conf": 0.854158},
+		{"word": "well", "start": 3.27, "end": 3.69, "conf": 1.0},
+		{"word": "my", "start": 4.29, "end": 4.44, "conf": 1.0},
+		{"word": "name", "start": 4.44, "end": 4.65, "conf": 1.0},
+		{"word": "is", "start": 4.65, "end": 4.77, "conf": 1.0},
+		{"word": "skyler", "start": 4.77, "end": 5.13, "conf": 0.411269},
+		{"word": "white", "start": 5.13, "end": 5.37, "conf": 0.979644},
+		{"word": "xxx", "start": 5.37, "end": 5.7, "conf": 0.976409},
+		{"word": "my", "start": 6.81, "end": 6.96, "conf": 1.0},
+		{"word": "husband", "start": 6.96, "end": 7.25967, "conf": 1.0},
+		{"word": "is", "start": 7.260299, "end": 7.41, "conf": 0.979326},
+		{"word": "walter", "start": 7.41, "end": 7.77, "conf": 1.0},
+		{"word": "white", "start": 7.77, "end": 8.1, "conf": 0.995946},
+		{"word": "xxx", "start": 8.100157, "end": 8.58, "conf": 0.770911},
+		{"word": "xxx", "start": 10.11, "end": 10.56, "conf": 0.687984},
+		{"word": "he", "start": 11.19, "end": 11.55, "conf": 1.0},
+		{"word": "told", "start": 11.55, "end": 11.76, "conf": 0.983942},
+		{"word": "me", "start": 11.76, "end": 11.88, "conf": 1.0},
+		{"word": "everything", "start": 11.88, "end": 12.42, "conf": 1.0},
+		{"word": "seriously", "start": 13.62, "end": 14.43, "conf": 1.0}
+	],
+
+	"goofywords": ["xxx"]
+}

@@ -1,3 +1,5 @@
+import json
+
 class Word:
     ''' A class representing a word from the JSON format for vosk speech recognition API '''
 
@@ -11,12 +13,10 @@ class Word:
             word (str): recognized word
         '''
 
-        self.conf = dict["conf"]
-        self.end = dict["end"]
-        self.start = dict["start"]
         self.word = dict["word"]
+        self.start = dict["start"]
+        self.end = dict["end"]
 
     def to_string(self):
         ''' Returns a string describing this instance '''
-        return "{:20} from {:.2f} sec to {:.2f} sec, confidence is {:.2f}%".format(
-            self.word, self.start, self.end, self.conf*100)
+        return json.dumps(self.__dict__)
