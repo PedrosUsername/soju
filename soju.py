@@ -1,14 +1,19 @@
 import os
 import json
-import utils
 
+from utils import utils
 from moviepy.editor import *
 
 
 
+DEFAULT_IMAGE = "./assets/image/vibecheckemojialt.png"
+DEFAULT_AUDIO = "./assets/audio/vineboom.mp3"
+DEFAULT_MAX_IMAGE_DURATION = 1.38
+DEFAULT_OUTPUT_PATH = 'output.mp4'
+DEFAULT_JSON_FILE_NAME = "soju.edit.json"
+
 MODEL_PATH = "./models/en-model"
 TMP_AUDIO = "tmp_audio_file.wav"
-DESCRIBE_JSON_FILE_NAME = "./settings/goofywords.json"
 
 
 
@@ -19,28 +24,30 @@ DESCRIBE_JSON_FILE_NAME = "./settings/goofywords.json"
 
 
 videofile = sys.argv[1] if len(sys.argv) > 1 else None
-wordlistfile = sys.argv[2] if len(sys.argv) > 2 else None
+jsonfile = sys.argv[2] if len(sys.argv) > 2 else None
 
 
 
-if(videofile is not None and wordlistfile is None):
+if(videofile is not None and jsonfile is None):
     clip = VideoFileClip(videofile, target_resolution=(1080, 1920))
     clip.audio.write_audiofile(TMP_AUDIO, ffmpeg_params=["-ac", "1"])
 
     list_of_words = utils.voskDescribe(TMP_AUDIO, MODEL_PATH)
     os.remove(TMP_AUDIO)
 
-    with open(DESCRIBE_JSON_FILE_NAME, 'w') as f:
+    with open(DEFAULT_JSON_FILE_NAME, 'w') as f:
         f.writelines('{\n\t"data": [' + '\n')
         for i, word in enumerate(list_of_words):
             comma = ',' if i < (len(list_of_words) - 1) else ''
             f.writelines('\t\t{0}{1}\n'.format(word.to_string(), comma))
         f.writelines('\t],\n\n')
         f.writelines('\t"goofywords": []\n}')
+    
+    clip.close()
 
-elif(videofile is not None and wordlistfile is not None):    
+elif(videofile is not None and jsonfile is not None):    
     describe_json = []
-    with open(DESCRIBE_JSON_FILE_NAME, 'r') as f:
+    with open(DEFAULT_JSON_FILE_NAME, 'r') as f:
         describe_json = f.read()
 
     describe_data = json.loads(describe_json)["data"]
@@ -49,21 +56,27 @@ elif(videofile is not None and wordlistfile is not None):
 
     clip = VideoFileClip(videofile, target_resolution=(1080, 1920))
 
-    goofyahh_clip = clip
     for word in describe_data_filtered:
-        image = ImageClip("./assets/image/vibecheckemoji.png", duration=.7)
+        goofy_image = word["image"] if word["image"] is not None else DEFAULT_IMAGE
+        goofy_audio = word["audio"] if word["audio"] is not None else DEFAULT_AUDIO
+
+        image = ImageClip(goofy_image, duration=.7)
         image = image.subclip(0, image.end).set_pos(("center","center")).resize((1920, 1080)).crossfadeout(.5)
 
-        uppper_half = goofyahh_clip.subclip(word["end"], goofyahh_clip.end)
-        bottom_half = goofyahh_clip.subclip(goofyahh_clip.start, word["end"])
-        uppper_half = CompositeVideoClip([uppper_half, image])
-        goofyahh_clip = concatenate_videoclips([bottom_half, uppper_half])
+        audio = AudioFileClip(goofy_audio)
+        audio = audio.subclip(0, DEFAULT_MAX_IMAGE_DURATION) if audio.duration > DEFAULT_MAX_IMAGE_DURATION else audio.subclip(0, audio.end)
 
-    goofyahh_clip.write_videofile(
-        'output.mp4',
-        fps=30,
-        remove_temp=True,
-        codec="libx264",
-        audio_codec="aac",
-        threads = 6,
+        uppper_half = clip.subclip(word["end"], clip.end)
+
+        uppper_half = CompositeVideoClip([uppper_half, image])
+        uppper_half.audio = CompositeAudioClip([uppper_half.audio, audio])
+        
+        bottom_half = clip.subclip(clip.start, word["end"])
+        clip = concatenate_videoclips([bottom_half, uppper_half])
+
+    clip.write_videofile(
+        DEFAULT_OUTPUT_PATH,
+        fps=30
     )
+
+    clip.close()
