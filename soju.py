@@ -9,7 +9,8 @@ from moviepy.editor import *
 
 
 
-# TODO - organizar codigo de acordo com algum design pattern
+# TODO - organize code and directories with some fancy design pattern
+# TODO - add video video composition
 
 
 
