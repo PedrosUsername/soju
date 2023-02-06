@@ -1,31 +1,13 @@
 import json
 import wave
-import speech_recognition as sr
 
-from . import Word as custom_word
 from vosk import Model, KaldiRecognizer
 
+from . import Word as custom_word
+from .settings import variables
 
 
 
-
-
-
-# get just the text
-def voskTranscribe(fil, mod):
-    r = sr.Recognizer()
-    with sr.AudioFile(fil) as source:
-        audio = r.record(source)
-
-    try:
-        model = Model(mod)
-        rec = KaldiRecognizer(model, 16000)
-        rec.AcceptWaveform(audio.get_raw_data(convert_rate=16000, convert_width=2))
-        return rec.FinalResult()
-    except sr.UnknownValueError:
-        raise Exception("Vosk could not understand audio")
-    except sr.RequestError as e:
-        raise Exception("Could not request results from Vosk; {0}".format(e))
 
 
 
@@ -56,6 +38,8 @@ def voskDescribe(fil, mod):
             # {'text': ''}
             continue
         for obj in sentence['result']:
+            obj["image"] = variables.DEFAULT_IMAGE_FILE
+            obj["audio"] = [variables.DEFAULT_AUDIO_FILE]
             w = custom_word.Word(obj)  # create custom Word object
             wordList.append(w)  # and add it to list
     wf.close()  # close audiofile

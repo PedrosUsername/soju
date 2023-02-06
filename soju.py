@@ -2,22 +2,14 @@ import os
 import json
 
 from utils import utils
+from utils.settings import variables
 from moviepy.editor import *
 
 
 
-DEFAULT_IMAGE = "./assets/image/vibecheckemojialt.png"
-DEFAULT_AUDIO = "./assets/audio/vineboom.mp3"
-DEFAULT_MAX_IMAGE_DURATION = 1.36
-DEFAULT_OUTPUT_PATH = 'output.mp4'
-DEFAULT_JSON_FILE_NAME = "edit.soju.json"
-
-MODEL_PATH = "./models/en-model"
-TMP_AUDIO = "tmp_audio_file.wav"
 
 
-
-
+# TODO - organizar codigo de acordo com algum design pattern
 
 
 
@@ -30,12 +22,12 @@ jsonfile = sys.argv[2] if len(sys.argv) > 2 else None
 
 if(videofile is not None and jsonfile is None):
     clip = VideoFileClip(videofile, target_resolution=(1080, 1920))
-    clip.audio.write_audiofile(TMP_AUDIO, ffmpeg_params=["-ac", "1"])
+    clip.audio.write_audiofile(variables.PATH_TMP_AUDIO, ffmpeg_params=["-ac", "1"])
 
-    list_of_words = utils.voskDescribe(TMP_AUDIO, MODEL_PATH)
-    os.remove(TMP_AUDIO)
+    list_of_words = utils.voskDescribe(variables.PATH_TMP_AUDIO, variables.PATH_MODEL)
+    os.remove(variables.PATH_TMP_AUDIO)
 
-    with open(DEFAULT_JSON_FILE_NAME, 'w') as f:
+    with open(variables.PATH_DEFAULT_JSON_FILE, 'w') as f:
         f.writelines('{\n\t"data": [' + '\n')
         for i, word in enumerate(list_of_words):
             comma = ',' if i < (len(list_of_words) - 1) else ''
@@ -47,7 +39,7 @@ if(videofile is not None and jsonfile is None):
 
 elif(videofile is not None and jsonfile is not None):    
     describe_json = []
-    with open(DEFAULT_JSON_FILE_NAME, 'r') as f:
+    with open(variables.PATH_DEFAULT_JSON_FILE, 'r') as f:
         describe_json = f.read()
 
     describe_data = json.loads(describe_json)["data"]
@@ -57,25 +49,26 @@ elif(videofile is not None and jsonfile is not None):
     clip = VideoFileClip(videofile, target_resolution=(1080, 1920))
 
     for word in describe_data_filtered:
-        goofy_image = word["image"] if word["image"] is not None else DEFAULT_IMAGE
-        goofy_audio = word["audio"] if word["audio"] is not None else DEFAULT_AUDIO
+        goofy_image = '{0}{1}'.format(variables.PATH_DEFAULT_IMAGE, word["image"]) if word["image"] is not None else variables.PATH_NULL_IMAGE
+        goofy_audios = word["audio"] if word["audio"] is not None else []
 
         image = ImageClip(goofy_image, duration=.7)
         image = image.subclip(0, image.end).set_pos(("center","center")).resize((1920, 1080)).crossfadeout(.5)
-
-        audio = AudioFileClip(goofy_audio)
-        audio = audio.subclip(0, DEFAULT_MAX_IMAGE_DURATION) if audio.duration > DEFAULT_MAX_IMAGE_DURATION else audio.subclip(0, audio.end)
-
+        
         uppper_half = clip.subclip(word["end"], clip.end)
-
         uppper_half = CompositeVideoClip([uppper_half, image])
-        uppper_half.audio = CompositeAudioClip([uppper_half.audio, audio])
+        
+        for goofy_audio in goofy_audios:
+            goofy_audio = '{0}{1}'.format(variables.PATH_DEFAULT_AUDIO, goofy_audio) if goofy_audio is not None else variables.PATH_NULL_AUDIO
+            audio = AudioFileClip(goofy_audio)
+            audio = audio.subclip(0, variables.DEFAULT_MAX_IMG_DURATION) if audio.duration > variables.DEFAULT_MAX_IMG_DURATION else audio.subclip(0, audio.end)
+            uppper_half.audio = CompositeAudioClip([uppper_half.audio, audio])
         
         bottom_half = clip.subclip(clip.start, word["end"])
         clip = concatenate_videoclips([bottom_half, uppper_half])
 
     clip.write_videofile(
-        DEFAULT_OUTPUT_PATH,
+        variables.PATH_DEFAULT_OUTPUT,
         fps=30
     )
 

@@ -16,8 +16,8 @@ class Word:
         self.word = dict["word"]
         self.start = dict["start"]
         self.end = dict["end"]
-        self.image = None
-        self.audio = None
+        self.image = dict["image"]
+        self.audio = dict["audio"]
 
     def to_string(self):
         ''' Returns a string describing this instance '''
