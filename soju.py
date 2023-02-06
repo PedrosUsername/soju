@@ -8,9 +8,9 @@ from moviepy.editor import *
 
 DEFAULT_IMAGE = "./assets/image/vibecheckemojialt.png"
 DEFAULT_AUDIO = "./assets/audio/vineboom.mp3"
-DEFAULT_MAX_IMAGE_DURATION = 1.38
+DEFAULT_MAX_IMAGE_DURATION = 1.36
 DEFAULT_OUTPUT_PATH = 'output.mp4'
-DEFAULT_JSON_FILE_NAME = "soju.edit.json"
+DEFAULT_JSON_FILE_NAME = "edit.soju.json"
 
 MODEL_PATH = "./models/en-model"
 TMP_AUDIO = "tmp_audio_file.wav"
