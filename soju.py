@@ -50,7 +50,7 @@ elif(videofile is not None and jsonfile is not None):
     clip = VideoFileClip(videofile, target_resolution=(1080, 1920))
 
     for word in describe_data_filtered:
-        goofy_image = '{0}{1}'.format(variables.PATH_DEFAULT_IMAGE, word["image"]) if word["image"] is not None else variables.PATH_NULL_IMAGE
+        goofy_image = '{0}{1}'.format(variables.DEFAULT_IMAGE_PATH, word["image"]) if word["image"] is not None else '{0}{1}'.format(variables.DEFAULT_IMAGE_PATH, variables.DEFAULT_NULL_IMAGE_FILE)
         goofy_audios = word["audio"] if word["audio"] is not None else []
 
         image = ImageClip(goofy_image, duration=.7)
@@ -60,9 +60,9 @@ elif(videofile is not None and jsonfile is not None):
         uppper_half = CompositeVideoClip([uppper_half, image])
         
         for goofy_audio in goofy_audios:
-            goofy_audio = '{0}{1}'.format(variables.PATH_DEFAULT_AUDIO, goofy_audio) if goofy_audio is not None else variables.PATH_NULL_AUDIO
+            goofy_audio = '{0}{1}'.format(variables.DEFAULT_AUDIO_PATH, goofy_audio) if goofy_audio is not None else '{0}{1}'.format(variables.DEFAULT_AUDIO_PATH, variables.DEFAULT_NULL_AUDIO_FILE)
             audio = AudioFileClip(goofy_audio)
-            audio = audio.subclip(0, variables.DEFAULT_MAX_IMG_DURATION) if audio.duration > variables.DEFAULT_MAX_IMG_DURATION else audio.subclip(0, audio.end)
+            audio = audio.subclip(0, variables.MAX_IMG_DURATION) if audio.duration > variables.MAX_IMG_DURATION else audio.subclip(0, audio.end)
             uppper_half.audio = CompositeAudioClip([uppper_half.audio, audio])
         
         bottom_half = clip.subclip(clip.start, word["end"])
