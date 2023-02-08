@@ -15,7 +15,7 @@ IGNORE_IMAGE_FILE_LIST = [
 DEFAULT_AUDIO_PATH = "./assets/audio/"
 DEFAULT_AUDIO_FILE = ["vineboom.mp3"]
 DEFAULT_NULL_AUDIO_FILE = "null.mp3"
-CHOOSE_AUDIO_AT_RANDOM = 6                     # 0 -> add only DEFAULT_AUDIO_FILE sounds
+CHOOSE_AUDIO_AT_RANDOM = 2                     # 0 -> add only DEFAULT_AUDIO_FILE sounds
                                                # n > 0 -> add DEFAULT_AUDIO_FILE + n random sounds
 MAX_AUDIO_DURATION = 1.38
 
