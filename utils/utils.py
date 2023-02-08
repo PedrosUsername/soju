@@ -43,7 +43,7 @@ def getRandomizedAudioFileNames():
 
 
 def constructWord(obj):
-    image_name = variables.DEFAULT_IMAGE_FILE if variables.CHOOSE_IMAGE_AT_RANDOM is True else getRandomizedImageFileName()
+    image_name = getRandomizedImageFileName() if variables.CHOOSE_IMAGE_AT_RANDOM == True else variables.DEFAULT_IMAGE_FILE
     audio_names = cycle(getRandomizedAudioFileNames())
 
     obj["image"] = image_name
