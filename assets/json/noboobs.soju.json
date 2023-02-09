@@ -1,0 +1,18 @@
+{
+	"data": [
+		{"word": "ooh", "start": 0.302278, "end": 1.83, "image": null, "audio": ["vineboom.mp3"]},
+		{"word": "boobs", "start": 6.45, "end": 7.645363, "image": "noel.jpeg", "audio": ["vineboom.mp3"]},		
+		{"word": "the", "start": 3.15, "end": 9.845363, "image": null, "audio": ["vineboom.mp3"]},
+		{"word": "eyes", "start": 9.912312, "end": 10.71, "image": "usaki.jpeg", "audio": ["vineboom.mp3"]},
+		{"word": "no", "start": 11.55, "end": 11.82, "image": null, "audio": ["vineboom.mp3"]},
+		{"word": "boobs", "start": 11.826554, "end": 12.45, "image": "megamilk.jpeg", "audio": ["vineboom.mp3"]},
+		{"word": "only", "start": 14.64, "end": 15.0, "image": null, "audio": ["vineboom.mp3"]},
+		{"word": "eyes", "start": 15.0, "end": 15.689791, "image": "scarle.jpg", "audio": ["vineboom.mp3"]},
+		{"word": "only", "start": 15.960494, "end": 16.260154, "image": null, "audio": ["vineboom.mp3"]},
+		{"word": "face", "start": 16.262732, "end": 17.04, "image": "watson.jpg", "audio": ["vineboom.mp3"]},
+		{"word": "the", "start": 18.251953, "end": 21.143564, "image": null, "audio": ["vineboom.mp3"]},
+		{"word": "boobs", "start": 21.33, "end": 22.11, "image": "hime.jpeg", "audio": ["vineboom.mp3"]}
+	],
+
+	"goofywords": ["boobs", "eyes", "face", "boobs"]
+}

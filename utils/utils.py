@@ -1,3 +1,4 @@
+import ntpath
 import random
 import json
 import wave
@@ -23,14 +24,16 @@ def file_is_a_good_choice(image_file):
 
 
 
-def getRandomizedImageFileName():
-    image_files = os.listdir(variables.DEFAULT_IMAGE_PATH)
-
+def getRandomizedImageFileName(image_files):
     flag = False
-    while flag is False:
-        image_file = random.choice(image_files)
-        flag = True if file_is_a_good_choice(image_file) else False
 
+    while flag is False:
+        try:
+            image_file = random.choice(image_files)
+            flag = True if file_is_a_good_choice(image_file) else False
+        except:
+            image_file = None
+            flag = True
     return image_file
 
 
@@ -42,8 +45,8 @@ def getRandomizedAudioFileNames():
 
 
 
-def constructWord(obj):
-    image_name = getRandomizedImageFileName() if variables.CHOOSE_IMAGE_AT_RANDOM == True else variables.DEFAULT_IMAGE_FILE
+def constructWord(obj, image_files):
+    image_name = getRandomizedImageFileName(image_files) if variables.CHOOSE_IMAGE_AT_RANDOM == True else variables.DEFAULT_IMAGE_FILE
     audio_names = cycle(getRandomizedAudioFileNames())
 
     obj["image"] = image_name
@@ -53,6 +56,25 @@ def constructWord(obj):
 
 
 
+def get_base_file_name_from(videofilepath):
+    filename = ntpath.basename(videofilepath)
+    head, tail = filename[::-1].split(".", 1)
+    return tail[::-1]
+
+
+
+
+def generate_soju_file_name(videofilepath):
+    videofilename = get_base_file_name_from(videofilepath)
+    return "{}{}.soju.json".format(variables.PATH_DEFAULT_JSON_FILE, videofilename)
+
+
+
+
+def generate_output_file_name(videofilepath):
+    videofilename = get_base_file_name_from(videofilepath)
+    return "{}{}.mp4".format(variables.DEFAULT_OUTPUT_PATH, videofilename)
+
 
 
 
@@ -60,6 +82,7 @@ def constructWord(obj):
 
 
 def voskDescribe(fil, mod):
+    image_files = os.listdir(variables.DEFAULT_IMAGE_PATH)
     model = Model(mod)
     wf = wave.open(fil, "rb")
     rec = KaldiRecognizer(model, wf.getframerate())
@@ -86,7 +109,10 @@ def voskDescribe(fil, mod):
             # {'text': ''}
             continue
         for obj in sentence['result']:
-            word_list.append(constructWord(obj))  # and add it to list
+            new_word = constructWord(obj, image_files)
+            if new_word.image is not None and variables.ALLOW_IMAGE_REPETITION_WHEN_RANDOM is not True:
+                image_files.remove(new_word.image)
+            word_list.append(new_word)  # and add it to list
     wf.close()  # close audiofile
 
     return word_list
