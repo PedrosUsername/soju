@@ -1,0 +1,23 @@
+{
+	"data": [
+		{"word": "yeah", "start": 0.303038, "end": 0.78, "image": "usaki.jpeg", "audio": ["vineboom.mp3"]},
+		{"word": "i", "start": 0.87, "end": 1.05, "image": "reine.jpeg", "audio": ["vineboom.mp3"]},
+		{"word": "want", "start": 1.05, "end": 1.32, "image": "sensei.jpg", "audio": ["vineboom.mp3"]},
+		{"word": "mommy", "start": 1.32029, "end": 1.83, "image": "mio.jpg", "audio": ["vineboom.mp3"]},
+		{"word": "i", "start": 1.83, "end": 1.95, "image": "noel.jpeg", "audio": ["vineboom.mp3"]},
+		{"word": "want", "start": 1.95, "end": 2.18984, "image": "amano.jpg", "audio": ["vineboom.mp3"]},
+		{"word": "milk", "start": 2.190759, "end": 2.67, "image": "megamilk.jpeg", "audio": ["vineboom.mp3"]},
+		{"word": "i", "start": 2.67, "end": 2.76, "image": "hajime.jpg", "audio": ["vineboom.mp3"]},
+		{"word": "want", "start": 2.76, "end": 2.94, "image": null, "audio": ["vineboom.mp3"]},
+		{"word": "to", "start": 2.943914, "end": 3.03, "image": "scarle.jpg", "audio": ["vineboom.mp3"]},
+		{"word": "be", "start": 3.03, "end": 3.21, "image": "fauna.jpg", "audio": ["vineboom.mp3"]},
+		{"word": "held", "start": 3.21, "end": 3.72, "image": "watson.jpg", "audio": ["vineboom.mp3"]},
+		{"word": "i", "start": 3.72, "end": 3.81, "image": "zent.png", "audio": ["vineboom.mp3"]},
+		{"word": "want", "start": 3.81, "end": 3.99, "image": null, "audio": ["vineboom.mp3"]},
+		{"word": "to", "start": 3.99, "end": 4.05, "image": null, "audio": ["vineboom.mp3"]},
+		{"word": "be", "start": 4.05, "end": 4.14, "image": null, "audio": ["vineboom.mp3"]},
+		{"word": "comforted", "start": 4.14, "end": 4.83, "image": "hime.jpeg", "audio": ["vineboom.mp3"]}
+	],
+
+	"goofywords": ["mommy", "milk", "held", "comforted"]
+}

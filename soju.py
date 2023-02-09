@@ -34,24 +34,22 @@ if(videofilepath is not None and jsonfilepath is None):
             comma = ',' if i < (len(list_of_words) - 1) else ''
             f.writelines('\t\t{0}{1}\n'.format(word.to_string(), comma))
         f.writelines('\t],\n\n')
-        f.writelines('\t"goofywords": []\n}')
+        f.writelines('\t"goofywords": [\n\n\t]\n}')
     
     clip.close()
 
 elif(videofilepath is not None and jsonfilepath is not None):
-    goofy_trigger = "end" if variables.BOOM_AT_END_OF_WORDS else "start"
+    goofy_trigger = "end" if variables.BOOM_AT_WORD_END else "start"
 
     describe_json = []
     with open(utils.generate_soju_file_name(videofilepath), 'r') as f:
         describe_json = f.read()
 
-    describe_data = json.loads(describe_json)["data"]
     describe_goofywords = json.loads(describe_json)["goofywords"]
-    describe_data_filtered = [e for e in describe_data if e["word"] in describe_goofywords]
 
     clip = VideoFileClip(videofilepath, target_resolution=(1080, 1920))
 
-    for word in describe_data_filtered:
+    for word in describe_goofywords:
         goofy_image = '{0}{1}'.format(variables.DEFAULT_IMAGE_PATH, word["image"]) if word["image"] is not None else variables.DEFAULT_NULL_IMAGE_FILE
         goofy_audios = word["audio"] if word["audio"] is not None else []
 
@@ -65,7 +63,8 @@ elif(videofilepath is not None and jsonfilepath is not None):
             goofy_audio = '{0}{1}'.format(variables.DEFAULT_AUDIO_PATH, goofy_audio) if goofy_audio is not None else variables.DEFAULT_NULL_AUDIO_FILE
             audio = AudioFileClip(goofy_audio)
             audio = audio.subclip(0, variables.MAX_AUDIO_DURATION) if audio.duration > variables.MAX_AUDIO_DURATION else audio.subclip(0, audio.end)
-            audio = audio.fx(afx.audio_fadeout, audio.duration * (1/3))
+            audio = audio.fx(afx.audio_fadeout, audio.duration * (2/3))
+            
             uppper_half.audio = CompositeAudioClip([uppper_half.audio, audio])
         
         bottom_half = clip.subclip(clip.start, word[goofy_trigger])

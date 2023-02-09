@@ -1,14 +1,14 @@
 # goofy confs
-BOOM_AT_END_OF_WORDS = True
+BOOM_AT_WORD_END = False
 ALLOW_IMAGE_REPETITION_WHEN_RANDOM = False
 
 # image confs
-DEFAULT_IMAGE_PATH = "./assets/image/mommy/"
+DEFAULT_IMAGE_PATH = "./assets/image/pettan/"
 DEFAULT_IMAGE_FILE = "vibecheckemojialt.png"
 DEFAULT_NULL_IMAGE_FILE = "./assets/image/null.png"
 CHOOSE_IMAGE_AT_RANDOM = 1                     # 0     -> use image DEFAULT_IMAGE_FILE for every word
                                                # n > 0 -> use Random images for every word
-MAX_IMAGE_DURATION = .7
+MAX_IMAGE_DURATION = .9
 
 IGNORE_IMAGE_FILE_LIST = [
     DEFAULT_NULL_IMAGE_FILE
