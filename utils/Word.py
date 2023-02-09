@@ -17,6 +17,7 @@ class Word:
         self.start = dict["start"]
         self.end = dict["end"]
         self.image = dict["image"]
+        self.imageconcatstrategy = dict["imageconcatstrategy"]
         self.audio = dict["audio"]
 
     def to_string(self):

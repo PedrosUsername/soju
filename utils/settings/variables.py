@@ -1,5 +1,5 @@
 # goofy confs
-BOOM_AT_WORD_END = False
+BOOM_AT_WORD_END = True
 ALLOW_IMAGE_REPETITION_WHEN_RANDOM = False
 
 # image confs

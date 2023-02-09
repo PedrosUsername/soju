@@ -1,7 +1,7 @@
 import os
 import json
 
-from utils import utils
+from utils import utils, ImageMergeStrategy
 from utils.settings import variables
 from moviepy.editor import *
 
@@ -57,17 +57,24 @@ elif(videofilepath is not None and jsonfilepath is not None):
         image = image.subclip(0, image.end).set_pos(("center","center")).resize((1920, 1080)).crossfadeout(.5)
         
         uppper_half = clip.subclip(word[goofy_trigger], clip.end)
-        uppper_half = CompositeVideoClip([uppper_half, image])
+        bottom_half = clip.subclip(clip.start, word[goofy_trigger])
+        if word["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
+            uppper_half = concatenate_videoclips([image, uppper_half])
+            for word_again in describe_goofywords:
+                word_again["start"] = word_again["start"] + variables.MAX_IMAGE_DURATION
+                word_again["end"] = word_again["end"] + variables.MAX_IMAGE_DURATION
+
+        else:
+            uppper_half = CompositeVideoClip([image, uppper_half])
         
         for goofy_audio in goofy_audios:
             goofy_audio = '{0}{1}'.format(variables.DEFAULT_AUDIO_PATH, goofy_audio) if goofy_audio is not None else variables.DEFAULT_NULL_AUDIO_FILE
             audio = AudioFileClip(goofy_audio)
             audio = audio.subclip(0, variables.MAX_AUDIO_DURATION) if audio.duration > variables.MAX_AUDIO_DURATION else audio.subclip(0, audio.end)
             audio = audio.fx(afx.audio_fadeout, audio.duration * (2/3))
-            
+
             uppper_half.audio = CompositeAudioClip([uppper_half.audio, audio])
         
-        bottom_half = clip.subclip(clip.start, word[goofy_trigger])
         clip = concatenate_videoclips([bottom_half, uppper_half])
     
     clip.write_videofile(

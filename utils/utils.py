@@ -8,6 +8,7 @@ from vosk import Model, KaldiRecognizer
 from itertools import cycle
 
 from . import Word as custom_word
+from . import ImageMergeStrategy
 from .settings import variables
 
 
@@ -109,8 +110,9 @@ def voskDescribe(fil, mod):
             # {'text': ''}
             continue
         for obj in sentence['result']:
+            obj["imageconcatstrategy"] = ImageMergeStrategy.COMPOSE_ENUM
             new_word = constructWord(obj, image_files)
-            if new_word.image is not None and variables.ALLOW_IMAGE_REPETITION_WHEN_RANDOM is not True:
+            if new_word.image is not None and variables.ALLOW_IMAGE_REPETITION_WHEN_RANDOM is not True:                                
                 image_files.remove(new_word.image)
             word_list.append(new_word)  # and add it to list
     wf.close()  # close audiofile
