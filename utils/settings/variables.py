@@ -3,7 +3,7 @@ BOOM_AT_WORD_END = True
 ALLOW_IMAGE_REPETITION_WHEN_RANDOM = False
 
 # image confs
-DEFAULT_IMAGE_PATH = "./assets/image/pettan/"
+DEFAULT_IMAGE_PATH = "./assets/image/cursed/"
 DEFAULT_IMAGE_FILE = "vibecheckemojialt.png"
 DEFAULT_NULL_IMAGE_FILE = "./assets/image/null.png"
 CHOOSE_IMAGE_AT_RANDOM = 1                     # 0     -> use image DEFAULT_IMAGE_FILE for every word
