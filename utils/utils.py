@@ -104,7 +104,7 @@ def get_goofy_image(word):
 
 
 
-def get_goofy_audio(element):
+def reach_goofy_audio(element):
     goofy_audio = '{0}{1}'.format(variables.DEFAULT_AUDIO_PATH, element) if element is not None else variables.DEFAULT_NULL_AUDIO_FILE
     audio = AudioFileClip(goofy_audio)
     audio = audio.subclip(0, variables.MAX_AUDIO_DURATION) if audio.duration > variables.MAX_AUDIO_DURATION else audio.subclip(0, audio.end)
@@ -123,7 +123,7 @@ def clip_extend(goofy_words):
 
 
 
-def merge_visuals(upper_half, image, word, goofy_words):
+def merge_image_video(image, upper_half, word, goofy_words):
     if word["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
         result = concatenate_videoclips([image, upper_half])
         clip_extend(goofy_words)
@@ -135,7 +135,7 @@ def merge_visuals(upper_half, image, word, goofy_words):
 
 
 
-def merge_sounds(upper_half, audio):
+def merge_audio_video(upper_half, audio):
     return CompositeAudioClip([upper_half.audio, audio])
 
 

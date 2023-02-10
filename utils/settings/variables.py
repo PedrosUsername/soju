@@ -29,7 +29,7 @@ IGNORE_AUDIO_FILE_LIST = [
 
 
 # general confs
-PATH_MODEL = "./models/pt-model"
+PATH_MODEL = "./models/en-model"
 
 DEFAULT_OUTPUT_PATH = "./"
 
