@@ -12,8 +12,8 @@ from utils import utils
 # TODO - organize code and directories with formal design patterns
 # TODO - add video video composition
 # TODO - organize ./settings/variables file by Vosk and moviePy (soju.json file generation / video edit configs)
-# TODO - dict / json words should support the attr "image" : { "file": null, "confs": { "duration": null, "imageconcatstrategy": null } }
-# TODO - dict / json words should support the attr "audio" : { "file": null, "confs": { "duration": null, "volume": null } }
+# TODO - the soju.json file should support the attr "image" : { "file": null, "confs": { "duration": null, "imageconcatstrategy": null } }
+# TODO - the soju.json file should support the attr "audio" : { "files": null, "confs": { "duration": null, "volume": null } }
 
 
 
@@ -28,7 +28,7 @@ from utils import utils
 
 
 
-def merge_audioarray_video(audioarray, video, word):
+def merge_audioarray_video(audioarray, video):
     for audio in audioarray:
         edit = utils.reach_goofy_audio(audio)
 
@@ -38,6 +38,17 @@ def merge_audioarray_video(audioarray, video, word):
         )
 
     return video
+
+
+
+
+
+def get_boomers():
+    describe_json = []
+    with open(utils.generate_soju_file_name(videofilepath), 'r') as f:
+        describe_json = f.read()
+
+    return json.loads(describe_json)["boomers"]
 
 
 
@@ -71,44 +82,36 @@ if(videofilepath is not None and jsonfilepath is None):
 
 
 elif(videofilepath is not None and jsonfilepath is not None):
-    goofy_trigger = utils.get_trigger_settings()
-
-    describe_json = []
-    with open(utils.generate_soju_file_name(videofilepath), 'r') as f:
-        describe_json = f.read()
-
-    describe_goofywords = json.loads(describe_json)["boomers"]
+    boom_trigger = utils.get_boom_trigger()
+    boomers = get_boomers()
 
     clip = utils.get_and_prepare_clip_for_moviepy_edition(videofilepath)
 
-    for word in describe_goofywords:
-        image = utils.get_goofy_image(word)
-        audioarray = word["audio"] if word["audio"] is not None else []
+    for boomer in boomers:
+        image = utils.reach_goofyahh_image(boomer)
+        audioarray = boomer["audio"] if boomer["audio"] is not None else []
 
-
-        if word["end"] > clip.start and word["start"] < clip.end:
-            uppper_half = clip.subclip(word[goofy_trigger], clip.end)
-            bottom_half = clip.subclip(clip.start, word[goofy_trigger])
-
+        if boomer["end"] > clip.start and boomer["start"] < clip.end:
+            uppper_half = clip.subclip(boomer[boom_trigger], clip.end)
+            bottom_half = clip.subclip(clip.start, boomer[boom_trigger])
 
             uppper_half = utils.merge_image_video(
                 image,
                 uppper_half,
-                word,
-                describe_goofywords
+                boomer,
+                boomers
             )
 
             uppper_half = merge_audioarray_video(
                 audioarray,
-                uppper_half,
-                word                
+                uppper_half 
             )
 
             clip = utils.final_merge(bottom_half, uppper_half)
-        elif word["end"] <= clip.start:
+        elif boomer["end"] <= clip.start:
             uppper_half = clip.subclip(clip.start, clip.end)
             bottom_half = image
-        elif word["start"] >= clip.end:
+        elif boomer["start"] >= clip.end:
             uppper_half = image
             bottom_half = clip.subclip(clip.start, clip.end)        
 
