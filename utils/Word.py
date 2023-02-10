@@ -1,7 +1,6 @@
 import json
 
 class Word:
-    ''' A class representing a word from the JSON format for vosk speech recognition API '''
 
     def __init__(self, dict):
         '''
@@ -14,10 +13,7 @@ class Word:
         '''
 
         self.word = dict["word"]
-        self.start = dict["start"]
-        self.end = dict["end"]
         self.image = dict["image"]
-        self.imageconcatstrategy = dict["imageconcatstrategy"]
         self.audio = dict["audio"]
 
     def to_string(self):

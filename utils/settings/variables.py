@@ -1,6 +1,8 @@
 # goofy confs
-BOOM_AT_WORD_END = True
+BOOM_AT_WORD_END = False
 ALLOW_IMAGE_REPETITION_WHEN_RANDOM = False
+DEFAULT_IMAGE_CONCAT_STRATEGY = "CONCAT"      # COMPOSE -> image will play with video (overlaped)
+                                               # CONCAT  -> image will interrupt video to show up
 
 # image confs
 DEFAULT_IMAGE_PATH = "./assets/image/cursed/"

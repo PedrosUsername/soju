@@ -10,10 +10,10 @@ from utils import utils
 # TODO - improve error messages
 # TODO - add unit tests
 # TODO - organize code and directories with formal design patterns
+# TODO - add support for imgages with different sizes
+# TODO - add support for image dramatic zoom in
 # TODO - add video video composition
 # TODO - organize ./settings/variables file by Vosk and moviePy (soju.json file generation / video edit configs)
-# TODO - the soju.json file should support the attr "image" : { "file": null, "confs": { "duration": null, "imageconcatstrategy": null } }
-# TODO - the soju.json file should support the attr "audio" : { "files": null, "confs": { "duration": null, "volume": null } }
 
 
 
@@ -89,11 +89,11 @@ elif(videofilepath is not None and jsonfilepath is not None):
 
     for boomer in boomers:
         image = utils.reach_goofyahh_image(boomer)
-        audioarray = boomer["audio"] if boomer["audio"] is not None else []
+        audioarray = boomer["audio"]["files"] if (boomer["audio"] is not None and boomer["audio"]["files"] is not None) else []
 
-        if boomer["end"] > clip.start and boomer["start"] < clip.end:
-            uppper_half = clip.subclip(boomer[boom_trigger], clip.end)
-            bottom_half = clip.subclip(clip.start, boomer[boom_trigger])
+        if boomer["word"]["end"] > clip.start and boomer["word"]["start"] < clip.end:
+            uppper_half = clip.subclip(boomer["word"][boom_trigger], clip.end)
+            bottom_half = clip.subclip(clip.start, boomer["word"][boom_trigger])
 
             uppper_half = utils.merge_image_video(
                 image,
@@ -108,10 +108,10 @@ elif(videofilepath is not None and jsonfilepath is not None):
             )
 
             clip = utils.final_merge(bottom_half, uppper_half)
-        elif boomer["end"] <= clip.start:
+        elif boomer["word"]["end"] <= clip.start:
             uppper_half = clip.subclip(clip.start, clip.end)
             bottom_half = image
-        elif boomer["start"] >= clip.end:
+        elif boomer["word"]["start"] >= clip.end:
             uppper_half = image
             bottom_half = clip.subclip(clip.start, clip.end)        
 

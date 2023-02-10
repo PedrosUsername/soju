@@ -62,8 +62,29 @@ def constructWord(obj, image_files):
     image_name = getRandomizedImageFileName(image_files) if variables.CHOOSE_IMAGE_AT_RANDOM == True else variables.DEFAULT_IMAGE_FILE
     audio_names = cycle(getRandomizedAudioFileNames())
 
-    obj["image"] = image_name
-    obj["audio"] = variables.DEFAULT_AUDIO_FILE + [next(audio_names) for i in range(variables.CHOOSE_AUDIO_AT_RANDOM)]
+    obj["word"] = {
+        "content": obj["word"],
+        "start": obj["start"],
+        "end": obj["end"]
+    }
+
+    obj["image"] = {
+        "file": image_name,
+        "conf": {
+            "imageconcatstrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
+            "max_duration": variables.MAX_IMAGE_DURATION,
+            "animation": None
+        }
+    }
+
+    obj["audio"] = {
+        "files": variables.DEFAULT_AUDIO_FILE + [next(audio_names) for i in range(variables.CHOOSE_AUDIO_AT_RANDOM)],
+        "conf": {
+            "max_duration": variables.MAX_AUDIO_DURATION,
+            "volume": 1
+        }
+    }
+
     return custom_word.Word(obj)  # create custom Word object
 
 
@@ -96,7 +117,7 @@ def generate_output_file_name(videofilepath):
 
 
 def reach_goofyahh_image(word):
-    goofy_image = '{0}{1}'.format(variables.DEFAULT_IMAGE_PATH, word["image"]) if word["image"] is not None else variables.DEFAULT_NULL_IMAGE_FILE
+    goofy_image = '{0}{1}'.format(variables.DEFAULT_IMAGE_PATH, word["image"]["file"]) if (word["image"] is not None and word["image"]["file"] is not None) else variables.DEFAULT_NULL_IMAGE_FILE
     image = ImageClip(goofy_image, duration= variables.MAX_IMAGE_DURATION)
     return image.subclip(0, image.end).set_pos(("center","center")).resize((1920, 1080)).crossfadeout(.5)
 
@@ -116,15 +137,15 @@ def reach_goofy_audio(element):
 
 def clip_extend(goofy_words):
     for word in goofy_words:
-        word["start"] = word["start"] + variables.MAX_IMAGE_DURATION
-        word["end"] = word["end"] + variables.MAX_IMAGE_DURATION
+        word["word"]["start"] = word["word"]["start"] + variables.MAX_IMAGE_DURATION
+        word["word"]["end"] = word["word"]["end"] + variables.MAX_IMAGE_DURATION
 
 
 
 
 
 def merge_image_video(image, video, word, goofy_words):
-    if word["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
+    if word["image"] is not None and word["image"]["conf"] is not None and word["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
         result = concatenate_videoclips([image, video])
         clip_extend(goofy_words)
     else:
@@ -200,10 +221,9 @@ def voskDescribe():
             # {'text': ''}
             continue
         for obj in sentence['result']:
-            obj["imageconcatstrategy"] = ImageMergeStrategy.COMPOSE_ENUM
             new_word = constructWord(obj, image_files)
-            if new_word.image is not None and variables.ALLOW_IMAGE_REPETITION_WHEN_RANDOM is not True:                                
-                image_files.remove(new_word.image)
+            if new_word.image is not None and new_word.image["file"] is not None and variables.ALLOW_IMAGE_REPETITION_WHEN_RANDOM is not True:
+                image_files.remove(new_word.image["file"])
             word_list.append(new_word)  # and add it to list
     wf.close()  # close audiofile
     os.remove(variables.PATH_TMP_AUDIO)
