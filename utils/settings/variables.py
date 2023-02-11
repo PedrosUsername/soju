@@ -1,7 +1,7 @@
 # goofy confs
 BOOM_AT_WORD_END = False
 ALLOW_IMAGE_REPETITION_WHEN_RANDOM = False
-DEFAULT_IMAGE_CONCAT_STRATEGY = "CONCAT"      # COMPOSE -> image will play with video (overlaped)
+DEFAULT_IMAGE_CONCAT_STRATEGY = "COMPOSE"      # COMPOSE -> image will play with video (overlaped)
                                                # CONCAT  -> image will interrupt video to show up
 
 # image confs

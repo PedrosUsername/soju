@@ -119,7 +119,7 @@ def generate_output_file_name(videofilepath):
 def reach_goofyahh_image(word):
     goofy_image = '{0}{1}'.format(variables.DEFAULT_IMAGE_PATH, word["image"]["file"]) if (word["image"] is not None and word["image"]["file"] is not None) else variables.DEFAULT_NULL_IMAGE_FILE
     image = ImageClip(goofy_image, duration= variables.MAX_IMAGE_DURATION)
-    return image.subclip(0, image.end).set_pos(("center","center")).resize((1920, 1080)).crossfadeout(.5)
+    return image.subclip(0, image.end).set_pos(("center","center")).resize((1920, 1080))
 
 
 
@@ -144,12 +144,13 @@ def clip_extend(goofy_words):
 
 
 
-def merge_image_video(image, video, word, goofy_words):
+def merge_image_video(image, video, word, words):
     if word["image"] is not None and word["image"]["conf"] is not None and word["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
-        result = concatenate_videoclips([image, video])
-        clip_extend(goofy_words)
+        result = CompositeVideoClip([video.set_start(word["image"]["conf"]["max_duration"]), image])
+        clip_extend(words)
     else:
-        result = CompositeVideoClip([video, image])
+        result = CompositeVideoClip([video.set_start(0), image.crossfadeout(.5)])
+
     return result
 
 
