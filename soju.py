@@ -30,7 +30,7 @@ from utils import utils
 
 def merge_audioarray_video(audioarray, video):
     for audio in audioarray:
-        edit = utils.reach_goofy_audio(audio)
+        edit = utils.reach_goofyahh_audio(audio)
 
         video.audio = utils.merge_audio_video(
             video,

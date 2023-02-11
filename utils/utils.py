@@ -125,7 +125,7 @@ def reach_goofyahh_image(word):
 
 
 
-def reach_goofy_audio(element):
+def reach_goofyahh_audio(element):
     goofy_audio = '{0}{1}'.format(variables.DEFAULT_AUDIO_PATH, element) if element is not None else variables.DEFAULT_NULL_AUDIO_FILE
     audio = AudioFileClip(goofy_audio)
     audio = audio.subclip(0, variables.MAX_AUDIO_DURATION) if audio.duration > variables.MAX_AUDIO_DURATION else audio.subclip(0, audio.end)
@@ -135,19 +135,19 @@ def reach_goofy_audio(element):
 
 
 
-def clip_extend(goofy_words):
-    for word in goofy_words:
-        word["word"]["start"] = word["word"]["start"] + variables.MAX_IMAGE_DURATION
-        word["word"]["end"] = word["word"]["end"] + variables.MAX_IMAGE_DURATION
+def clip_extend(boomers):
+    for boomer in boomers:
+        boomer["word"]["start"] = boomer["word"]["start"] + variables.MAX_IMAGE_DURATION
+        boomer["word"]["end"] = boomer["word"]["end"] + variables.MAX_IMAGE_DURATION
 
 
 
 
 
-def merge_image_video(image, video, word, words):
-    if word["image"] is not None and word["image"]["conf"] is not None and word["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
-        result = CompositeVideoClip([video.set_start(word["image"]["conf"]["max_duration"]), image])
-        clip_extend(words)
+def merge_image_video(image, video, boomer, boomers):
+    if boomer["image"] is not None and boomer["image"]["conf"] is not None and boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
+        result = CompositeVideoClip([video.set_start(boomer["image"]["conf"]["max_duration"]), image])
+        clip_extend(boomers)
     else:
         result = CompositeVideoClip([video.set_start(0), image.crossfadeout(.5)])
 
