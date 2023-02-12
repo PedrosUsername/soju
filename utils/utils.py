@@ -71,6 +71,8 @@ def constructWord(obj, image_files):
     obj["image"] = {
         "file": image_name,
         "conf": {
+            "height": variables.DEFAULT_IMAGE_RESOLUTION_HEIGHT,
+            "width": variables.DEFAULT_IMAGE_RESOLUTION_WIDTH,
             "imageconcatstrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
             "max_duration": variables.MAX_IMAGE_DURATION,
             "animation": None
@@ -117,28 +119,30 @@ def generate_output_file_name(videofilepath):
 
 
 def reach_goofyahh_image(word):
+    duration = word["image"]["conf"]["max_duration"] if word["image"]["conf"]["max_duration"] is not None else variables.MAX_IMAGE_DURATION
+    height = word["image"]["conf"]["height"]
+    width = word["image"]["conf"]["width"]
     goofy_image = '{0}{1}'.format(variables.DEFAULT_IMAGE_PATH, word["image"]["file"]) if (word["image"] is not None and word["image"]["file"] is not None) else variables.DEFAULT_NULL_IMAGE_FILE
-    image = ImageClip(goofy_image, duration= variables.MAX_IMAGE_DURATION)
-    return image.subclip(0, image.end).set_pos(("center","center")).resize((1920, 1080))
+    image = ImageClip(goofy_image, duration= duration)
+    return image.subclip(0, image.end).set_pos(("center","center")).resize((width, height))
 
 
 
 
 
-def reach_goofyahh_audio(element):
-    goofy_audio = '{0}{1}'.format(variables.DEFAULT_AUDIO_PATH, element) if element is not None else variables.DEFAULT_NULL_AUDIO_FILE
+def reach_goofyahh_audio(filename):
+    goofy_audio = '{0}{1}'.format(variables.DEFAULT_AUDIO_PATH, filename) if filename is not None else variables.DEFAULT_NULL_AUDIO_FILE
     audio = AudioFileClip(goofy_audio)
-    audio = audio.subclip(0, variables.MAX_AUDIO_DURATION) if audio.duration > variables.MAX_AUDIO_DURATION else audio.subclip(0, audio.end)
     return audio.fx(afx.audio_fadeout, audio.duration * (2/3))
 
 
 
 
 
-def clip_extend(boomers):
+def clip_extend(boomers, extra= variables.MAX_IMAGE_DURATION):
     for boomer in boomers:
-        boomer["word"]["start"] = boomer["word"]["start"] + variables.MAX_IMAGE_DURATION
-        boomer["word"]["end"] = boomer["word"]["end"] + variables.MAX_IMAGE_DURATION
+        boomer["word"]["start"] = boomer["word"]["start"] + extra
+        boomer["word"]["end"] = boomer["word"]["end"] + extra
 
 
 
@@ -147,7 +151,7 @@ def clip_extend(boomers):
 def merge_image_video(image, video, boomer, boomers):
     if boomer["image"] is not None and boomer["image"]["conf"] is not None and boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
         result = CompositeVideoClip([video.set_start(boomer["image"]["conf"]["max_duration"]), image])
-        clip_extend(boomers)
+        clip_extend(boomers, boomer["image"]["conf"]["max_duration"])
     else:
         result = CompositeVideoClip([video.set_start(0), image.crossfadeout(.5)])
 
@@ -158,7 +162,30 @@ def merge_image_video(image, video, boomer, boomers):
 
 
 def merge_audio_video(video, audio):
+    if video.audio is None:
+        null_audio = reach_goofyahh_audio(None)
+        video.audio = null_audio
     return CompositeAudioClip([video.audio, audio])
+
+
+
+
+
+def merge_audioarray_video(audioarray, video, boomer):
+    for audio in audioarray:
+        edit = reach_goofyahh_audio(audio)
+        duration = boomer["audio"]["conf"]["max_duration"] if boomer["audio"]["conf"]["max_duration"] is not None else variables.MAX_AUDIO_DURATION
+        volume = boomer["audio"]["conf"]["volume"] if boomer["audio"]["conf"]["volume"] is not None else variables.DEFAULT_VOLUME
+        edit = edit.subclip(0, duration) if edit.duration > duration else edit.subclip(0, edit.end)
+        edit = edit.volumex(boomer["audio"]["conf"]["volume"])
+
+        video.audio = merge_audio_video(
+            video,
+            edit
+        )
+
+    return video
+
 
 
 
@@ -174,7 +201,7 @@ def get_and_prepare_clip_for_vosk_description(videofilepath):
 
 
 def get_and_prepare_clip_for_moviepy_edition(videofilepath):
-    return VideoFileClip(videofilepath, target_resolution=(1080, 1920))
+    return VideoFileClip(videofilepath, target_resolution=(variables.OUTPUT_RESOLUTION_HEIGHT, variables.OUTPUT_RESOLUTION_WIDTH))
 
 
 

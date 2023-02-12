@@ -10,7 +10,8 @@ from utils import utils
 # TODO - improve error messages
 # TODO - add unit tests
 # TODO - organize code and directories with formal design patterns
-# TODO - add support for imgages with different sizes
+# TODO - add support for imgages with different sizes (config: width & height)
+# TODO - add support for changing main video width & height on .settings/variables
 # TODO - add support for image dramatic zoom in
 # TODO - add video video composition
 # TODO - organize ./settings/variables file by Vosk and moviePy (soju.json file generation / video edit configs)
@@ -28,16 +29,7 @@ from utils import utils
 
 
 
-def merge_audioarray_video(audioarray, video):
-    for audio in audioarray:
-        edit = utils.reach_goofyahh_audio(audio)
 
-        video.audio = utils.merge_audio_video(
-            video,
-            edit
-        )
-
-    return video
 
 
 
@@ -102,18 +94,55 @@ elif(videofilepath is not None and jsonfilepath is not None):
                 boomers
             )
 
-            uppper_half = merge_audioarray_video(
+            uppper_half = utils.merge_audioarray_video(
                 audioarray,
-                uppper_half 
+                uppper_half,
+                boomer
             )
-
             clip = utils.final_merge(bottom_half, uppper_half)
+
         elif boomer["word"]["end"] <= clip.start:
             uppper_half = clip.subclip(clip.start, clip.end)
             bottom_half = image
+
+            boomer["image"]["conf"]["imageconcatstrategy"] = utils.ImageMergeStrategy.CONCAT_ENUM
+
+
+            bottom_half = utils.merge_audioarray_video(
+                audioarray,
+                bottom_half,
+                boomer
+            )
+
+            uppper_half = utils.merge_image_video(
+                bottom_half,
+                uppper_half,
+                boomer,
+                boomers
+            )
+
+            clip = uppper_half
+
         elif boomer["word"]["start"] >= clip.end:
             uppper_half = image
-            bottom_half = clip.subclip(clip.start, clip.end)        
+            bottom_half = clip.subclip(clip.start, clip.end)
+
+            boomer["image"]["conf"]["imageconcatstrategy"] = utils.ImageMergeStrategy.CONCAT_ENUM
+
+            uppper_half = utils.merge_image_video(
+                image,
+                uppper_half,
+                boomer,
+                boomers
+            )
+
+            uppper_half = utils.merge_audioarray_video(
+                audioarray,
+                uppper_half,
+                boomer
+            )
+
+            clip = utils.final_merge(bottom_half, uppper_half)
 
     print("Soju - final clip duration: {0}".format(clip.duration))
     clip.write_videofile(
