@@ -10,8 +10,7 @@ from utils import utils
 # TODO - improve error messages
 # TODO - add unit tests
 # TODO - organize code and directories with formal design patterns
-# TODO - add support for imgages with different sizes (config: width & height)
-# TODO - add support for changing main video width & height on .settings/variables
+
 # TODO - add support for image dramatic zoom in
 # TODO - add video video composition
 # TODO - organize ./settings/variables file by Vosk and moviePy (soju.json file generation / video edit configs)
@@ -144,7 +143,7 @@ elif(videofilepath is not None and jsonfilepath is not None):
 
             clip = utils.final_merge(bottom_half, uppper_half)
 
-    print("Soju - final clip duration: {0}".format(clip.duration))
+    print("Soju - final clip duration: {:.2f} sec".format(clip.duration))
     clip.write_videofile(
         utils.generate_output_file_name(videofilepath),
         fps=30

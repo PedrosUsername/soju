@@ -3,6 +3,7 @@ import random
 import json
 import wave
 import os
+import filetype
 
 from vosk import Model, KaldiRecognizer
 from moviepy.editor import *
@@ -22,6 +23,40 @@ from . import ImageMergeStrategy
 
 
 
+
+
+
+def getNullBoomer():
+    return {
+            "image": {
+                "file": None,
+                "conf": {
+                    "height": variables.DEFAULT_IMAGE_RESOLUTION_HEIGHT,
+                    "width": variables.DEFAULT_IMAGE_RESOLUTION_WIDTH,
+                    "imageconcatstrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
+                    "max_duration": variables.MAX_IMAGE_DURATION,
+                    "animation": None
+                }
+            },
+            "audio": {
+				"files": [],
+				"conf": {
+					"max_duration": variables.MAX_AUDIO_DURATION,
+					"volume": variables.DEFAULT_VOLUME
+				}
+			}
+        }
+
+def isVideo(our_file):
+    kind = filetype.guess(our_file)
+    if kind is None:
+        print('Cannot guess file type!')
+        return False
+    
+    if kind.extension != "ogv" and kind.extension != "mp4" and kind.extension != "mpeg" and kind.extension != "avi" and kind.extension != "mov":
+        return False
+    else:
+        return True
 
 
 
@@ -118,13 +153,20 @@ def generate_output_file_name(videofilepath):
 
 
 
-def reach_goofyahh_image(word):
-    duration = word["image"]["conf"]["max_duration"] if word["image"]["conf"]["max_duration"] is not None else variables.MAX_IMAGE_DURATION
-    height = word["image"]["conf"]["height"]
-    width = word["image"]["conf"]["width"]
-    goofy_image = '{0}{1}'.format(variables.DEFAULT_IMAGE_PATH, word["image"]["file"]) if (word["image"] is not None and word["image"]["file"] is not None) else variables.DEFAULT_NULL_IMAGE_FILE
-    image = ImageClip(goofy_image, duration= duration)
-    return image.subclip(0, image.end).set_pos(("center","center")).resize((width, height))
+def reach_goofyahh_image(boomer= getNullBoomer()):
+    duration = boomer["image"]["conf"]["max_duration"]
+    height = boomer["image"]["conf"]["height"]
+    width = boomer["image"]["conf"]["width"]
+    goofy_image = '{0}{1}'.format(variables.DEFAULT_IMAGE_PATH, boomer["image"]["file"]) if (boomer["image"] is not None and boomer["image"]["file"] is not None) else variables.DEFAULT_NULL_IMAGE_FILE
+    visual = None
+
+    if(isVideo(goofy_image)):
+        visual = VideoFileClip(goofy_image)
+        visual = CompositeVideoClip([visual, reach_goofyahh_image().subclip(0, duration)])
+        visual = visual.subclip(0, duration)
+    else:
+        visual = ImageClip(goofy_image).subclip(0, duration)
+    return visual.set_pos(("center","center")).resize((width, height))
 
 
 
@@ -177,7 +219,7 @@ def merge_audioarray_video(audioarray, video, boomer):
         duration = boomer["audio"]["conf"]["max_duration"] if boomer["audio"]["conf"]["max_duration"] is not None else variables.MAX_AUDIO_DURATION
         volume = boomer["audio"]["conf"]["volume"] if boomer["audio"]["conf"]["volume"] is not None else variables.DEFAULT_VOLUME
         edit = edit.subclip(0, duration) if edit.duration > duration else edit.subclip(0, edit.end)
-        edit = edit.volumex(boomer["audio"]["conf"]["volume"])
+        edit = edit.volumex(volume)
 
         video.audio = merge_audio_video(
             video,
@@ -192,7 +234,7 @@ def merge_audioarray_video(audioarray, video, boomer):
 
 
 def get_and_prepare_clip_for_vosk_description(videofilepath):
-    result = VideoFileClip(videofilepath, target_resolution=(1080, 1920))
+    result = VideoFileClip(videofilepath)
     result.audio.write_audiofile(variables.PATH_TMP_AUDIO, ffmpeg_params=["-ac", "1"])
     return result
 
@@ -250,7 +292,7 @@ def voskDescribe():
             continue
         for obj in sentence['result']:
             new_word = constructWord(obj, image_files)
-            if new_word.image is not None and new_word.image["file"] is not None and variables.ALLOW_IMAGE_REPETITION_WHEN_RANDOM is not True:
+            if new_word.image is not None and new_word.image["file"] is not None and variables.ALLOW_IMAGE_REPETITION is not True and variables.CHOOSE_IMAGE_AT_RANDOM > 0:
                 image_files.remove(new_word.image["file"])
             word_list.append(new_word)  # and add it to list
     wf.close()  # close audiofile
