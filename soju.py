@@ -12,7 +12,7 @@ from utils import utils
 # TODO - organize code and directories with formal design patterns
 
 # TODO - add support for image dramatic zoom in
-# TODO - add video video composition
+# TODO - add support for image/video positioning
 # TODO - organize ./settings/variables file by Vosk and moviePy (soju.json file generation / video edit configs)
 
 
