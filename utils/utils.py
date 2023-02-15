@@ -10,7 +10,7 @@ from moviepy.editor import *
 from itertools import cycle
 
 from .settings import variables
-from . import Word as custom_word
+from . import Boomer as custom_b
 from . import ImageMergeStrategy
 
 
@@ -28,6 +28,7 @@ from . import ImageMergeStrategy
 
 def getNullBoomer():
     return {
+            "word": None,
             "image": {
                 "file": None,
                 "conf": {
@@ -35,7 +36,7 @@ def getNullBoomer():
                     "width": variables.DEFAULT_IMAGE_RESOLUTION_WIDTH,
                     "imageconcatstrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
                     "max_duration": variables.MAX_IMAGE_DURATION,
-                    "animation": None
+                    "volume": variables.DEFAULT_VOLUME
                 }
             },
             "audio": {
@@ -47,6 +48,10 @@ def getNullBoomer():
 			}
         }
 
+
+
+
+
 def isVideo(our_file):
     kind = filetype.guess(our_file)
     if kind is None:
@@ -57,6 +62,7 @@ def isVideo(our_file):
         return False
     else:
         return True
+
 
 
 
@@ -110,7 +116,7 @@ def constructWord(obj, image_files):
             "width": variables.DEFAULT_IMAGE_RESOLUTION_WIDTH,
             "imageconcatstrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
             "max_duration": variables.MAX_IMAGE_DURATION,
-            "animation": None
+            "volume": variables.DEFAULT_VOLUME
         }
     }
 
@@ -118,11 +124,11 @@ def constructWord(obj, image_files):
         "files": variables.DEFAULT_AUDIO_FILE + [next(audio_names) for i in range(variables.CHOOSE_AUDIO_AT_RANDOM)],
         "conf": {
             "max_duration": variables.MAX_AUDIO_DURATION,
-            "volume": 1
+            "volume": variables.DEFAULT_VOLUME
         }
     }
 
-    return custom_word.Word(obj)  # create custom Word object
+    return custom_b.Boomer(obj)
 
 
 
@@ -157,11 +163,13 @@ def reach_goofyahh_image(boomer= getNullBoomer()):
     duration = boomer["image"]["conf"]["max_duration"]
     height = boomer["image"]["conf"]["height"]
     width = boomer["image"]["conf"]["width"]
+    volume = boomer["image"]["conf"]["volume"] if boomer["image"]["conf"]["volume"] is not None else variables.DEFAULT_VOLUME
     goofy_image = '{0}{1}'.format(variables.DEFAULT_IMAGE_PATH, boomer["image"]["file"]) if (boomer["image"] is not None and boomer["image"]["file"] is not None) else variables.DEFAULT_NULL_IMAGE_FILE
     visual = None
 
     if(isVideo(goofy_image)):
         visual = VideoFileClip(goofy_image)
+        visual.audio = visual.audio.volumex(volume)
         visual = CompositeVideoClip([visual, reach_goofyahh_image().subclip(0, duration)])
         visual = visual.subclip(0, duration)
     else:
