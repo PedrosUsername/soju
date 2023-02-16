@@ -32,6 +32,7 @@ def getNullBoomer():
             "image": {
                 "file": None,
                 "conf": {
+                    "boom_trigger": variables.DEFAULT_BOOM_TRIGGER,
                     "height": variables.DEFAULT_IMAGE_RESOLUTION_HEIGHT,
                     "width": variables.DEFAULT_IMAGE_RESOLUTION_WIDTH,
                     "imageconcatstrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
@@ -99,7 +100,7 @@ def getRandomizedAudioFileNames():
 
 
 
-def constructWord(obj, image_files):
+def constructBoomer(obj, image_files):
     image_name = getRandomizedImageFileName(image_files) if variables.CHOOSE_IMAGE_AT_RANDOM == True else variables.DEFAULT_IMAGE_FILE
     audio_names = cycle(getRandomizedAudioFileNames())
 
@@ -112,6 +113,7 @@ def constructWord(obj, image_files):
     obj["image"] = {
         "file": image_name,
         "conf": {
+            "boom_trigger": variables.DEFAULT_BOOM_TRIGGER,
             "height": variables.DEFAULT_IMAGE_RESOLUTION_HEIGHT,
             "width": variables.DEFAULT_IMAGE_RESOLUTION_WIDTH,
             "imageconcatstrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
@@ -258,14 +260,27 @@ def get_and_prepare_clip_for_moviepy_edition(videofilepath):
 
 
 def final_merge(bottom_half, uppper_half):
-    return concatenate_videoclips([bottom_half, uppper_half])
+
+    return CompositeVideoClip(
+        [
+            bottom_half, 
+            uppper_half.set_start(bottom_half.end)
+        ],
+        size= (
+            variables.OUTPUT_RESOLUTION_WIDTH,
+            variables.OUTPUT_RESOLUTION_HEIGHT
+        )
+    )
 
 
 
 
 
-def get_boom_trigger():
-    return "end" if variables.BOOM_AT_WORD_END else "start"
+def get_boom_trigger(boomer= None):
+    if boomer is None:
+        return variables.DEFAULT_BOOM_TRIGGER if variables.DEFAULT_BOOM_TRIGGER is not None else "end"
+    else:
+        return boomer["image"]["conf"]["boom_trigger"]
 
 
 
@@ -299,7 +314,7 @@ def voskDescribe():
             # {'text': ''}
             continue
         for obj in sentence['result']:
-            new_word = constructWord(obj, image_files)
+            new_word = constructBoomer(obj, image_files)
             if new_word.image is not None and new_word.image["file"] is not None and variables.ALLOW_IMAGE_REPETITION is not True and variables.CHOOSE_IMAGE_AT_RANDOM > 0:
                 image_files.remove(new_word.image["file"])
             word_list.append(new_word)  # and add it to list

@@ -11,6 +11,7 @@ from utils import utils
 # TODO - add unit tests
 # TODO - organize code and directories with formal design patterns
 
+# TODO - impedir que getRandomizedImageFileName() entre em loop infinito por conta de DEFAULT_IMAGE_PATH errado
 # TODO - add support for image dramatic zoom in
 # TODO - add support for image/video positioning
 # TODO - organize ./settings/variables file by Vosk and moviePy (soju.json file generation / video edit configs)
@@ -73,12 +74,13 @@ if(videofilepath is not None and jsonfilepath is None):
 
 
 elif(videofilepath is not None and jsonfilepath is not None):
-    boom_trigger = utils.get_boom_trigger()
     boomers = get_boomers()
 
     clip = utils.get_and_prepare_clip_for_moviepy_edition(videofilepath)
 
     for boomer in boomers:
+        boom_trigger = utils.get_boom_trigger(boomer)
+
         image = utils.reach_goofyahh_image(boomer)
         audioarray = boomer["audio"]["files"] if (boomer["audio"] is not None and boomer["audio"]["files"] is not None) else []
 
@@ -104,36 +106,21 @@ elif(videofilepath is not None and jsonfilepath is not None):
             uppper_half = clip.subclip(clip.start, clip.end)
             bottom_half = image
 
-            boomer["image"]["conf"]["imageconcatstrategy"] = utils.ImageMergeStrategy.CONCAT_ENUM
-
-
             bottom_half = utils.merge_audioarray_video(
                 audioarray,
                 bottom_half,
                 boomer
             )
 
-            uppper_half = utils.merge_image_video(
-                bottom_half,
-                uppper_half,
-                boomer,
-                boomers
-            )
+            utils.clip_extend(boomers, boomer["image"]["conf"]["max_duration"])
 
-            clip = uppper_half
+            clip = utils.final_merge(bottom_half, uppper_half)
 
         elif boomer["word"]["start"] >= clip.end:
             uppper_half = image
             bottom_half = clip.subclip(clip.start, clip.end)
 
             boomer["image"]["conf"]["imageconcatstrategy"] = utils.ImageMergeStrategy.CONCAT_ENUM
-
-            uppper_half = utils.merge_image_video(
-                image,
-                uppper_half,
-                boomer,
-                boomers
-            )
 
             uppper_half = utils.merge_audioarray_video(
                 audioarray,

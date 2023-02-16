@@ -1,14 +1,14 @@
 # goofy confs
-BOOM_AT_WORD_END = False
+DEFAULT_BOOM_TRIGGER = "end"
 DEFAULT_IMAGE_CONCAT_STRATEGY = "COMPOSE"      # COMPOSE -> image will play with video (overlaped)
                                                # CONCAT  -> image will interrupt video to show up
 
 # image confs
-DEFAULT_IMAGE_PATH = "./assets/image/mommy/"
+DEFAULT_IMAGE_PATH = "./assets/video/clips/"
 DEFAULT_IMAGE_FILE = "mio.png"
 DEFAULT_NULL_IMAGE_FILE = "./assets/image/null.png"
-ALLOW_IMAGE_REPETITION = True                  # ignored when not CHOOSE_IMAGE_AT_RANDOM 
-CHOOSE_IMAGE_AT_RANDOM = 0                     # 0     -> use image DEFAULT_IMAGE_FILE for every word
+ALLOW_IMAGE_REPETITION = False                  # ignored when not CHOOSE_IMAGE_AT_RANDOM 
+CHOOSE_IMAGE_AT_RANDOM = 1                     # 0     -> use image DEFAULT_IMAGE_FILE for every word
                                                # n > 0 -> use Random images for every word
 MAX_IMAGE_DURATION = .9
 DEFAULT_IMAGE_RESOLUTION_HEIGHT = 1080               # 1080 px
