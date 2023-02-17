@@ -101,7 +101,7 @@ elif(videofilepath is not None and jsonfilepath is not None):
                 boomer
             )
             clip = utils.final_merge(bottom_half, uppper_half)
-
+            
         elif boomer["word"]["end"] <= clip.start:
             uppper_half = clip.subclip(clip.start, clip.end)
             bottom_half = image
@@ -130,10 +130,10 @@ elif(videofilepath is not None and jsonfilepath is not None):
 
             clip = utils.final_merge(bottom_half, uppper_half)
 
-    print("Soju - final clip duration: {:.2f} sec".format(clip.duration))
+    print("\nSoju - final clip duration: {:.2f} sec".format(clip.duration))
     clip.write_videofile(
         utils.generate_output_file_name(videofilepath),
-        fps=30
+        fps= 30
     )
 
     clip.close()

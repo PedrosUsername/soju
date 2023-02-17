@@ -26,6 +26,33 @@ from . import ImageMergeStrategy
 
 
 
+def compose_them_clips(clip_array, enforce_resolution= False):
+    aux_file_name = variables.PATH_TMP_CLIP
+    try:
+        os.remove(aux_file_name) # this file is frick'n cursed
+    except:
+        print("ok")
+
+    if enforce_resolution:
+        composed_clips = CompositeVideoClip(
+            clip_array,
+            size= (
+                variables.OUTPUT_RESOLUTION_WIDTH,
+                variables.OUTPUT_RESOLUTION_HEIGHT
+            )
+        )
+    else:
+        composed_clips = CompositeVideoClip(clip_array)
+    
+    composed_clips.write_videofile(
+        aux_file_name,
+        fps= 30
+    )
+
+    clip = get_and_prepare_clip_for_moviepy_edition(aux_file_name)
+    return clip
+
+
 def getNullBoomer():
     return {
             "word": None,
@@ -116,9 +143,10 @@ def constructBoomer(obj, image_files):
             "boom_trigger": variables.DEFAULT_BOOM_TRIGGER,
             "height": variables.DEFAULT_IMAGE_RESOLUTION_HEIGHT,
             "width": variables.DEFAULT_IMAGE_RESOLUTION_WIDTH,
+            "position": [0, 0],
             "imageconcatstrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
             "max_duration": variables.MAX_IMAGE_DURATION,
-            "volume": variables.DEFAULT_VOLUME
+            "volume": variables.DEFAULT_IMAGE_VOLUME
         }
     }
 
@@ -126,7 +154,7 @@ def constructBoomer(obj, image_files):
         "files": variables.DEFAULT_AUDIO_FILE + [next(audio_names) for i in range(variables.CHOOSE_AUDIO_AT_RANDOM)],
         "conf": {
             "max_duration": variables.MAX_AUDIO_DURATION,
-            "volume": variables.DEFAULT_VOLUME
+            "volume": variables.DEFAULT_SOUND_VOLUME
         }
     }
 
@@ -261,15 +289,12 @@ def get_and_prepare_clip_for_moviepy_edition(videofilepath):
 
 def final_merge(bottom_half, uppper_half):
 
-    return CompositeVideoClip(
+    return compose_them_clips(
         [
             bottom_half, 
             uppper_half.set_start(bottom_half.end)
         ],
-        size= (
-            variables.OUTPUT_RESOLUTION_WIDTH,
-            variables.OUTPUT_RESOLUTION_HEIGHT
-        )
+        enforce_resolution= True
     )
 
 
