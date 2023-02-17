@@ -11,9 +11,7 @@ from utils import utils
 # TODO - add unit tests
 # TODO - organize code and directories with formal design patterns
 
-# TODO - impedir que getRandomizedImageFileName() entre em loop infinito por conta de DEFAULT_IMAGE_PATH errado
 # TODO - add support for image dramatic zoom in
-# TODO - add support for image/video positioning
 # TODO - organize ./settings/variables file by Vosk and moviePy (soju.json file generation / video edit configs)
 
 

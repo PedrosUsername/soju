@@ -62,16 +62,20 @@ def getNullBoomer():
                     "boom_trigger": variables.DEFAULT_BOOM_TRIGGER,
                     "height": variables.DEFAULT_IMAGE_RESOLUTION_HEIGHT,
                     "width": variables.DEFAULT_IMAGE_RESOLUTION_WIDTH,
+                    "position": {
+                        "x": variables.DEFAULT_IMAGE_POSITION_X,
+                        "y": variables.DEFAULT_IMAGE_POSITION_Y
+                    },
                     "imageconcatstrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
                     "max_duration": variables.MAX_IMAGE_DURATION,
-                    "volume": variables.DEFAULT_VOLUME
+                    "volume": variables.DEFAULT_IMAGE_VOLUME
                 }
             },
             "audio": {
 				"files": [],
 				"conf": {
 					"max_duration": variables.MAX_AUDIO_DURATION,
-					"volume": variables.DEFAULT_VOLUME
+					"volume": variables.DEFAULT_SOUND_VOLUME
 				}
 			}
         }
@@ -143,7 +147,10 @@ def constructBoomer(obj, image_files):
             "boom_trigger": variables.DEFAULT_BOOM_TRIGGER,
             "height": variables.DEFAULT_IMAGE_RESOLUTION_HEIGHT,
             "width": variables.DEFAULT_IMAGE_RESOLUTION_WIDTH,
-            "position": [0, 0],
+            "position": {
+                "x": variables.DEFAULT_IMAGE_POSITION_X,
+                "y": variables.DEFAULT_IMAGE_POSITION_Y
+            },
             "imageconcatstrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
             "max_duration": variables.MAX_IMAGE_DURATION,
             "volume": variables.DEFAULT_IMAGE_VOLUME
@@ -193,7 +200,8 @@ def reach_goofyahh_image(boomer= getNullBoomer()):
     duration = boomer["image"]["conf"]["max_duration"]
     height = boomer["image"]["conf"]["height"]
     width = boomer["image"]["conf"]["width"]
-    volume = boomer["image"]["conf"]["volume"] if boomer["image"]["conf"]["volume"] is not None else variables.DEFAULT_VOLUME
+    volume = boomer["image"]["conf"]["volume"]
+    position = (boomer["image"]["conf"]["position"]["x"], boomer["image"]["conf"]["position"]["y"])
     goofy_image = '{0}{1}'.format(variables.DEFAULT_IMAGE_PATH, boomer["image"]["file"]) if (boomer["image"] is not None and boomer["image"]["file"] is not None) else variables.DEFAULT_NULL_IMAGE_FILE
     visual = None
 
@@ -204,7 +212,7 @@ def reach_goofyahh_image(boomer= getNullBoomer()):
         visual = visual.subclip(0, duration)
     else:
         visual = ImageClip(goofy_image).subclip(0, duration)
-    return visual.set_pos(("center","center")).resize((width, height))
+    return visual.set_pos(position, relative= True).resize((width, height))
 
 
 
