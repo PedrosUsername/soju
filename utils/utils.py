@@ -212,7 +212,11 @@ def reach_goofyahh_image(boomer= getNullBoomer()):
         visual = visual.subclip(0, duration)
     else:
         visual = ImageClip(goofy_image).subclip(0, duration)
-    return visual.set_pos(position, relative= True).resize((width, height))
+
+    if(width is None or height is None):
+        return visual.set_pos(position, relative= True)
+    else:
+        return visual.set_pos(position, relative= True).resize((width, height))
 
 
 

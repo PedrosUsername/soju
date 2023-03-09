@@ -78,9 +78,15 @@ elif(videofilepath is not None and jsonfilepath is not None):
 
     for boomer in boomers:
         boom_trigger = utils.get_boom_trigger(boomer)
-
         image = utils.reach_goofyahh_image(boomer)
         audioarray = boomer["audio"]["files"] if (boomer["audio"] is not None and boomer["audio"]["files"] is not None) else []
+
+        print("\n")
+        print('Soju - Working on boomer [ "{}" ]'.format(boomer["word"]["content"]))
+        print("""soju - Boomin' at second [ {:.2f} ]""".format(boomer["word"][boom_trigger]))
+        print("""soju - visual media [ {} ]""".format(boomer["image"]["file"]))
+        print("""soju - audio media [ {} ]""".format(str(audioarray)))
+        print("\n")
 
         if boomer["word"]["end"] > clip.start and boomer["word"]["start"] < clip.end:
             uppper_half = clip.subclip(boomer["word"][boom_trigger], clip.end)
@@ -128,7 +134,7 @@ elif(videofilepath is not None and jsonfilepath is not None):
 
             clip = utils.final_merge(bottom_half, uppper_half)
 
-    print("\nSoju - final clip duration: {:.2f} sec".format(clip.duration))
+    print("\nSoju - final clip duration in seconds: {:.2f}\n".format(clip.duration))
     clip.write_videofile(
         utils.generate_output_file_name(videofilepath),
         fps= 30
