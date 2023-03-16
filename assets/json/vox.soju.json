@@ -1,23 +1,34 @@
 {
 	"data": [
-		{"word": "yeah", "start": 0.303038, "end": 0.78, "image": "usaki.jpeg", "audio": ["vineboom.mp3"]},
-		{"word": "i", "start": 0.87, "end": 1.05, "image": "reine.jpeg", "audio": ["vineboom.mp3"]},
-		{"word": "want", "start": 1.05, "end": 1.32, "image": "sensei.jpg", "audio": ["vineboom.mp3"]},
-		{"word": "mommy", "start": 1.32029, "end": 1.83, "image": "mio.jpg", "audio": ["vineboom.mp3"]},
-		{"word": "i", "start": 1.83, "end": 1.95, "image": "noel.jpeg", "audio": ["vineboom.mp3"]},
-		{"word": "want", "start": 1.95, "end": 2.18984, "image": "amano.jpg", "audio": ["vineboom.mp3"]},
-		{"word": "milk", "start": 2.190759, "end": 2.67, "image": "megamilk.jpeg", "audio": ["vineboom.mp3"]},
-		{"word": "i", "start": 2.67, "end": 2.76, "image": "hajime.jpg", "audio": ["vineboom.mp3"]},
-		{"word": "want", "start": 2.76, "end": 2.94, "image": null, "audio": ["vineboom.mp3"]},
-		{"word": "to", "start": 2.943914, "end": 3.03, "image": "scarle.jpg", "audio": ["vineboom.mp3"]},
-		{"word": "be", "start": 3.03, "end": 3.21, "image": "fauna.jpg", "audio": ["vineboom.mp3"]},
-		{"word": "held", "start": 3.21, "end": 3.72, "image": "watson.jpg", "audio": ["vineboom.mp3"]},
-		{"word": "i", "start": 3.72, "end": 3.81, "image": "zent.png", "audio": ["vineboom.mp3"]},
-		{"word": "want", "start": 3.81, "end": 3.99, "image": null, "audio": ["vineboom.mp3"]},
-		{"word": "to", "start": 3.99, "end": 4.05, "image": null, "audio": ["vineboom.mp3"]},
-		{"word": "be", "start": 4.05, "end": 4.14, "image": null, "audio": ["vineboom.mp3"]},
-		{"word": "comforted", "start": 4.14, "end": 4.83, "image": "hime.jpeg", "audio": ["vineboom.mp3"]}
+		{"word": {"content": "yeah", "start": 0.303038, "end": 0.78}, "image": {"file": "nickyoung.mp4", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "i", "start": 0.87, "end": 1.05}, "image": {"file": "seizure_part2.mp4", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "want", "start": 1.05, "end": 1.32}, "image": {"file": "oooooo.mp4", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "mommy", "start": 1.32029, "end": 1.83}, "image": {"file": "jordan.mp4", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "i", "start": 1.83, "end": 1.95}, "image": {"file": "shintae.mp4", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "want", "start": 1.95, "end": 2.18984}, "image": {"file": "sadyagoo.png", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "milk", "start": 2.190759, "end": 2.67}, "image": {"file": "speedrunner.mp4", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "i", "start": 2.67, "end": 2.76}, "image": {"file": "kkkk.mp4", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "want", "start": 2.76, "end": 2.94}, "image": {"file": "seizure.mp4", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "to", "start": 2.943914, "end": 3.03}, "image": {"file": "hoodnews.mp4", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "be", "start": 3.03, "end": 3.21}, "image": {"file": "rockylockridge.mp4", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "held", "start": 3.21, "end": 3.72}, "image": {"file": "kayodeewmi.mp4", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "i", "start": 3.72, "end": 3.81}, "image": {"file": null, "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "want", "start": 3.81, "end": 3.99}, "image": {"file": null, "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "to", "start": 3.99, "end": 4.05}, "image": {"file": null, "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "be", "start": 4.05, "end": 4.14}, "image": {"file": null, "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "comforted", "start": 4.14, "end": 4.83}, "image": {"file": null, "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}}
 	],
 
-	"goofywords": ["mommy", "milk", "held", "comforted"]
+	"boomers": [
+		{"word": {"content": "...", "start": -10, "end": -9}, "image": {"file": "kkkk.mp4", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 1.8, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+
+		{"word": {"content": "mommy", "start": 1.32029, "end": 1.83}, "image": {"file": "jordan.mp4", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 1.2, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "milk", "start": 2.190759, "end": 2.67}, "image": {"file": "speedrunner.mp4", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 1.8, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "held", "start": 3.21, "end": 3.72}, "image": {"file": "kayodeewmi.mp4", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 1.8, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+		{"word": {"content": "comforted", "start": 4.14, "end": 4.83}, "image": {"file": "rockylockridge.mp4", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 1.8, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}},
+
+		{"word": {"content": "...", "start": 1000, "end": 1000}, "image": {"file": "shintae.mp4", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "imageconcatstrategy": "COMPOSE", "max_duration": 1.8, "volume": 1}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 1}}}
+
+
+	]
 }

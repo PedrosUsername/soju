@@ -1,22 +1,21 @@
 {
 	"data": [
-		{"word": "it", "start": 0.21, "end": 0.36, "image": "kanata.png", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
-		{"word": "was", "start": 0.36, "end": 0.56787, "image": "lucoa.jpg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
-		{"word": "science", "start": 0.750265, "end": 1.8, "image": "amemiya.jpg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
-		{"word": "i", "start": 4.62, "end": 4.83, "image": "shondo.jpg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
-		{"word": "didn't", "start": 4.831587, "end": 5.037727, "image": "suisei.jpeg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
-		{"word": "know", "start": 5.037727, "end": 5.78994, "image": "flat.jpg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
-		{"word": "that", "start": 5.82647, "end": 6.288275, "image": "petan.jpeg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
-		{"word": "that", "start": 6.330634, "end": 6.895807, "image": "a_chan.jpg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
-		{"word": "do", "start": 6.906921, "end": 7.320316, "image": "pomu.jpg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
-		{"word": "day", "start": 7.346358, "end": 7.71, "image": "achan.png", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
-		{"word": "yeah", "start": 8.880105, "end": 9.838904, "image": "gura.png", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]}
+		{"word": "it", "start": 0.21, "end": 0.36, "image": "zucc.jpeg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
+		{"word": "was", "start": 0.36, "end": 0.56787, "image": "sadcat.jpeg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
+		{"word": "science", "start": 0.750265, "end": 1.8, "image": "nerdemoji.jpg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
+		{"word": "i", "start": 4.62, "end": 4.83, "image": "vibecheckemojialt.png", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
+		{"word": "didn't", "start": 4.831587, "end": 5.037727, "image": "fuccboiemoji.jpg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
+		{"word": "know", "start": 5.037727, "end": 5.78994, "image": "thumbsupemoji.jpg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
+		{"word": "that", "start": 5.82647, "end": 6.288275, "image": "humanobunga.png", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
+		{"word": "that", "start": 6.330634, "end": 6.895807, "image": "eyes.jpeg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
+		{"word": "do", "start": 6.906921, "end": 7.320316, "image": "bart.jpg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
+		{"word": "day", "start": 7.346358, "end": 7.71, "image": "dog.jpg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
+		{"word": "yeah", "start": 8.880105, "end": 9.838904, "image": "dolphinman.jpeg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]}
 	],
 
 	"goofywords": [
-		{"word": "science", "start": 0.750265, "end": 1.8, "image": "pomu.jpg", "imageconcatstrategy": "CONCAT", "audio": ["vineboom.mp3"]},
-		{"word": "segs", "start": 5.82647, "end": 6.288275, "image": "kanata.png", "imageconcatstrategy": "CONCAT", "audio": ["vineboom.mp3"]},
-		{"word": "dolphin", "start": 6.330634, "end": 7.71, "image": "achan.png", "imageconcatstrategy": "CONCAT", "audio": ["vineboom.mp3"]},
-		{"word": "science", "start": 9.123, "end": 9.58275, "image": "kanata.png", "imageconcatstrategy": "CONCAT", "audio": ["vineboom.mp3"]}
+		{"word": "science", "start": 1.8, "end": 1.8, "image": "sadcat.jpeg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
+		{"word": "dolphin", "start": 6.330634, "end": 7.71, "image": "dolphinman.jpeg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3"]},
+		{"word": "science", "start": 9.123, "end": 9.8, "image": "nerdemoji.jpg", "imageconcatstrategy": "COMPOSE", "audio": ["vineboom.mp3", "amongus.mp3"]}
 	]
 }

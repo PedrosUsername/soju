@@ -1,0 +1,117 @@
+{
+	"data": [
+		{"word": {"content": "wound", "start": 0.0, "end": 0.539999}, "image": {"file": "pooh.jpg", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}},
+		{"word": {"content": "around", "start": 0.630541, "end": 0.945586}, "image": {"file": "thicc_fruit2.jpeg", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}},
+		{"word": {"content": "the", "start": 0.945586, "end": 0.9563}, "image": {"file": "dolphinman.jpeg", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}},
+		{"word": {"content": "ground", "start": 0.9563, "end": 1.06667}, "image": {"file": "wakeup.jpg", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}},
+		{"word": {"content": "lamb", "start": 1.08, "end": 1.590503}, "image": {"file": "vibecheckemojialt.png", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}},
+		{"word": {"content": "i", "start": 2.25, "end": 2.55}, "image": {"file": "thiccearth.png", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}},
+		{"word": {"content": "am", "start": 2.55, "end": 2.817835}, "image": {"file": "sadcat.jpeg", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}},
+		{"word": {"content": "the", "start": 2.91, "end": 3.12}, "image": {"file": "zucc.jpeg", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}},
+		{"word": {"content": "ass", "start": 3.133361, "end": 3.571962}, "image": {"file": "nerdemoji.jpg", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}},
+		{"word": {"content": "i", "start": 4.403136, "end": 4.674094}, "image": {"file": "thiccsolid.jpg", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}},
+		{"word": {"content": "am", "start": 4.678553, "end": 5.004934}, "image": {"file": "eyes.jpeg", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}},
+		{"word": {"content": "the", "start": 5.041455, "end": 5.28}, "image": {"file": "koroneshampoo.png", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}},
+		{"word": {"content": "ass", "start": 5.34, "end": 6.03}, "image": {"file": "bart.jpg", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}},
+		{"word": {"content": "i", "start": 9.09, "end": 9.39}, "image": {"file": "fuccboiemoji.jpg", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}},
+		{"word": {"content": "am", "start": 9.39, "end": 9.749883}, "image": {"file": "krabs.jpg", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}},
+		{"word": {"content": "the", "start": 9.84, "end": 10.11}, "image": {"file": "thechairman.jpeg", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}},
+		{"word": {"content": "us", "start": 10.23, "end": 10.8}, "image": {"file": "humanobunga.png", "conf": {"boom_trigger": "start", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 1.67, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 1.36, "volume": 0}}}
+	],
+
+	"boomers": [
+		{
+			"word": {
+				"content": "ass",
+				"start": 3.133361,
+				"end": 3.571962
+			},
+			"image": {
+				"file": "thiccemoji.png",
+				"conf": {
+					"boom_trigger": "end",
+					"height": 1000,
+					"width": 2169,
+					"position": {
+						"x": "center",
+						"y": "center"
+					},
+					"imageconcatstrategy": "COMPOSE",
+					"max_duration": 0.9,
+					"volume": 0
+				}
+			},
+			"audio": {
+				"files": [
+					"vineboom.mp3"
+				],
+				"conf": {
+					"max_duration": 1.36,
+					"volume": 1
+				}
+			}
+		},
+		{
+			"word": {
+				"content": "ass",
+				"start": 5.34,
+				"end": 6.03
+			},
+			"image": {
+				"file": "thiccsolid.jpg",
+				"conf": {
+					"boom_trigger": "end",
+					"height": 1000,
+					"width": 1089,
+					"position": {
+						"x": "center",
+						"y": "center"
+					},
+					"imageconcatstrategy": "COMPOSE",
+					"max_duration": 0.9,
+					"volume": 0
+				}
+			},			
+			"audio": {
+				"files": [
+					"vineboom.mp3"
+				],
+				"conf": {
+					"max_duration": 1.36,
+					"volume": 1
+				}
+			}
+		},
+		{
+			"word": {
+				"content": "ass",
+				"start": 1000,
+				"end": 1000
+			},
+			"image": {
+				"file": "thechairman.png",
+				"conf": {
+					"boom_trigger": "end",
+					"height": 1000,
+					"width": 1000,
+					"position": {
+						"x": "center",
+						"y": "center"
+					},
+					"imageconcatstrategy": "COMPOSE",
+					"max_duration": 0.9,
+					"volume": 0
+				}
+			},
+			"audio": {
+				"files": [
+					"ohmygah.mp3"
+				],
+				"conf": {
+					"max_duration": 0.9,
+					"volume": 1
+				}
+			}
+		}
+	]
+}
