@@ -1,4 +1,3 @@
-import json
 import sys
 
 from utils import utils
@@ -9,10 +8,12 @@ from utils import utils
 
 # TODO - improve error messages
 # TODO - add unit tests
-# TODO - organize code and directories with formal design patterns
+# TODO - organize code and directories with formal design patterns and classes
 
-# TODO - add support for image dramatic zoom in
+# TODO - wrong variables.DEFAULT_IMAGE_PATH name returns loop
+# TODO - implement deep folder file search
 # TODO - organize ./settings/variables file by Vosk and moviePy (soju.json file generation / video edit configs)
+# TODO - add support for image dramatic zoom in
 
 
 
@@ -30,15 +31,6 @@ from utils import utils
 
 
 
-
-
-
-def get_boomers():
-    describe_json = []
-    with open(utils.generate_soju_file_name(videofilepath), 'r') as f:
-        describe_json = f.read()
-
-    return json.loads(describe_json)["boomers"]
 
 
 
@@ -72,7 +64,7 @@ if(videofilepath is not None and jsonfilepath is None):
 
 
 elif(videofilepath is not None and jsonfilepath is not None):
-    boomers = get_boomers()
+    boomers = utils.get_boomers(videofilepath, jsonfilepath)
 
     clip = utils.get_and_prepare_clip_for_moviepy_edition(videofilepath)
 
@@ -137,7 +129,8 @@ elif(videofilepath is not None and jsonfilepath is not None):
     print("\nSoju - final clip duration in seconds: {:.2f}\n".format(clip.duration))
     clip.write_videofile(
         utils.generate_output_file_name(videofilepath),
-        fps= 30
+        fps= 30,
+        threads= 4
     )
 
     clip.close()
