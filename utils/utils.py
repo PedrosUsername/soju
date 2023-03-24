@@ -25,6 +25,105 @@ from . import ImageMergeStrategy
 
 
 
+def get_boomers(jsonfilepath):
+    describe_json = []
+    with open(jsonfilepath, 'r') as f:
+        describe_json = f.read()
+
+    return json.loads(describe_json)["boomers"]
+
+
+
+
+def soju(videofilepath= None, jsonfilepath= None):
+    if(videofilepath is not None and jsonfilepath is None):
+        clip = get_and_prepare_clip_for_vosk_description(videofilepath)
+        print("Soju - clip duration: {}".format(clip.duration))
+
+        list_of_words = voskDescribe()
+
+        with open(generate_soju_file_name(videofilepath), 'w') as f:
+            f.writelines('{\n\t"data": [' + '\n')
+            for i, word in enumerate(list_of_words):
+                comma = ',' if i < (len(list_of_words) - 1) else ''
+                f.writelines('\t\t{0}{1}\n'.format(word.to_string(), comma))
+            f.writelines('\t],\n\n')
+            f.writelines('\t"boomers": [\n\n\t]\n}')
+        
+        clip.close()
+        return None
+
+
+
+
+    elif(videofilepath is not None and jsonfilepath is not None):
+        boomers = get_boomers(jsonfilepath)
+
+        clip = get_and_prepare_clip_for_moviepy_edition(videofilepath)
+
+        for boomer in boomers:
+            boom_trigger = get_boom_trigger(boomer)
+            image = reach_goofyahh_image(boomer)
+            audioarray = boomer["audio"]["files"] if (boomer["audio"] is not None and boomer["audio"]["files"] is not None) else []
+
+            print("\n")
+            print('Soju - Working on boomer [ "{}" ]'.format(boomer["word"]["content"]))
+            print("""soju - Boomin' at second [ {:.2f} ]""".format(boomer["word"][boom_trigger]))
+            print("""soju - visual media [ {} ]""".format(boomer["image"]["file"]))
+            print("""soju - audio media [ {} ]""".format(str(audioarray)))
+            print("\n")
+
+            if boomer["word"]["end"] > clip.start and boomer["word"]["start"] < clip.end:
+                uppper_half = clip.subclip(boomer["word"][boom_trigger], clip.end)
+                bottom_half = clip.subclip(clip.start, boomer["word"][boom_trigger])
+
+                uppper_half = merge_image_video(
+                    image,
+                    uppper_half,
+                    boomer,
+                    boomers
+                )
+
+                uppper_half = merge_audioarray_video(
+                    audioarray,
+                    uppper_half,
+                    boomer
+                )
+                clip = final_merge(bottom_half, uppper_half)
+                
+            elif boomer["word"]["end"] <= clip.start:
+                uppper_half = clip.subclip(clip.start, clip.end)
+                bottom_half = image
+
+                bottom_half = merge_audioarray_video(
+                    audioarray,
+                    bottom_half,
+                    boomer
+                )
+
+                clip_extend(boomers, boomer["image"]["conf"]["max_duration"])
+
+                clip = final_merge(bottom_half, uppper_half)
+
+            elif boomer["word"]["start"] >= clip.end:
+                uppper_half = image
+                bottom_half = clip.subclip(clip.start, clip.end)
+
+                boomer["image"]["conf"]["imageconcatstrategy"] = ImageMergeStrategy.CONCAT_ENUM
+
+                uppper_half = merge_audioarray_video(
+                    audioarray,
+                    uppper_half,
+                    boomer
+                )
+
+                clip = final_merge(bottom_half, uppper_half)
+
+        print("\nSoju - final clip duration in seconds: {:.2f}\n".format(clip.duration))
+        return clip
+
+
+
 
 def compose_them_clips(clip_array, enforce_resolution= False):
     aux_file_name = variables.PATH_TMP_CLIP
@@ -51,6 +150,9 @@ def compose_them_clips(clip_array, enforce_resolution= False):
 
     clip = get_and_prepare_clip_for_moviepy_edition(aux_file_name)
     return clip
+
+
+
 
 
 def getNullBoomer():
@@ -294,6 +396,8 @@ def get_and_prepare_clip_for_vosk_description(videofilepath):
 
 def get_and_prepare_clip_for_moviepy_edition(videofilepath):
     return VideoFileClip(videofilepath, target_resolution=(variables.OUTPUT_RESOLUTION_HEIGHT, variables.OUTPUT_RESOLUTION_WIDTH))
+
+
 
 
 
