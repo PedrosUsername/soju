@@ -2,7 +2,7 @@
 
 # start   -> visuals will be inserted at ["boomers"]["word"]["start"]
 # end     -> visuals will be inserted at ["boomers"]["word"]["end"]
-DEFAULT_BOOM_TRIGGER = "end"
+DEFAULT_BOOM_TRIGGER = "start"
 
 # COMPOSE -> image will play with video (overlaped)
 # CONCAT  -> image will interrupt video to show up
