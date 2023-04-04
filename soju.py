@@ -1,6 +1,6 @@
 import sys
 
-from utils import utils
+from utils import vosk_utils, ffmpeg_utils
 
 
 
@@ -42,5 +42,15 @@ jsonfilepath = sys.argv[2] if len(sys.argv) > 2 else None
 
 
 
+if(videofilepath is not None and jsonfilepath is None):
+    vosk_utils.soju(videofilepath)
 
-utils.soju(videofilepath, jsonfilepath)
+elif(videofilepath is not None and jsonfilepath is not None):
+    ffmpeg_utils.soju(videofilepath, jsonfilepath)
+    result = vosk_utils.soju2(videofilepath, jsonfilepath)
+
+    print("\nSoju - final clip duration in seconds: {:.2f}\n".format(result.duration))
+    result.write_videofile(
+        vosk_utils.generate_output_file_name(videofilepath),
+        fps= 30
+    )

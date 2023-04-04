@@ -34,6 +34,46 @@ def get_boomers(jsonfilepath):
 
 
 
+def soju2(videofilepath="", jsonfilepath= None):
+    if(jsonfilepath is not None):
+        boomers = get_boomers(jsonfilepath)
+
+        original_clip = get_and_prepare_clip_for_moviepy_edition(videofilepath)
+        full_clip = [get_and_prepare_clip_for_moviepy_edition("./utils/tmp_files/clip_piece_0.mp4")]
+
+        for counter, boomer in enumerate(boomers):
+            current_temp_file_name = "clip_piece_{}.mp4".format(counter + 1)
+            clip = get_and_prepare_clip_for_moviepy_edition("./utils/tmp_files/{}".format(current_temp_file_name))
+
+            boomin_time = boomer["word"][get_boom_trigger(boomer)]
+            image = reach_goofyahh_image(boomer)
+            audioarray = boomer["audio"]["files"] if (boomer["audio"] is not None and boomer["audio"]["files"] is not None) else []
+
+            print("\n")
+            print('Soju - Working on boomer [ "{}" ]'.format(boomer["word"]["content"]))
+            print("""soju - Boomin' at second [ {:.2f} ]""".format(boomin_time))
+            print("""soju - visual media [ {} ]""".format(boomer["image"]["file"]))
+            print("""soju - audio media [ {} ]""".format(str(audioarray)))
+            print("\n")
+
+            clip = merge_image_video(
+                image,
+                clip,
+                boomer,
+                boomers
+            )
+
+            clip = merge_audioarray_video(
+                audioarray,
+                clip,
+                boomer
+            )
+
+            full_clip = full_clip + [clip]
+
+        return concatenate_videoclips(full_clip)
+
+
 
 def soju(videofilepath= None, jsonfilepath= None):
     if(videofilepath is not None and jsonfilepath is None):
@@ -345,7 +385,6 @@ def clip_extend(boomers, extra= variables.MAX_IMAGE_DURATION):
 def merge_image_video(image, video, boomer, boomers):
     if boomer["image"] is not None and boomer["image"]["conf"] is not None and boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
         result = CompositeVideoClip([video.set_start(boomer["image"]["conf"]["max_duration"]), image])
-        clip_extend(boomers, boomer["image"]["conf"]["max_duration"])
     else:
         result = CompositeVideoClip([video.set_start(0), image.crossfadeout(.5)])
 
