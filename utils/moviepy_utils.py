@@ -37,34 +37,36 @@ def get_boomers(jsonfilepath):
 
 
 def makeItGoofy(videofilepath="", jsonfilepath= None):
+    og_clip = get_and_prepare_clip_for_moviepy_edition(videofilepath)
+
     with tempfile.TemporaryDirectory() as tmp_dir:
-        ffmpeg_utils.splitClip(videofilepath, jsonfilepath, tmp_dir + "/")
-        goofy_edit = edit(videofilepath, jsonfilepath, tmp_dir + "/")
+        ffmpeg_utils.splitClip(videofilepath, jsonfilepath, tmp_dir + "/", og_clip.duration)
+        goofy_edit = edit(og_clip, jsonfilepath, tmp_dir)
     return goofy_edit
 
 
-def edit(videofilepath="", jsonfilepath= None, tmp_dir= ""):
+
+def edit(og_clip=None, jsonfilepath= None, tmp_dir= ""):
     if(jsonfilepath is not None):
         boomers = get_boomers(jsonfilepath)
 
-        og_clip = get_and_prepare_clip_for_moviepy_edition(videofilepath)
+        out_of_bounds_boomers_bot = []
+        regular_boomers = []
+        out_of_bounds_boomers_top = []
 
-        clip_pieces_top = []
-        clip_pieces_mid = ["clip_piece_0.mp4"]
-        clip_pieces_bot = []
-
-        for counter, boomer in enumerate(boomers, 1):
+        for boomer in boomers:
             boomin_time = boomer["word"][get_boom_trigger(boomer)]
             if boomin_time > 0 and boomin_time < og_clip.duration:
-                clip_pieces_mid = clip_pieces_mid + ["clip_piece_{}.mp4".format(counter)]
+                regular_boomers = regular_boomers + [boomer]
             elif boomin_time <= 0:
-                clip_pieces_bot = clip_pieces_bot + ["clip_piece_{}.mp4".format(counter)]
+                out_of_bounds_boomers_bot = out_of_bounds_boomers_bot + [boomer]
             elif boomin_time >= og_clip.duration:
-                clip_pieces_top = clip_pieces_top + ["clip_piece_{}.mp4".format(counter)]
+                out_of_bounds_boomers_top = out_of_bounds_boomers_top + [boomer]
 
-        full_clip = [get_and_prepare_clip_for_moviepy_edition("{}/{}".format(tmp_dir, clip_pieces_mid[0]))]
-        for counter, boomer in enumerate(boomers, 1):
-            clip = get_and_prepare_clip_for_moviepy_edition("{}/{}".format(tmp_dir, clip_pieces_mid[counter]))
+        full_clip = [get_and_prepare_clip_for_moviepy_edition("{}/{}".format(tmp_dir, "clip_piece_0.mp4"))]
+
+        for counter, boomer in enumerate(regular_boomers, 1):
+            clip = get_and_prepare_clip_for_moviepy_edition("{}/{}".format(tmp_dir, "clip_piece_{}.mp4".format(counter)))
 
             boomin_time = boomer["word"][get_boom_trigger(boomer)]
             image = reach_goofyahh_image(boomer)
@@ -90,6 +92,10 @@ def edit(videofilepath="", jsonfilepath= None, tmp_dir= ""):
             )
 
             full_clip = full_clip + [clip]
+
+        print("aaaaa")
+        print(full_clip)        
+        print("aaaaa")        
 
         return concatenate_videoclips(full_clip)
 

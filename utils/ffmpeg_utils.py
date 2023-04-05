@@ -20,9 +20,9 @@ fps = "30"
 
 
 
-def splitClip(videofilepath= None, jsonfilepath= None, tmp_dir= ""):
+def splitClip(videofilepath= None, jsonfilepath= None, tmp_dir= "", clip_duration= 0):
     boomers = get_boomers(jsonfilepath)
-    ffmpegSplitClipByBoomers(videofilepath, boomers, tmp_dir)
+    ffmpegSplitClipByBoomers(videofilepath, boomers, tmp_dir, clip_duration)
 
 
 
@@ -50,33 +50,37 @@ def get_boom_trigger(boomer= None):
     
 
     
-def ffmpegSplitClipByBoomers(video_file_path="", boomers= [], tmp_dir= ""):
-    pieces = []
+def ffmpegSplitClipByBoomers(video_file_path="", boomers= [], tmp_dir= "", clip_duration= 0):
+    out_of_range_boomer_count = 0
    
     former_boomin_time = 0
     for counter, boomer in enumerate(boomers):
+        actual_counter = counter - out_of_range_boomer_count
+
         boomin_time = boomer["word"][get_boom_trigger(boomer)]
-        current_temp_file_name = "clip_piece_{}.mp4".format(counter)
-        pieces = pieces + [current_temp_file_name]
+        current_temp_file_name = "clip_piece_{}.mp4".format(actual_counter)
 
-        subprocess.run([
-            ffmpeg,
-            "-y",
-            "-ss",
-            str(former_boomin_time),
-            "-to",
-            str(boomin_time),
-            "-i",
-            video_file_path,
-            "-r",
-            fps,
-            tmp_dir + current_temp_file_name
-        ])
+        if boomin_time > 0 and boomin_time < clip_duration:
+            subprocess.run([
+                ffmpeg,
+                "-y",
+                "-ss",
+                str(former_boomin_time),
+                "-to",
+                str(boomin_time),
+                "-i",
+                video_file_path,
+                "-r",
+                fps,
+                tmp_dir + current_temp_file_name
+            ])
 
-        former_boomin_time = boomin_time
+            former_boomin_time = boomin_time
+        else:
+            out_of_range_boomer_count += 1
+        
     
-    current_temp_file_name = "clip_piece_{}.mp4".format(len(boomers))
-    pieces = pieces + [current_temp_file_name]
+    current_temp_file_name = "clip_piece_{}.mp4".format(len(boomers) - out_of_range_boomer_count)
     
     subprocess.run([
         ffmpeg,
@@ -89,8 +93,6 @@ def ffmpegSplitClipByBoomers(video_file_path="", boomers= [], tmp_dir= ""):
         fps,        
         tmp_dir + current_temp_file_name
     ])
-    
-    return pieces
     
 # merge video w audio
 # ffmpeg -i ./assets/video/vox.mp4 -i ./assets/audio/vineboom.mp3 -filter_complex '[0:a][1:a] amix [y]' -c:v copy -c:a aac -map 0:v -map [y]:a output.mp4
