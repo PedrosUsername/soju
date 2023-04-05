@@ -54,5 +54,5 @@ PATH_DEFAULT_JSON_FILE = "./assets/json/"
 
 
 # program variables
-PATH_TMP_AUDIO = "./utils/settings/tmp_audio_file.wav"
-PATH_TMP_CLIP = "./utils/settings/_tmp.mp4"
+TMP_AUDIO_FILE_NAME = "tmp_audio.wav"
+TMP_COMPOSE_FILE_NAME = "tmp_compose.mp4"

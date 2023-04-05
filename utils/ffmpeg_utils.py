@@ -20,13 +20,9 @@ fps = "30"
 
 
 
-def soju(videofilepath= None, jsonfilepath= None):
+def splitClip(videofilepath= None, jsonfilepath= None, tmp_dir= ""):
     boomers = get_boomers(jsonfilepath)
-    clip_pieces = ffmpegSplitClipByBoomers(videofilepath, boomers)
-
-    
-    print(clip_pieces)
-
+    ffmpegSplitClipByBoomers(videofilepath, boomers, tmp_dir)
 
 
 
@@ -54,7 +50,7 @@ def get_boom_trigger(boomer= None):
     
 
     
-def ffmpegSplitClipByBoomers(video_file_path="", boomers= []):
+def ffmpegSplitClipByBoomers(video_file_path="", boomers= [], tmp_dir= ""):
     pieces = []
    
     former_boomin_time = 0
@@ -74,7 +70,7 @@ def ffmpegSplitClipByBoomers(video_file_path="", boomers= []):
             video_file_path,
             "-r",
             fps,
-            "./utils/tmp_files/{}".format(current_temp_file_name)
+            tmp_dir + current_temp_file_name
         ])
 
         former_boomin_time = boomin_time
@@ -91,7 +87,7 @@ def ffmpegSplitClipByBoomers(video_file_path="", boomers= []):
         video_file_path,
         "-r",
         fps,        
-        "./utils/tmp_files/{}".format(current_temp_file_name)
+        tmp_dir + current_temp_file_name
     ])
     
     return pieces

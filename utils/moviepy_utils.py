@@ -4,12 +4,14 @@ import json
 import wave
 import os
 import filetype
+import tempfile
 
 from vosk import Model, KaldiRecognizer
 from moviepy.editor import *
 from itertools import cycle
 
 from .settings import variables
+from . import ffmpeg_utils
 from . import Boomer as custom_b
 from . import ImageMergeStrategy
 
@@ -34,16 +36,35 @@ def get_boomers(jsonfilepath):
 
 
 
-def soju2(videofilepath="", jsonfilepath= None):
+def makeItGoofy(videofilepath="", jsonfilepath= None):
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        ffmpeg_utils.splitClip(videofilepath, jsonfilepath, tmp_dir + "/")
+        goofy_edit = edit(videofilepath, jsonfilepath, tmp_dir + "/")
+    return goofy_edit
+
+
+def edit(videofilepath="", jsonfilepath= None, tmp_dir= ""):
     if(jsonfilepath is not None):
         boomers = get_boomers(jsonfilepath)
 
-        original_clip = get_and_prepare_clip_for_moviepy_edition(videofilepath)
-        full_clip = [get_and_prepare_clip_for_moviepy_edition("./utils/tmp_files/clip_piece_0.mp4")]
+        og_clip = get_and_prepare_clip_for_moviepy_edition(videofilepath)
 
-        for counter, boomer in enumerate(boomers):
-            current_temp_file_name = "clip_piece_{}.mp4".format(counter + 1)
-            clip = get_and_prepare_clip_for_moviepy_edition("./utils/tmp_files/{}".format(current_temp_file_name))
+        clip_pieces_top = []
+        clip_pieces_mid = ["clip_piece_0.mp4"]
+        clip_pieces_bot = []
+
+        for counter, boomer in enumerate(boomers, 1):
+            boomin_time = boomer["word"][get_boom_trigger(boomer)]
+            if boomin_time > 0 and boomin_time < og_clip.duration:
+                clip_pieces_mid = clip_pieces_mid + ["clip_piece_{}.mp4".format(counter)]
+            elif boomin_time <= 0:
+                clip_pieces_bot = clip_pieces_bot + ["clip_piece_{}.mp4".format(counter)]
+            elif boomin_time >= og_clip.duration:
+                clip_pieces_top = clip_pieces_top + ["clip_piece_{}.mp4".format(counter)]
+
+        full_clip = [get_and_prepare_clip_for_moviepy_edition("{}/{}".format(tmp_dir, clip_pieces_mid[0]))]
+        for counter, boomer in enumerate(boomers, 1):
+            clip = get_and_prepare_clip_for_moviepy_edition("{}/{}".format(tmp_dir, clip_pieces_mid[counter]))
 
             boomin_time = boomer["word"][get_boom_trigger(boomer)]
             image = reach_goofyahh_image(boomer)
@@ -60,7 +81,6 @@ def soju2(videofilepath="", jsonfilepath= None):
                 image,
                 clip,
                 boomer,
-                boomers
             )
 
             clip = merge_audioarray_video(
@@ -77,10 +97,13 @@ def soju2(videofilepath="", jsonfilepath= None):
 
 def soju(videofilepath= None, jsonfilepath= None):
     if(videofilepath is not None and jsonfilepath is None):
-        clip = get_and_prepare_clip_for_vosk_description(videofilepath)
-        print("Soju - clip duration: {}".format(clip.duration))
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            clip = VideoFileClip(videofilepath)
+            clip.audio.write_audiofile(tmp_dir + "/" + variables.TMP_AUDIO_FILE_NAME, ffmpeg_params=["-ac", "1"])
 
-        list_of_words = voskDescribe()
+            print("Soju - clip duration: {}".format(clip.duration))
+
+            list_of_words = voskDescribe(tmp_dir + "/" + variables.TMP_AUDIO_FILE_NAME)
 
         with open(generate_soju_file_name(videofilepath), 'w') as f:
             f.writelines('{\n\t"data": [' + '\n')
@@ -166,7 +189,7 @@ def soju(videofilepath= None, jsonfilepath= None):
 
 
 def compose_them_clips(clip_array, enforce_resolution= False):
-    aux_file_name = variables.PATH_TMP_CLIP
+    aux_file_name = variables.TMP_PATH + variables.TMP_COMPOSE_FILE_NAME
     try:
         os.remove(aux_file_name) # this file is frick'n cursed
     except:
@@ -367,7 +390,8 @@ def reach_goofyahh_image(boomer= getNullBoomer()):
 def reach_goofyahh_audio(filename):
     goofy_audio = '{0}{1}'.format(variables.DEFAULT_AUDIO_PATH, filename) if filename is not None else variables.DEFAULT_NULL_AUDIO_FILE
     audio = AudioFileClip(goofy_audio)
-    return audio.fx(afx.audio_fadeout, audio.duration * (2/3))
+    # return audio                                             # no audio fadeout ?
+    return audio.fx(afx.audio_fadeout, audio.duration * (2/3)) # yes audio fadeout ?
 
 
 
@@ -382,11 +406,11 @@ def clip_extend(boomers, extra= variables.MAX_IMAGE_DURATION):
 
 
 
-def merge_image_video(image, video, boomer, boomers):
+def merge_image_video(image, video, boomer):
     if boomer["image"] is not None and boomer["image"]["conf"] is not None and boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
         result = CompositeVideoClip([video.set_start(boomer["image"]["conf"]["max_duration"]), image])
     else:
-        result = CompositeVideoClip([video.set_start(0), image.crossfadeout(.5)])
+        result = CompositeVideoClip([video, image.crossfadeout(.5)])
 
     return result
 
@@ -426,7 +450,7 @@ def merge_audioarray_video(audioarray, video, boomer):
 
 def get_and_prepare_clip_for_vosk_description(videofilepath):
     result = VideoFileClip(videofilepath)
-    result.audio.write_audiofile(variables.PATH_TMP_AUDIO, ffmpeg_params=["-ac", "1"])
+    result.audio.write_audiofile(variables.TMP_PATH + variables.TMP_AUDIO_FILE_NAME, ffmpeg_params=["-ac", "1"])
     return result
 
 
@@ -466,10 +490,12 @@ def get_boom_trigger(boomer= None):
 
 
 
-def voskDescribe():
+
+
+def voskDescribe(audio_file_path= ""):
     image_files = os.listdir(variables.DEFAULT_IMAGE_PATH)
     model = Model(variables.PATH_MODEL)
-    wf = wave.open(variables.PATH_TMP_AUDIO, "rb")
+    wf = wave.open(audio_file_path, "rb")
     rec = KaldiRecognizer(model, wf.getframerate())
     rec.SetWords(True)
 
@@ -499,6 +525,5 @@ def voskDescribe():
                 image_files.remove(new_word.image["file"])
             word_list.append(new_word)  # and add it to list
     wf.close()  # close audiofile
-    os.remove(variables.PATH_TMP_AUDIO)
     return word_list
 
