@@ -93,10 +93,6 @@ def edit(og_clip=None, jsonfilepath= None, tmp_dir= ""):
 
             full_clip = full_clip + [clip]
 
-        print("aaaaa")
-        print(full_clip)        
-        print("aaaaa")        
-
         return concatenate_videoclips(full_clip)
 
 
@@ -463,8 +459,12 @@ def get_and_prepare_clip_for_vosk_description(videofilepath):
 
 
 
-def get_and_prepare_clip_for_moviepy_edition(videofilepath):
-    return VideoFileClip(videofilepath, target_resolution=(variables.OUTPUT_RESOLUTION_HEIGHT, variables.OUTPUT_RESOLUTION_WIDTH))
+def get_and_prepare_clip_for_moviepy_edition(videofilepath, audio= True):
+    return VideoFileClip(
+        videofilepath,
+        target_resolution=(variables.OUTPUT_RESOLUTION_HEIGHT, variables.OUTPUT_RESOLUTION_WIDTH),
+        audio= audio
+    )
 
 
 

@@ -14,7 +14,7 @@ def get_boomers(jsonfilepath):
 
 
 
-ffmpeg = "/usr/bin/ffmpeg"
+ffmpeg = "/usr/local/bin/ffmpeg"
 fps = "30"
 
 
@@ -70,6 +70,8 @@ def ffmpegSplitClipByBoomers(video_file_path="", boomers= [], tmp_dir= "", clip_
                 str(boomin_time),
                 "-i",
                 video_file_path,
+                "-c:v",
+                "copy",
                 "-r",
                 fps,
                 tmp_dir + current_temp_file_name
@@ -89,6 +91,8 @@ def ffmpegSplitClipByBoomers(video_file_path="", boomers= [], tmp_dir= "", clip_
         str(former_boomin_time),
         "-i",
         video_file_path,
+        "-c:v",
+        "copy",
         "-r",
         fps,        
         tmp_dir + current_temp_file_name
