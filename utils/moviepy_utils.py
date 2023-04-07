@@ -37,67 +37,79 @@ def get_boomers(jsonfilepath):
 
 
 def makeItGoofy(videofilepath="", jsonfilepath= None):
+
     og_clip = get_and_prepare_clip_for_moviepy_edition(videofilepath)
+    boomers = get_boomers(jsonfilepath)
+
+    out_of_bounds_boomers_bot = []
+    regular_boomers = []
+    out_of_bounds_boomers_top = []
+
+    for boomer in boomers:
+        boomin_time = boomer["word"][get_boom_trigger(boomer)]
+        if boomin_time > 0 and boomin_time < og_clip.duration:
+            regular_boomers = regular_boomers + [boomer]
+        elif boomin_time <= 0:
+            out_of_bounds_boomers_bot = out_of_bounds_boomers_bot + [boomer]
+        elif boomin_time >= og_clip.duration:
+            out_of_bounds_boomers_top = out_of_bounds_boomers_top + [boomer]    
+
+
 
     with tempfile.TemporaryDirectory() as tmp_dir:
-        ffmpeg_utils.splitClip(videofilepath, jsonfilepath, tmp_dir + "/", og_clip.duration)
-        goofy_edit = edit(og_clip, jsonfilepath, tmp_dir)
-    return goofy_edit
+        ffmpeg_utils.splitClip(videofilepath, regular_boomers, ".")
+        buildvisuals(regular_boomers, ".")
+        ffmpeg_utils.buildAudio(regular_boomers, ".")
+
+        with open("." + "/" + "params.txt", mode='w') as fp:
+            fp.write("file 'ready_clip_piece_0.wav'\n")
+            for counter, boomer in enumerate(regular_boomers, 1):
+                fp.write("file 'ready_clip_piece_{}.wav'\n".format(counter))
+            
+        ffmpeg_utils.concatAudioClips(".")
+
+        with open("." + "/" + "params.txt", mode='w') as fp:
+            fp.write("file 'ready_clip_piece_0.mp4'\n")
+            for counter, boomer in enumerate(regular_boomers, 1):
+                fp.write("file 'ready_clip_piece_{}.mp4'\n".format(counter))
+
+        ffmpeg_utils.concatVideoClips(".")
+        
+        ffmpeg_utils.mixAudioAndVideo(".")
 
 
 
-def edit(og_clip=None, jsonfilepath= None, tmp_dir= ""):
-    if(jsonfilepath is not None):
-        boomers = get_boomers(jsonfilepath)
+def buildvisuals(boomers= None, tmp_dir= ""):
 
-        out_of_bounds_boomers_bot = []
-        regular_boomers = []
-        out_of_bounds_boomers_top = []
+    for counter, boomer in enumerate(boomers, 1):
+        clip = get_and_prepare_clip_for_moviepy_edition("{}/clip_piece_{}.mp4".format(tmp_dir, counter))
 
-        for boomer in boomers:
-            boomin_time = boomer["word"][get_boom_trigger(boomer)]
-            if boomin_time > 0 and boomin_time < og_clip.duration:
-                regular_boomers = regular_boomers + [boomer]
-            elif boomin_time <= 0:
-                out_of_bounds_boomers_bot = out_of_bounds_boomers_bot + [boomer]
-            elif boomin_time >= og_clip.duration:
-                out_of_bounds_boomers_top = out_of_bounds_boomers_top + [boomer]
+        boomin_time = boomer["word"][get_boom_trigger(boomer)]
+        image = reach_goofyahh_image(boomer)
+        audioarray = boomer["audio"]["files"] if (boomer["audio"] is not None and boomer["audio"]["files"] is not None) else []
 
-        full_clip = [get_and_prepare_clip_for_moviepy_edition("{}/{}".format(tmp_dir, "clip_piece_0.mp4"))]
+        print("\n")
+        print('Soju - Working on boomer [ "{}" ]'.format(boomer["word"]["content"]))
+        print("""soju - Boomin' at second [ {:.2f} ]""".format(boomin_time))
+        print("""soju - visual media [ {} ]""".format(boomer["image"]["file"]))
+        print("""soju - audio media [ {} ]""".format(str(audioarray)))
+        print("\n")
 
-        for counter, boomer in enumerate(regular_boomers, 1):
-            clip = get_and_prepare_clip_for_moviepy_edition("{}/{}".format(tmp_dir, "clip_piece_{}.mp4".format(counter)))
+        clip = merge_image_video(
+            image,
+            clip,
+            boomer
+        )
 
-            boomin_time = boomer["word"][get_boom_trigger(boomer)]
-            image = reach_goofyahh_image(boomer)
-            audioarray = boomer["audio"]["files"] if (boomer["audio"] is not None and boomer["audio"]["files"] is not None) else []
-
-            print("\n")
-            print('Soju - Working on boomer [ "{}" ]'.format(boomer["word"]["content"]))
-            print("""soju - Boomin' at second [ {:.2f} ]""".format(boomin_time))
-            print("""soju - visual media [ {} ]""".format(boomer["image"]["file"]))
-            print("""soju - audio media [ {} ]""".format(str(audioarray)))
-            print("\n")
-
-            clip = merge_image_video(
-                image,
-                clip,
-                boomer,
-            )
-
-            clip = merge_audioarray_video(
-                audioarray,
-                clip,
-                boomer
-            )
-
-            full_clip = full_clip + [clip]
-
-        return concatenate_videoclips(full_clip)
+        clip.write_videofile(
+            "{0}/ready_clip_piece_{1}.mp4".format(".", counter),
+            fps= 30,
+            threads= 4,
+            logger= "bar"
+        )
 
 
-
-def soju(videofilepath= None, jsonfilepath= None):
+def buildSojuFile(videofilepath= None, jsonfilepath= None):
     if(videofilepath is not None and jsonfilepath is None):
         with tempfile.TemporaryDirectory() as tmp_dir:
             clip = VideoFileClip(videofilepath)
@@ -117,76 +129,6 @@ def soju(videofilepath= None, jsonfilepath= None):
         
         clip.close()
         return None
-
-
-
-
-    elif(videofilepath is not None and jsonfilepath is not None):
-        boomers = get_boomers(jsonfilepath)
-
-        clip = get_and_prepare_clip_for_moviepy_edition(videofilepath)
-
-        for boomer in boomers:
-            boom_trigger = get_boom_trigger(boomer)
-            image = reach_goofyahh_image(boomer)
-            audioarray = boomer["audio"]["files"] if (boomer["audio"] is not None and boomer["audio"]["files"] is not None) else []
-
-            print("\n")
-            print('Soju - Working on boomer [ "{}" ]'.format(boomer["word"]["content"]))
-            print("""soju - Boomin' at second [ {:.2f} ]""".format(boomer["word"][boom_trigger]))
-            print("""soju - visual media [ {} ]""".format(boomer["image"]["file"]))
-            print("""soju - audio media [ {} ]""".format(str(audioarray)))
-            print("\n")
-
-            if boomer["word"]["end"] > clip.start and boomer["word"]["start"] < clip.end:
-                uppper_half = clip.subclip(boomer["word"][boom_trigger], clip.end)
-                bottom_half = clip.subclip(clip.start, boomer["word"][boom_trigger])
-
-                uppper_half = merge_image_video(
-                    image,
-                    uppper_half,
-                    boomer,
-                    boomers
-                )
-
-                uppper_half = merge_audioarray_video(
-                    audioarray,
-                    uppper_half,
-                    boomer
-                )
-                clip = final_merge(bottom_half, uppper_half)
-                
-            elif boomer["word"]["end"] <= clip.start:
-                uppper_half = clip.subclip(clip.start, clip.end)
-                bottom_half = image
-
-                bottom_half = merge_audioarray_video(
-                    audioarray,
-                    bottom_half,
-                    boomer
-                )
-
-                clip_extend(boomers, boomer["image"]["conf"]["max_duration"])
-
-                clip = final_merge(bottom_half, uppper_half)
-
-            elif boomer["word"]["start"] >= clip.end:
-                uppper_half = image
-                bottom_half = clip.subclip(clip.start, clip.end)
-
-                boomer["image"]["conf"]["imageconcatstrategy"] = ImageMergeStrategy.CONCAT_ENUM
-
-                uppper_half = merge_audioarray_video(
-                    audioarray,
-                    uppper_half,
-                    boomer
-                )
-
-                clip = final_merge(bottom_half, uppper_half)
-
-        print("\nSoju - final clip duration in seconds: {:.2f}\n".format(clip.duration))
-        return clip
-
 
 
 

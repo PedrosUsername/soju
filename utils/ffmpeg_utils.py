@@ -20,9 +20,8 @@ fps = "30"
 
 
 
-def splitClip(videofilepath= None, jsonfilepath= None, tmp_dir= "", clip_duration= 0):
-    boomers = get_boomers(jsonfilepath)
-    ffmpegSplitClipByBoomers(videofilepath, boomers, tmp_dir, clip_duration)
+def splitClip(videofilepath= None, boomers= [], tmp_dir= ""):
+    ffmpegSplitClipByBoomers(videofilepath, boomers, tmp_dir)
 
 
 
@@ -50,39 +49,50 @@ def get_boom_trigger(boomer= None):
     
 
     
-def ffmpegSplitClipByBoomers(video_file_path="", boomers= [], tmp_dir= "", clip_duration= 0):
-    out_of_range_boomer_count = 0
-   
+def ffmpegSplitClipByBoomers(video_file_path="", boomers= [], tmp_dir= ""):
+
     former_boomin_time = 0
     for counter, boomer in enumerate(boomers):
-        actual_counter = counter - out_of_range_boomer_count
-
         boomin_time = boomer["word"][get_boom_trigger(boomer)]
-        current_temp_file_name = "clip_piece_{}.mp4".format(actual_counter)
+        current_temp_file_name = "clip_piece_{}.mp4".format(counter)
+        current_temp_audio_file_name = "ready_clip_piece_{}.wav".format(counter)
 
-        if boomin_time > 0 and boomin_time < clip_duration:
+        if counter == 0:
+            current_temp_file_name = "ready_" + current_temp_file_name
+
             subprocess.run([
                 ffmpeg,
                 "-y",
                 "-ss",
                 str(former_boomin_time),
                 "-to",
-                str(boomin_time),
+                str(boomin_time),                
                 "-i",
                 video_file_path,
-                "-c:v",
-                "copy",
                 "-r",
-                fps,
-                tmp_dir + current_temp_file_name
+                fps,        
+                "{}/{}".format(tmp_dir, current_temp_audio_file_name)
             ])
-
-            former_boomin_time = boomin_time
-        else:
-            out_of_range_boomer_count += 1
         
-    
-    current_temp_file_name = "clip_piece_{}.mp4".format(len(boomers) - out_of_range_boomer_count)
+        subprocess.run([
+            ffmpeg,
+            "-y",
+            "-ss",
+            str(former_boomin_time),
+            "-to",
+            str(boomin_time),
+            "-i",
+            video_file_path,
+            "-c",
+            "copy",
+            "-r",
+            fps,
+            "{}/{}".format(tmp_dir, current_temp_file_name)
+        ])
+
+        former_boomin_time = boomin_time
+        
+    current_temp_file_name = "clip_piece_{}.mp4".format(len(boomers))
     
     subprocess.run([
         ffmpeg,
@@ -91,13 +101,84 @@ def ffmpegSplitClipByBoomers(video_file_path="", boomers= [], tmp_dir= "", clip_
         str(former_boomin_time),
         "-i",
         video_file_path,
-        "-c:v",
+        "-c",
         "copy",
         "-r",
         fps,        
-        tmp_dir + current_temp_file_name
+        "{}/{}".format(tmp_dir, current_temp_file_name)
     ])
-    
+
+
+
+def buildAudio(boomers= None, tmp_dir= ""):
+    for counter, boomer in enumerate(boomers, 1):
+        if boomer["audio"] is None or boomer["audio"]["files"] is None:
+            continue
+
+        boomer_audio = '{0}{1}'.format(variables.DEFAULT_AUDIO_PATH, boomer["audio"]["files"][0] if boomer["audio"]["files"][0] is not None else variables.DEFAULT_NULL_AUDIO_FILE)
+        current_temp_file_name = "ready_clip_piece_{}.mp4".format(counter)
+        output_temp_file_name = "ready_clip_piece_{}.wav".format(counter)
+
+        subprocess.run([
+            ffmpeg,
+            "-y",
+            "-i",
+            "{}/{}".format(tmp_dir, current_temp_file_name),
+            "-i",
+            boomer_audio,
+            "-filter_complex",
+            "[0:a] [1:a] amix ",
+            "{}/{}".format(tmp_dir, output_temp_file_name)
+        ])            
+
+
+
+def concatAudioClips(tmp_dir):
+    subprocess.run([
+        "ffmpeg",
+        "-y",
+        "-f",
+        "concat",
+        "-safe",
+        "0",
+        "-i",
+        tmp_dir + "/" + "params.txt",
+        "-c",
+        "copy",
+        "output_audio.wav"
+    ])
+
+def concatVideoClips(tmp_dir):
+    subprocess.run([
+        "ffmpeg",
+        "-y",
+        "-f",
+        "concat",
+        "-safe",
+        "0",
+        "-i",
+        tmp_dir + "/" + "params.txt",
+        "-c",
+        "copy",
+        "output_video.mp4"
+    ])
+
+def mixAudioAndVideo(tmp_dir):
+    subprocess.run([
+        "ffmpeg",
+        "-y",
+        "-i",
+        "output_video.mp4",
+        "-i",
+        "output_audio.wav",
+        "-map",
+        "0:v:0",
+        "-map",
+        "1:a:0",
+        "final.mp4"
+    ])
+
+
 # merge video w audio
 # ffmpeg -i ./assets/video/vox.mp4 -i ./assets/audio/vineboom.mp3 -filter_complex '[0:a][1:a] amix [y]' -c:v copy -c:a aac -map 0:v -map [y]:a output.mp4
 
