@@ -54,30 +54,81 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
         elif boomin_time >= og_clip.duration:
             out_of_bounds_boomers_top = out_of_bounds_boomers_top + [boomer]    
 
+    clip = videofilepath
+    for boomer in regular_boomers:
+        if boomer["image"] is not None and boomer["image"]["conf"] is not None and boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.FAST_COMPOSE_ENUM:
+            output_file = generate_output_file_name(clip)
+
+            ffmpeg_utils.quickOverlay(clip, boomer, "overlay.mp4", variables.DEFAULT_TMP_FILE_PATH)
+            ffmpeg_utils.copy(from_= variables.DEFAULT_TMP_FILE_PATH + "overlay.mp4", to_= output_file)
+
+            clip = output_file
 
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        ffmpeg_utils.splitClip(videofilepath, regular_boomers, ".")
+
+
+        else:
+            ffmpeg_utils.splitClip(clip, boomer, variables.DEFAULT_TMP_FILE_PATH)
+            editUpperHalfVideo(boomer, variables.DEFAULT_TMP_FILE_PATH)
+
+            output_file = generate_output_file_name(videofilepath)
+            
+            ffmpeg_utils.concatClipHalves(output_file, variables.DEFAULT_TMP_FILE_PATH)
+            clip = output_file
+""" 
+        ffmpeg_utils.splitClipByBoomers(videofilepath, regular_boomers, ".")
         buildvisuals(regular_boomers, ".")
         ffmpeg_utils.buildAudio(regular_boomers, ".")
-
-        with open("." + "/" + "params.txt", mode='w') as fp:
-            fp.write("file 'ready_clip_piece_0.wav'\n")
-            for counter, boomer in enumerate(regular_boomers, 1):
-                fp.write("file 'ready_clip_piece_{}.wav'\n".format(counter))
-            
-        ffmpeg_utils.concatAudioClips(".")
-
+        
         with open("." + "/" + "params.txt", mode='w') as fp:
             fp.write("file 'ready_clip_piece_0.mp4'\n")
             for counter, boomer in enumerate(regular_boomers, 1):
                 fp.write("file 'ready_clip_piece_{}.mp4'\n".format(counter))
 
-        ffmpeg_utils.concatVideoClips(".")
-        
-        ffmpeg_utils.mixAudioAndVideo(".")
+        ffmpeg_utils.concatClips("params.txt", ".")
+
+        clips = [VideoFileClip("." + "/" + "ready_clip_piece_0.mp4")]
+        for counter, boomer in enumerate(regular_boomers, 1):
+            clips = clips + [VideoFileClip("." + "/" + "ready_clip_piece_{}.mp4".format(counter))]
+
+        final = concatenate_videoclips(clips)
+        final.write_videofile("outpooot.mp4")
+"""
 
 
+
+
+def editUpperHalfVideo(boomer= None, tmp_dir= ""):
+    print("\n")
+    print('Soju - Working on boomer [ "{}" ]'.format(boomer["word"]["content"]))
+    print("""soju - Boomin' at second [ {:.2f} ]""".format(boomer["word"][get_boom_trigger(boomer)]))
+    print("""soju - visual media [ {} ]""".format(boomer["image"]["file"]))
+    print("""soju - audio media [ {} ]""".format(str(boomer["audio"]["files"])))
+    print("\n")
+
+    upper_half = get_and_prepare_clip_for_moviepy_edition("{}/upper_half_0.mp4".format(tmp_dir))
+    media = reach_goofyahh_image(boomer)
+    audioarray = boomer["audio"]["files"] if (boomer["audio"] is not None and boomer["audio"]["files"] is not None) else []
+
+    upper_half = merge_image_video(
+        media,
+        upper_half,
+        boomer
+    )
+
+    upper_half = merge_audioarray_video(
+        audioarray,
+        upper_half,
+        boomer
+    )
+
+    upper_half.write_videofile(
+        "{0}/upper_half.mp4".format(tmp_dir),
+        fps= 30,
+        threads= 4,
+        logger= "bar",
+        ffmpeg_params= ["-s", "1280x720"]
+    )
 
 def buildvisuals(boomers= None, tmp_dir= ""):
 
@@ -102,7 +153,7 @@ def buildvisuals(boomers= None, tmp_dir= ""):
         )
 
         clip.write_videofile(
-            "{0}/ready_clip_piece_{1}.mp4".format(".", counter),
+            "{0}/v_clip_piece_{1}.mp4".format(".", counter),
             fps= 30,
             threads= 4,
             logger= "bar"
