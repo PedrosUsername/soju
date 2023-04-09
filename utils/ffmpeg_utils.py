@@ -14,18 +14,6 @@ def get_boomers(jsonfilepath):
 
 
 
-ffmpeg = "/snap/bin/ffmpeg"
-fps = "30"
-video_codec = "h264"
-audio_codec = "mp3"
-video_bitrate = "64k"
-audio_bitrate = "196k"
-sample_rate = "44100"
-encoding_speed = "fast"
-crf = "22"
-frame_size = "1280x720"
-pix_fmt = "yuv420p"
-bufsize = "64k"
 
 
 
@@ -62,76 +50,29 @@ def splitClip(video_file_path="", boomer= [], tmp_dir= "."):
     upper_half_file = "{}/upper_half_0.mp4".format(tmp_dir)
     
     subprocess.run([
-        ffmpeg,
+        variables.FFMPEG_PATH,
         "-y",
         "-i",
         video_file_path,
         "-filter_complex",
-        "trim= end= " + str(boomin_time) + ", setpts=PTS-STARTPTS [botv]; atrim= end= " + str(boomin_time) + ",asetpts=PTS-STARTPTS [bota]",
+        """
+        [0] trim= end= {0}, setpts=PTS-STARTPTS [botv]; [0] atrim= end= {0},asetpts=PTS-STARTPTS [bota];
+        [0] trim= start= {0}, setpts=PTS-STARTPTS [uppv]; [0] atrim= start= {0},asetpts=PTS-STARTPTS [uppa]
+        """.format(str(boomin_time)),
         "-map",
         "[botv]",
         "-map",
         "[bota]",
-        "-c:v",
-        video_codec,
-        "-c:a",
-        audio_codec,
-        "-b:v",
-        video_bitrate,
-        "-b:a",
-        audio_bitrate,
-        "-preset",
-        encoding_speed,
-        "-crf",
-        crf,
-        "-s",
-        frame_size,
-        "-ar",
-        sample_rate,
-        "-pix_fmt",
-        pix_fmt,
-        "-video_track_timescale",
-        "90000",
-        "-r",
-        fps,
-        bottom_half_file
-    ])
-
-    subprocess.run([
-        ffmpeg,
-        "-y",
-        "-i",
-        video_file_path,
-        "-filter_complex",
-        "trim= start= " + str(boomin_time) + ", setpts=PTS-STARTPTS [uppv]; atrim= start= " + str(boomin_time) + ",asetpts=PTS-STARTPTS [uppa]",
+        *variables.FFMPEG_OUTPUT_SPECS,
+        bottom_half_file,
         "-map",
         "[uppv]",
         "-map",
         "[uppa]",
-        "-c:v",
-        video_codec,
-        "-c:a",
-        audio_codec,
-        "-b:v",
-        video_bitrate,
-        "-b:a",
-        audio_bitrate,
-        "-preset",
-        encoding_speed,
-        "-crf",
-        crf,
-        "-s",
-        frame_size,
-        "-ar",
-        sample_rate,
-        "-pix_fmt",
-        pix_fmt,
-        "-video_track_timescale",
-        "90000",
-        "-r",
-        fps,
-        upper_half_file
+        *variables.FFMPEG_OUTPUT_SPECS,
+        upper_half_file        
     ])
+
     
     
 
@@ -145,7 +86,7 @@ def splitClipByBoomers(video_file_path="", boomers= [], tmp_dir= "."):
             current_temp_file_name = "ready_clip_piece_0.mp4"
         
         subprocess.run([
-            ffmpeg,
+            variables.FFMPEG_PATH,
             "-y",
             "-ss",
             str(former_boomin_time),
@@ -153,28 +94,7 @@ def splitClipByBoomers(video_file_path="", boomers= [], tmp_dir= "."):
             str(boomin_time),
             "-i",
             video_file_path,
-            "-c:v",
-            video_codec,
-            "-c:a",
-            audio_codec,
-            "-b:v",
-            video_bitrate,
-            "-b:a",
-            audio_bitrate,
-            "-preset",
-            encoding_speed,
-            "-crf",
-            crf,
-            "-s",
-            frame_size,
-            "-ar",
-            sample_rate,
-            "-pix_fmt",
-            pix_fmt,
-            "-video_track_timescale",
-            "90000",
-            "-r",
-            fps,
+            *variables.FFMPEG_OUTPUT_SPECS,
             "{}/{}".format(tmp_dir, current_temp_file_name)
         ])
 
@@ -183,34 +103,13 @@ def splitClipByBoomers(video_file_path="", boomers= [], tmp_dir= "."):
     current_temp_file_name = "clip_piece_{}.mp4".format(len(boomers))
     
     subprocess.run([
-        ffmpeg,
+        variables.FFMPEG_PATH,
         "-y",
         "-ss",
         str(former_boomin_time),
         "-i",
         video_file_path,
-        "-c:v",
-        video_codec,
-        "-c:a",
-        audio_codec,
-        "-b:v",
-        video_bitrate,
-        "-b:a",
-        audio_bitrate,
-        "-preset",
-        encoding_speed,
-        "-crf",
-        crf,
-        "-s",
-        frame_size,
-        "-ar",
-        sample_rate,
-        "-pix_fmt",
-        pix_fmt,
-        "-video_track_timescale",
-        "90000",
-        "-r",
-        fps,
+        *variables.FFMPEG_OUTPUT_SPECS,
         "{}/{}".format(tmp_dir, current_temp_file_name)
     ])
 
@@ -227,7 +126,7 @@ def buildAudio(boomers= None, tmp_dir= "."):
         output_temp_file_name = "ready_clip_piece_{}.mp4".format(counter)
 
         subprocess.run([
-            ffmpeg,
+            variables.FFMPEG_PATH,
             "-y",
             "-i",
             boomer_audio,
@@ -235,28 +134,7 @@ def buildAudio(boomers= None, tmp_dir= "."):
             "{}/{}".format(tmp_dir, current_temp_file_name),
             "-filter_complex",
             "[0] [1] amix",
-            "-c:v",
-            video_codec,
-            "-c:a",
-            audio_codec,
-            "-b:v",
-            video_bitrate,
-            "-b:a",
-            audio_bitrate,
-            "-preset",
-            encoding_speed,
-            "-crf",
-            crf,
-            "-s",
-            frame_size,
-            "-ar",
-            sample_rate,
-            "-pix_fmt",
-            pix_fmt,
-            "-video_track_timescale",
-            "90000",
-            "-r",
-            fps,
+            *variables.FFMPEG_OUTPUT_SPECS,
             "{}/{}".format(tmp_dir, output_temp_file_name)
         ])
 
@@ -272,28 +150,7 @@ def concatClips(concat_file, tmp_dir):
         "0",
         "-i",
         tmp_dir + "/" + concat_file,
-        "-c:v",
-        video_codec,
-        "-c:a",
-        audio_codec,
-        "-b:v",
-        video_bitrate,
-        "-b:a",
-        audio_bitrate,
-        "-preset",
-        encoding_speed,
-        "-crf",
-        crf,
-        "-s",
-        frame_size,
-        "-ar",
-        sample_rate,
-        "-pix_fmt",
-        pix_fmt,
-        "-video_track_timescale",
-        "90000",
-        "-r",
-        fps,        
+        *variables.FFMPEG_OUTPUT_SPECS,        
         "output_video.mp4"
     ])
 
@@ -303,11 +160,11 @@ def concatClipHalves(output_file, tmp_dir):
         "ffmpeg",
         "-y",
         "-r",
-        fps,
+        variables.FFMPEG_FPS,
         "-i",
         tmp_dir + "/" + "bottom_half.mp4",
         "-r",
-        fps,
+        variables.FFMPEG_FPS,
         "-i",
         tmp_dir + "/" + "upper_half.mp4",        
         "-filter_complex",
@@ -316,28 +173,7 @@ def concatClipHalves(output_file, tmp_dir):
         "[outv]",
         "-map",
         "[outa]",
-        "-c:v",
-        video_codec,
-        "-c:a",
-        audio_codec,
-        "-b:v",
-        video_bitrate,
-        "-b:a",
-        audio_bitrate,
-        "-preset",
-        encoding_speed,
-        "-crf",
-        crf,
-        "-s",
-        frame_size,
-        "-ar",
-        sample_rate,
-        "-pix_fmt",
-        pix_fmt,
-        "-video_track_timescale",
-        "90000",
-        "-r",
-        fps,
+        *variables.FFMPEG_OUTPUT_SPECS,
         output_file
     ])
 
@@ -350,7 +186,7 @@ def quickOverlay(videofilepath= "", boomer= None, output_file= "overlay.mp4", tm
     boomin_time_end = bommin_time_start + boomer["image"]["conf"]["max_duration"]
 
     subprocess.run([
-        ffmpeg,
+        variables.FFMPEG_PATH,
         "-y",
         "-i",
         videofilepath,
@@ -358,28 +194,7 @@ def quickOverlay(videofilepath= "", boomer= None, output_file= "overlay.mp4", tm
         media,        
         "-filter_complex",
         "overlay= enable='between(t,{:.2f},{:.2f})'".format(bommin_time_start, boomin_time_end),
-        "-c:v",
-        video_codec,
-        "-c:a",
-        audio_codec,
-        "-b:v",
-        video_bitrate,
-        "-b:a",
-        audio_bitrate,
-        "-preset",
-        encoding_speed,
-        "-crf",
-        crf,
-        "-s",
-        frame_size,
-        "-ar",
-        sample_rate,
-        "-pix_fmt",
-        pix_fmt,
-        "-video_track_timescale",
-        "90000",
-        "-r",
-        fps,
+        *variables.FFMPEG_OUTPUT_SPECS,
         tmp_dir + "/" + output_file
     ])
 
@@ -387,7 +202,7 @@ def quickOverlay(videofilepath= "", boomer= None, output_file= "overlay.mp4", tm
 def copy(from_= "", to_= ""):
     
     subprocess.run([
-        ffmpeg,
+        variables.FFMPEG_PATH,
         "-y",
         "-i",
         from_,
@@ -395,6 +210,10 @@ def copy(from_= "", to_= ""):
         "copy",
         to_
     ])
+
+
+
+
 # merge video w audio
 # ffmpeg -i ./assets/video/vox.mp4 -i ./assets/audio/vineboom.mp3 -filter_complex '[0:a][1:a] amix [y]' -c:v copy -c:a aac -map 0:v -map [y]:a output.mp4
 

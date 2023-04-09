@@ -1,18 +1,12 @@
 import ntpath
-import random
 import json
-import wave
-import os
 import filetype
 import tempfile
 
-from vosk import Model, KaldiRecognizer
 from moviepy.editor import *
-from itertools import cycle
 
 from .settings import variables
-from . import ffmpeg_utils
-from . import Boomer as custom_b
+from . import ffmpeg_utils, vosk_utils
 from . import ImageMergeStrategy
 
 
@@ -36,26 +30,37 @@ def get_boomers(jsonfilepath):
 
 
 
-def makeItGoofy(videofilepath="", jsonfilepath= None):
 
-    og_clip = get_and_prepare_clip_for_moviepy_edition(videofilepath)
-    boomers = get_boomers(jsonfilepath)
-
+def filterBoomers(og_clip_duration= 0, boomers= []):
     out_of_bounds_boomers_bot = []
     regular_boomers = []
     out_of_bounds_boomers_top = []
 
     for boomer in boomers:
         boomin_time = boomer["word"][get_boom_trigger(boomer)]
-        if boomin_time > 0 and boomin_time < og_clip.duration:
+        if boomin_time > 0 and boomin_time < og_clip_duration:
             regular_boomers = regular_boomers + [boomer]
         elif boomin_time <= 0:
             out_of_bounds_boomers_bot = out_of_bounds_boomers_bot + [boomer]
-        elif boomin_time >= og_clip.duration:
-            out_of_bounds_boomers_top = out_of_bounds_boomers_top + [boomer]    
+        elif boomin_time >= og_clip_duration:
+            out_of_bounds_boomers_top = out_of_bounds_boomers_top + [boomer]
+
+    return (out_of_bounds_boomers_top, regular_boomers, out_of_bounds_boomers_bot)
+
+
+
+
+
+def makeItGoofy(videofilepath="", jsonfilepath= None):
+
+    og_clip = getClipWithMoviePy(videofilepath)
+    boomers = get_boomers(jsonfilepath)
+
+    boomers_top, boomers_mid, boomers_bot = filterBoomers(og_clip.duration, boomers)
 
     clip = videofilepath
-    for boomer in regular_boomers:
+    for boomer in boomers_mid:
+
         if boomer["image"] is not None and boomer["image"]["conf"] is not None and boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.FAST_COMPOSE_ENUM:
             output_file = generate_output_file_name(clip)
 
@@ -63,8 +68,6 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
             ffmpeg_utils.copy(from_= variables.DEFAULT_TMP_FILE_PATH + "overlay.mp4", to_= output_file)
 
             clip = output_file
-
-
 
 
         elif boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.COMPOSE_ENUM:
@@ -77,13 +80,11 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
             clip = output_file
 
 
-
-
         elif boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
             ffmpeg_utils.splitClip(clip, boomer, variables.DEFAULT_TMP_FILE_PATH)
             editUpperHalfVideo(boomer, variables.DEFAULT_TMP_FILE_PATH)
 
-            clip_extend(regular_boomers, boomer["image"]["conf"]["max_duration"])
+            clip_extend(boomers_mid, boomer["image"]["conf"]["max_duration"])
             output_file = generate_output_file_name(videofilepath)
             
             ffmpeg_utils.concatClipHalves(output_file, variables.DEFAULT_TMP_FILE_PATH)
@@ -162,7 +163,7 @@ def buildSojuFile(videofilepath= None, jsonfilepath= None):
 
             print("Soju - clip duration: {}".format(clip.duration))
 
-            list_of_words = voskDescribe(tmp_dir + "/" + variables.TMP_AUDIO_FILE_NAME)
+            list_of_words = vosk_utils.voskDescribe(tmp_dir + "/" + variables.TMP_AUDIO_FILE_NAME)
 
         with open(generate_soju_file_name(videofilepath), 'w') as f:
             f.writelines('{\n\t"data": [' + '\n')
@@ -227,73 +228,21 @@ def isVideo(our_file):
 
 
 
-def file_is_a_good_choice(image_file):
-    return os.path.isfile('{0}{1}'.format(variables.DEFAULT_IMAGE_PATH, image_file)) and image_file not in variables.IGNORE_IMAGE_FILE_LIST
 
 
 
 
 
-def getRandomizedImageFileName(image_files):
-    flag = False
-
-    while flag is False:
-        try:
-            image_file = random.choice(image_files)
-            flag = True if file_is_a_good_choice(image_file) else False
-        except:
-            image_file = None
-            flag = True
-    return image_file
 
 
 
 
 
-def getRandomizedAudioFileNames():
-    audio_files = os.listdir(variables.DEFAULT_AUDIO_PATH)
-    random.shuffle(audio_files)
-    return [aud for aud in audio_files if os.path.isfile('{0}{1}'.format(variables.DEFAULT_AUDIO_PATH, aud)) and aud not in variables.IGNORE_AUDIO_FILE_LIST and aud not in variables.DEFAULT_AUDIO_FILE]
 
 
 
 
 
-def constructBoomer(obj, image_files):
-    image_name = getRandomizedImageFileName(image_files) if variables.CHOOSE_IMAGE_AT_RANDOM == True else variables.DEFAULT_IMAGE_FILE
-    audio_names = cycle(getRandomizedAudioFileNames())
-
-    obj["word"] = {
-        "content": obj["word"],
-        "start": obj["start"],
-        "end": obj["end"]
-    }
-
-    obj["image"] = {
-        "file": image_name,
-        "conf": {
-            "boom_trigger": variables.DEFAULT_BOOM_TRIGGER,
-            "height": variables.DEFAULT_IMAGE_RESOLUTION_HEIGHT,
-            "width": variables.DEFAULT_IMAGE_RESOLUTION_WIDTH,
-            "position": {
-                "x": variables.DEFAULT_IMAGE_POSITION_X,
-                "y": variables.DEFAULT_IMAGE_POSITION_Y
-            },
-            "imageconcatstrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
-            "max_duration": variables.MAX_IMAGE_DURATION,
-            "volume": variables.DEFAULT_IMAGE_VOLUME
-        }
-    }
-
-    obj["audio"] = {
-        "files": variables.DEFAULT_AUDIO_FILE + [next(audio_names) for i in range(variables.CHOOSE_AUDIO_AT_RANDOM)],
-        "conf": {
-            "max_duration": variables.MAX_AUDIO_DURATION,
-            "volume": variables.DEFAULT_SOUND_VOLUME
-        }
-    }
-
-    return custom_b.Boomer(obj)
 
 
 
@@ -430,7 +379,11 @@ def get_and_prepare_clip_for_moviepy_edition(videofilepath, audio= True):
 
 
 
-
+def getClipWithMoviePy(videofilepath, audio= True):
+    return VideoFileClip(
+        videofilepath,
+        audio= audio
+    )
 
 
 
@@ -449,38 +402,4 @@ def get_boom_trigger(boomer= None):
 
 
 
-def voskDescribe(audio_file_path= ""):
-    image_files = os.listdir(variables.DEFAULT_IMAGE_PATH)
-    model = Model(variables.PATH_MODEL)
-    wf = wave.open(audio_file_path, "rb")
-    rec = KaldiRecognizer(model, wf.getframerate())
-    rec.SetWords(True)
-
-    # recognize speech using vosk model
-    results = []
-    while True:
-        data = wf.readframes(4000)
-        if len(data) == 0:
-            break
-        if rec.AcceptWaveform(data):
-            part_result = json.loads(rec.Result())
-            results.append(part_result)
-    part_result = json.loads(rec.FinalResult())
-    results.append(part_result)
-
-    # convert list of JSON dictionaries to list of 'Word' objects
-    word_list = []
-    for sentence in results:
-        if len(sentence) == 1:
-            # sometimes there are bugs in recognition
-            # and it returns an empty dictionary
-            # {'text': ''}
-            continue
-        for obj in sentence['result']:
-            new_word = constructBoomer(obj, image_files)
-            if new_word.image is not None and new_word.image["file"] is not None and variables.ALLOW_IMAGE_REPETITION is not True and variables.CHOOSE_IMAGE_AT_RANDOM > 0:
-                image_files.remove(new_word.image["file"])
-            word_list.append(new_word)  # and add it to list
-    wf.close()  # close audiofile
-    return word_list
 

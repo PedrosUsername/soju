@@ -4,8 +4,9 @@
 # end     -> visuals will be inserted at ["boomers"]["word"]["end"]
 DEFAULT_BOOM_TRIGGER = "start"
 
-# COMPOSE -> image will play with video (overlaped)
-# CONCAT  -> image will interrupt video to show up
+# COMPOSE   -> image/video will overlay original clip
+# CONCAT    -> image/video will interrupt video to show up
+# F_COMPOSE -> image (doesn't work with videos) will overlay original clip (faster than COMPOSE but it has no animations, nor support for positioning)
 DEFAULT_IMAGE_CONCAT_STRATEGY = "CONCAT"      
 
 # image confs
@@ -50,6 +51,51 @@ PATH_MODEL = "./models/en-model"
 DEFAULT_OUTPUT_PATH = "./"
 
 PATH_DEFAULT_JSON_FILE = "./assets/json/"
+
+
+
+# ffmpeg confs
+FFMPEG_PATH = "/snap/bin/ffmpeg"
+FFMPEG_FPS = "30"
+FFMPEG_VIDEO_CODEC = "h264"
+FFMPEG_AUDIO_CODEC = "mp3"
+FFMPEG_VIDEO_BITRATE = "64k"
+FFMPEG_AUDIO_BITRATE = "196k"
+FFMPEG_SAMPLE_RATE = "44100"
+FFMPEG_ENCODING_SPEED = "fast"
+FFMPEG_CRF = "22"
+FFMPEG_FRAME_SIZE = "1280x720"
+FFMPEG_PIX_FMT = "yuv420p"
+FFMPEG_VTTS = "90000"
+
+FFMPEG_OUTPUT_SPECS=  [
+    "-c:v",
+    FFMPEG_VIDEO_CODEC,
+    "-c:a",
+    FFMPEG_AUDIO_CODEC,
+    "-b:v",
+    FFMPEG_VIDEO_BITRATE,
+    "-b:a",
+    FFMPEG_AUDIO_BITRATE,
+    "-preset",
+    FFMPEG_ENCODING_SPEED,
+    "-crf",
+    FFMPEG_CRF,
+    "-s",
+    FFMPEG_FRAME_SIZE,
+    "-ar",
+    FFMPEG_SAMPLE_RATE,
+    "-pix_fmt",
+    FFMPEG_PIX_FMT,
+    "-video_track_timescale",
+    FFMPEG_VTTS,
+    "-r",
+    FFMPEG_FPS
+]
+
+
+
+
 
 
 

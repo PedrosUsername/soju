@@ -45,12 +45,4 @@ if(videofilepath is not None and jsonfilepath is None):
     moviepy_utils.buildSojuFile(videofilepath)
 
 elif(videofilepath is not None and jsonfilepath is not None):
-    result = moviepy_utils.makeItGoofy(videofilepath, jsonfilepath)
-
-    """print("\nSoju - final clip duration in seconds: {:.2f}\n".format(result.duration))
-    result.write_videofile(
-        moviepy_utils.generate_output_file_name(videofilepath),
-        fps= 30,
-        threads= 4,
-        logger= "bar"
-    )"""
+    moviepy_utils.makeItGoofy(videofilepath, jsonfilepath)
