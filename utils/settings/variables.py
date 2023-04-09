@@ -6,11 +6,11 @@ DEFAULT_BOOM_TRIGGER = "start"
 
 # COMPOSE -> image will play with video (overlaped)
 # CONCAT  -> image will interrupt video to show up
-DEFAULT_IMAGE_CONCAT_STRATEGY = "COMPOSE"      
+DEFAULT_IMAGE_CONCAT_STRATEGY = "CONCAT"      
 
 # image confs
 DEFAULT_IMAGE_PATH = "./assets/image/cursed/"
-DEFAULT_IMAGE_FILE = "aaa.jpeg"
+DEFAULT_IMAGE_FILE = "dog.jpg"
 DEFAULT_NULL_IMAGE_FILE = "./assets/image/null.png"
 ALLOW_IMAGE_REPETITION = True                  # ignored when not CHOOSE_IMAGE_AT_RANDOM 
 CHOOSE_IMAGE_AT_RANDOM = 0                     # 0     -> use image DEFAULT_IMAGE_FILE for every word

@@ -67,7 +67,7 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
 
 
 
-        else:
+        elif boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.COMPOSE_ENUM:
             ffmpeg_utils.splitClip(clip, boomer, variables.DEFAULT_TMP_FILE_PATH)
             editUpperHalfVideo(boomer, variables.DEFAULT_TMP_FILE_PATH)
 
@@ -75,25 +75,19 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
             
             ffmpeg_utils.concatClipHalves(output_file, variables.DEFAULT_TMP_FILE_PATH)
             clip = output_file
-""" 
-        ffmpeg_utils.splitClipByBoomers(videofilepath, regular_boomers, ".")
-        buildvisuals(regular_boomers, ".")
-        ffmpeg_utils.buildAudio(regular_boomers, ".")
-        
-        with open("." + "/" + "params.txt", mode='w') as fp:
-            fp.write("file 'ready_clip_piece_0.mp4'\n")
-            for counter, boomer in enumerate(regular_boomers, 1):
-                fp.write("file 'ready_clip_piece_{}.mp4'\n".format(counter))
 
-        ffmpeg_utils.concatClips("params.txt", ".")
 
-        clips = [VideoFileClip("." + "/" + "ready_clip_piece_0.mp4")]
-        for counter, boomer in enumerate(regular_boomers, 1):
-            clips = clips + [VideoFileClip("." + "/" + "ready_clip_piece_{}.mp4".format(counter))]
 
-        final = concatenate_videoclips(clips)
-        final.write_videofile("outpooot.mp4")
-"""
+
+        elif boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
+            ffmpeg_utils.splitClip(clip, boomer, variables.DEFAULT_TMP_FILE_PATH)
+            editUpperHalfVideo(boomer, variables.DEFAULT_TMP_FILE_PATH)
+
+            clip_extend(regular_boomers, boomer["image"]["conf"]["max_duration"])
+            output_file = generate_output_file_name(videofilepath)
+            
+            ffmpeg_utils.concatClipHalves(output_file, variables.DEFAULT_TMP_FILE_PATH)
+            clip = output_file
 
 
 
@@ -182,32 +176,6 @@ def buildSojuFile(videofilepath= None, jsonfilepath= None):
         return None
 
 
-
-def compose_them_clips(clip_array, enforce_resolution= False):
-    aux_file_name = variables.TMP_PATH + variables.TMP_COMPOSE_FILE_NAME
-    try:
-        os.remove(aux_file_name) # this file is frick'n cursed
-    except:
-        print("ok")
-
-    if enforce_resolution:
-        composed_clips = CompositeVideoClip(
-            clip_array,
-            size= (
-                variables.OUTPUT_RESOLUTION_WIDTH,
-                variables.OUTPUT_RESOLUTION_HEIGHT
-            )
-        )
-    else:
-        composed_clips = CompositeVideoClip(clip_array)
-    
-    composed_clips.write_videofile(
-        aux_file_name,
-        fps= 30
-    )
-
-    clip = get_and_prepare_clip_for_moviepy_edition(aux_file_name)
-    return clip
 
 
 
@@ -464,16 +432,6 @@ def get_and_prepare_clip_for_moviepy_edition(videofilepath, audio= True):
 
 
 
-
-def final_merge(bottom_half, uppper_half):
-
-    return compose_them_clips(
-        [
-            bottom_half, 
-            uppper_half.set_start(bottom_half.end)
-        ],
-        enforce_resolution= True
-    )
 
 
 
