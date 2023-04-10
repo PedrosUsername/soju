@@ -55,7 +55,7 @@ PATH_DEFAULT_JSON_FILE = "./assets/json/"
 
 
 # ffmpeg confs
-FFMPEG_PATH = "/usr/local/bin/ffmpeg" # whereis ffmpeg
+FFMPEG_PATH = "/snap/bin/ffmpeg" # whereis ffmpeg
 FFMPEG_FPS = "30"
 FFMPEG_VIDEO_CODEC = "h264"
 FFMPEG_AUDIO_CODEC = "mp3"

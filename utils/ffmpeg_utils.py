@@ -221,6 +221,16 @@ def amixUpperHalfVideo(boomer= None, tmp_dir= "."):
     ])
 
 
+
+
+
+
+
+
+
+
+
+
 def quickAmix(videofilepath= "", boomer= [], output_file= "amix.mp4", tmp_dir= "."):
     if boomer["audio"]["files"] == None:
         return
@@ -240,10 +250,20 @@ def quickAmix(videofilepath= "", boomer= [], output_file= "amix.mp4", tmp_dir= "
         "-i",
         media,
         "-filter_complex",
-        "[1] [0] ",
+        "[0:a]volume=1[a0]; [1:a]volume=1[a1]; [a1] [a0] amix=inputs=2:normalize=0",
         *variables.FFMPEG_OUTPUT_SPECS,
         tmp_dir + "/" + output_file
     ])    
+
+
+
+
+
+
+
+
+
+
 
 
 
