@@ -1,7 +1,7 @@
 # goofy confs
 
-# start   -> visuals will be inserted at ["boomers"]["word"]["start"]
-# end     -> visuals will be inserted at ["boomers"]["word"]["end"]
+# start   -> boom will be inserted at ["boomers"]["word"]["start"] seconds
+# end     -> boom will be inserted at ["boomers"]["word"]["end"] seconds
 DEFAULT_BOOM_TRIGGER = "start"
 
 # COMPOSE   -> image/video will overlay original clip
@@ -55,7 +55,7 @@ PATH_DEFAULT_JSON_FILE = "./assets/json/"
 
 
 # ffmpeg confs
-FFMPEG_PATH = "/snap/bin/ffmpeg"
+FFMPEG_PATH = "/usr/local/bin/ffmpeg" # whereis ffmpeg
 FFMPEG_FPS = "30"
 FFMPEG_VIDEO_CODEC = "h264"
 FFMPEG_AUDIO_CODEC = "mp3"

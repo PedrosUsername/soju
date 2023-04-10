@@ -61,34 +61,36 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
     clip = videofilepath
     for boomer in boomers_mid:
 
-        if boomer["image"] is not None and boomer["image"]["conf"] is not None and boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.FAST_COMPOSE_ENUM:
-            output_file = generate_output_file_name(clip)
+        if boomer["image"] is not None and boomer["image"]["conf"] is not None:
+            if boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.FAST_COMPOSE_ENUM:
+                ffmpeg_utils.quickOverlay(clip, boomer, "overlay.mp4", variables.DEFAULT_TMP_FILE_PATH)
+                ffmpeg_utils.quickAmix(variables.DEFAULT_TMP_FILE_PATH + "overlay.mp4", boomer, 'amix.mp4', variables.DEFAULT_TMP_FILE_PATH)
 
-            ffmpeg_utils.quickOverlay(clip, boomer, "overlay.mp4", variables.DEFAULT_TMP_FILE_PATH)
-            ffmpeg_utils.copy(from_= variables.DEFAULT_TMP_FILE_PATH + "overlay.mp4", to_= output_file)
+                output_file = generate_output_file_name(videofilepath)
 
-            clip = output_file
+                ffmpeg_utils.copy(from_= variables.DEFAULT_TMP_FILE_PATH + "amix.mp4", to_= output_file)
+
+                clip = output_file
+
+            elif boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.COMPOSE_ENUM:
+                ffmpeg_utils.splitClip(clip, boomer, variables.DEFAULT_TMP_FILE_PATH)
+                editUpperHalfVideo(boomer, variables.DEFAULT_TMP_FILE_PATH)
+
+                output_file = generate_output_file_name(videofilepath)
+                
+                ffmpeg_utils.concatClipHalves(output_file, variables.DEFAULT_TMP_FILE_PATH)
+                clip = output_file
 
 
-        elif boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.COMPOSE_ENUM:
-            ffmpeg_utils.splitClip(clip, boomer, variables.DEFAULT_TMP_FILE_PATH)
-            editUpperHalfVideo(boomer, variables.DEFAULT_TMP_FILE_PATH)
+            elif boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
+                ffmpeg_utils.splitClip(clip, boomer, variables.DEFAULT_TMP_FILE_PATH)
+                editUpperHalfVideo(boomer, variables.DEFAULT_TMP_FILE_PATH)
 
-            output_file = generate_output_file_name(videofilepath)
-            
-            ffmpeg_utils.concatClipHalves(output_file, variables.DEFAULT_TMP_FILE_PATH)
-            clip = output_file
-
-
-        elif boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
-            ffmpeg_utils.splitClip(clip, boomer, variables.DEFAULT_TMP_FILE_PATH)
-            editUpperHalfVideo(boomer, variables.DEFAULT_TMP_FILE_PATH)
-
-            clip_extend(boomers_mid, boomer["image"]["conf"]["max_duration"])
-            output_file = generate_output_file_name(videofilepath)
-            
-            ffmpeg_utils.concatClipHalves(output_file, variables.DEFAULT_TMP_FILE_PATH)
-            clip = output_file
+                clip_extend(boomers_mid, boomer["image"]["conf"]["max_duration"])
+                output_file = generate_output_file_name(videofilepath)
+                
+                ffmpeg_utils.concatClipHalves(output_file, variables.DEFAULT_TMP_FILE_PATH)
+                clip = output_file
 
 
 
@@ -101,7 +103,10 @@ def editUpperHalfVideo(boomer= None, tmp_dir= ""):
     print("""soju - audio media [ {} ]""".format(str(boomer["audio"]["files"])))
     print("\n")
 
-    upper_half = get_and_prepare_clip_for_moviepy_edition("{}/upper_half_0.mp4".format(tmp_dir))
+    upper_half_file_tmp = "{}/upper_half_0.mp4".format(tmp_dir)
+    upper_half_file_final = "{}/upper_half.mp4".format(tmp_dir)
+
+    upper_half = get_and_prepare_clip_for_moviepy_edition(upper_half_file_tmp)
     media = reach_goofyahh_image(boomer)
     audioarray = boomer["audio"]["files"] if (boomer["audio"] is not None and boomer["audio"]["files"] is not None) else []
 
@@ -118,7 +123,7 @@ def editUpperHalfVideo(boomer= None, tmp_dir= ""):
     )
 
     upper_half.write_videofile(
-        "{0}/upper_half.mp4".format(tmp_dir),
+        upper_half_file_final,
         fps= 30,
         threads= 4,
         logger= "bar",
