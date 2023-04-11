@@ -177,6 +177,10 @@ def concatClipHalves(output_file, tmp_dir):
         output_file
     ])
 
+
+
+
+
 def quickOverlay(videofilepath= "", boomer= None, output_file= "overlay.mp4", tmp_dir= "."):
     if boomer["image"]["file"] == None:
         return
@@ -198,7 +202,11 @@ def quickOverlay(videofilepath= "", boomer= None, output_file= "overlay.mp4", tm
         tmp_dir + "/" + output_file
     ])
 
-def amixUpperHalfVideo(boomer= None, tmp_dir= "."):
+
+
+
+
+def amixUpperHalf(boomer= None, tmp_dir= "."):
     if boomer["audio"]["files"] == None:
         return
     
@@ -260,26 +268,9 @@ def slowAmix(videofilepath= "", boomer= [], output_file= "amix.mp4", tmp_dir= ".
     if boomer["audio"]["files"] == None:
         return
     
-    media = variables.DEFAULT_AUDIO_PATH + boomer["audio"]["files"][0]
-    bommin_time_start = boomer["word"][boomer["image"]["conf"]["boom_trigger"]]
-
-    subprocess.run([
-        "ffmpeg",
-        "-y",
-        "-i",
-        videofilepath,
-        "-async",
-        "1",
-        "-itsoffset",
-        str(bommin_time_start),
-        "-i",
-        media,
-        "-filter_complex",
-        "[0:a]volume=1[a0]; [1:a]volume=1[a1]; [a1] [a0] amix=inputs=2:normalize=0",
-        *variables.FFMPEG_OUTPUT_SPECS,
-        tmp_dir + "/" + output_file
-    ])
-
+    splitClip(videofilepath, boomer, tmp_dir)
+    amixUpperHalf(boomer, tmp_dir)
+    concatClipHalves(output_file, tmp_dir)
 
 
 

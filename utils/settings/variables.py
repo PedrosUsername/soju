@@ -1,13 +1,11 @@
-# goofy confs
-
 # start   -> boom will be inserted at ["boomers"]["word"]["start"] seconds
 # end     -> boom will be inserted at ["boomers"]["word"]["end"] seconds
-DEFAULT_BOOM_TRIGGER = "start"
+DEFAULT_BOOM_TRIGGER = "end"
 
 # COMPOSE   -> image/video will overlay original clip
 # CONCAT    -> image/video will interrupt video to show up
 # F_COMPOSE -> image (doesn't work with videos) will overlay original clip (faster than COMPOSE but it has no animations, nor support for positioning)
-DEFAULT_IMAGE_CONCAT_STRATEGY = "CONCAT"      
+DEFAULT_IMAGE_CONCAT_STRATEGY = "F_COMPOSE"      
 
 # image confs
 DEFAULT_IMAGE_PATH = "./assets/image/cursed/"
@@ -34,7 +32,7 @@ DEFAULT_AUDIO_FILE = ["vineboom.mp3"]
 DEFAULT_NULL_AUDIO_FILE = "./assets/audio/null.mp3"
 CHOOSE_AUDIO_AT_RANDOM = 0                     # 0     -> add only DEFAULT_AUDIO_FILE sounds
                                                # n > 0 -> add DEFAULT_AUDIO_FILE + n random sounds
-MAX_AUDIO_DURATION = 1.36
+MAX_AUDIO_DURATION = 0.9
 DEFAULT_SOUND_VOLUME = 1
 
 IGNORE_AUDIO_FILE_LIST = [

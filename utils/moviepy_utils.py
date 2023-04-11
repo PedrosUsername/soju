@@ -68,8 +68,11 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
                 ffmpeg_utils.quickOverlay(clip, boomer, "overlay.mp4", variables.DEFAULT_TMP_FILE_PATH)
 
                 output_file = generate_output_file_name(videofilepath)
-
-                ffmpeg_utils.copy(from_= variables.DEFAULT_TMP_FILE_PATH + "overlay.mp4", to_= output_file)
+                
+                if (boomer["audio"] is not None and boomer["audio"]["files"] is not None and len(boomer["audio"]["files"]) > 0):
+                    ffmpeg_utils.slowAmix(variables.DEFAULT_TMP_FILE_PATH + "overlay.mp4", boomer, output_file, variables.DEFAULT_TMP_FILE_PATH)
+                else:
+                    ffmpeg_utils.copy(from_= variables.DEFAULT_TMP_FILE_PATH + "overlay.mp4", to_= output_file)
 
                 clip = output_file
 
