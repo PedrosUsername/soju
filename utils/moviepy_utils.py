@@ -1,3 +1,4 @@
+import time
 import ntpath
 import json
 import filetype
@@ -52,6 +53,7 @@ def filterBoomers(og_clip_duration= 0, boomers= []):
 
 
 def makeItGoofy(videofilepath="", jsonfilepath= None):
+    time_start = time.time()
 
     og_clip = getClipWithMoviePy(videofilepath)
     boomers = get_boomers(jsonfilepath)
@@ -64,11 +66,10 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
         if boomer["image"] is not None and boomer["image"]["conf"] is not None:
             if boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.FAST_COMPOSE_ENUM:
                 ffmpeg_utils.quickOverlay(clip, boomer, "overlay.mp4", variables.DEFAULT_TMP_FILE_PATH)
-                ffmpeg_utils.quickAmix(variables.DEFAULT_TMP_FILE_PATH + "overlay.mp4", boomer, 'amix.mp4', variables.DEFAULT_TMP_FILE_PATH)
 
                 output_file = generate_output_file_name(videofilepath)
 
-                ffmpeg_utils.copy(from_= variables.DEFAULT_TMP_FILE_PATH + "amix.mp4", to_= output_file)
+                ffmpeg_utils.copy(from_= variables.DEFAULT_TMP_FILE_PATH + "overlay.mp4", to_= output_file)
 
                 clip = output_file
 
@@ -91,6 +92,10 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
                 
                 ffmpeg_utils.concatClipHalves(output_file, variables.DEFAULT_TMP_FILE_PATH)
                 clip = output_file
+
+    time_end = time.time() - time_start
+    print("\n")
+    print("it took {:.2f} seconds to make it goofy".format(time_end))
 
 
 
