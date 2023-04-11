@@ -207,7 +207,7 @@ def quickOverlay(videofilepath= "", boomer= None, output_file= "overlay.mp4", tm
 
 
 def amixUpperHalf(boomer= None, tmp_dir= "."):
-    if boomer["audio"]["files"] == None:
+    if boomer["audio"]["files"] == None or len(boomer["audio"]["files"]) < 1:
         return
     
     upper_half_file_tmp = "{}/upper_half_0.mp4".format(tmp_dir)
@@ -264,15 +264,38 @@ def quickAmix(videofilepath= "", boomer= [], output_file= "amix.mp4", tmp_dir= "
     ])    
 
 
-def slowAmix(videofilepath= "", boomer= [], output_file= "amix.mp4", tmp_dir= "."):
+
+
+def slowAmix(videofilepath= "", boomer= [], output_file= "amix.mp4"):
     if boomer["audio"]["files"] == None:
         return
     
-    splitClip(videofilepath, boomer, tmp_dir)
-    amixUpperHalf(boomer, tmp_dir)
-    concatClipHalves(output_file, tmp_dir)
+    media = variables.DEFAULT_AUDIO_PATH + boomer["audio"]["files"][0]
+    boomin_time = boomer["word"][get_boom_trigger(boomer)]
 
-
+    subprocess.run([
+        variables.FFMPEG_PATH,
+        "-y",
+        "-i",
+        videofilepath,
+        "-i",
+        media,
+        "-filter_complex",
+        """
+        [0] trim= end= {0}, setpts=PTS-STARTPTS [botv]; [0] atrim= end= {0},asetpts=PTS-STARTPTS [bota];
+        [0] trim= start= {0}, setpts=PTS-STARTPTS [uppv]; [0] atrim= start= {0},asetpts=PTS-STARTPTS [uppa];
+        
+        [uppa] [1] amix [uppar];
+        
+        [botv] [bota] [uppv] [uppar] concat=n=2:v=1:a=1 [outv] [outa]
+        """.format(str(boomin_time)),
+        "-map",
+        "[outv]",
+        "-map",
+        "[outa]",
+        *variables.FFMPEG_OUTPUT_SPECS,
+        output_file
+    ])
 
 
 

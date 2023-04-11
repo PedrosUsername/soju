@@ -32,9 +32,9 @@
 	],
 
 	"boomers": [
-		{"word": {"content": "yo", "start": 5.37, "end": 5.7}, "image": {"file": "thiccemoji.png", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 0.9, "volume": 1}}},
-		{"word": {"content": "you", "start": 8.100157, "end": 8.58}, "image": {"file": "cowboyemoji.jpg", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 0.9, "volume": 1}}},
-		{"word": {"content": "uh-huh", "start": 10.11, "end": 10.56}, "image": {"file": "thechairman.png", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "COMPOSE", "max_duration": 0.9, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 0.9, "volume": 1}}}
+		{"word": {"content": "yo", "start": 5.37, "end": 5.7}, "image": {"file": "thiccemoji.png", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "F_COMPOSE", "max_duration": 0.9, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 0.9, "volume": 1}}},
+		{"word": {"content": "you", "start": 8.100157, "end": 8.58}, "image": {"file": "cowboyemoji.jpg", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "F_COMPOSE", "max_duration": 0.9, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 0.9, "volume": 1}}},
+		{"word": {"content": "uh-huh", "start": 10.11, "end": 10.56}, "image": {"file": "thechairman.png", "conf": {"boom_trigger": "end", "height": 1080, "width": 1920, "position": {"x": 0, "y": 0}, "imageconcatstrategy": "F_COMPOSE", "max_duration": 0.9, "volume": 0}}, "audio": {"files": ["vineboom.mp3"], "conf": {"max_duration": 0.9, "volume": 1}}}
 
 	]
 }
