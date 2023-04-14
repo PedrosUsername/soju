@@ -1,6 +1,6 @@
 # start   -> boom will be inserted at ["boomers"]["word"]["start"] seconds
 # end     -> boom will be inserted at ["boomers"]["word"]["end"] seconds
-DEFAULT_BOOM_TRIGGER = "end"
+DEFAULT_BOOM_TRIGGER = "start"
 
 # COMPOSE   -> image/video will overlay original clip
 # CONCAT    -> image/video will interrupt video to show up
@@ -8,13 +8,13 @@ DEFAULT_BOOM_TRIGGER = "end"
 DEFAULT_IMAGE_CONCAT_STRATEGY = "F_COMPOSE"      
 
 # image confs
-DEFAULT_IMAGE_PATH = "./assets/image/cursed/"
+DEFAULT_IMAGE_PATH = "./assets/image/mommy/"
 DEFAULT_IMAGE_FILE = "vibecheckemojialt.png"
 DEFAULT_NULL_IMAGE_FILE = "./assets/image/null.png"
-ALLOW_IMAGE_REPETITION = True                  # ignored when not CHOOSE_IMAGE_AT_RANDOM 
+ALLOW_IMAGE_REPETITION = False                  # ignored when not CHOOSE_IMAGE_AT_RANDOM 
 CHOOSE_IMAGE_AT_RANDOM = 1                     # 0     -> use image DEFAULT_IMAGE_FILE for every word
                                                # n > 0 -> use Random images for every word
-MAX_IMAGE_DURATION = 0.9
+MAX_IMAGE_DURATION = 0.36
 DEFAULT_IMAGE_VOLUME = 0
 DEFAULT_IMAGE_RESOLUTION_HEIGHT = 1080               # 1080 px
 DEFAULT_IMAGE_RESOLUTION_WIDTH = 1920                # 1920 px
