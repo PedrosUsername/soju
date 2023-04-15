@@ -18,11 +18,8 @@ def image_file_is_a_good_choice(image_file= ""):
 def audio_file_is_a_good_choice(audio_file= ""):
     return os.path.isfile('{0}{1}'.format(variables.DEFAULT_AUDIO_FOLDER, audio_file)) and audio_file not in variables.IGNORE_AUDIO_FILE_LIST
 
-def getFile(files= [], default_file= None):
-    if default_file != None:
-        return default_file
-    
-    elif len(files) > 0:
+def getFile(files= []):
+    if len(files) > 0:
         return random.choice(files)
     
     else:
@@ -32,8 +29,8 @@ def getFile(files= [], default_file= None):
 
 
 def buildBoomer(obj, image_files, audio_files):
-    image_file = getFile(image_files, variables.DEFAULT_IMAGE_FILE)
-    audio_file = getFile(audio_files, variables.DEFAULT_AUDIO_FILE)
+    image_file = getFile(image_files)
+    audio_file = getFile(audio_files)
 
     obj["word"] = {
         "content": obj["word"],
@@ -69,11 +66,41 @@ def buildBoomer(obj, image_files, audio_files):
 
 
 
-def voskDescribe(audio_file_path= ""):
+
+
+
+
+def getValidImageFiles():
     image_files = os.listdir(variables.DEFAULT_IMAGE_FOLDER)
-    valid_image_files = [file for file in image_files if image_file_is_a_good_choice(file)]
+
+    if variables.DEFAULT_IMAGE_FILE != None:
+        return [variables.DEFAULT_IMAGE_FILE]
+    else:
+        return [file for file in image_files if image_file_is_a_good_choice(file)]
+
+
+def getValidAudioFiles():
     audio_files = os.listdir(variables.DEFAULT_AUDIO_FOLDER)
-    valid_audio_files = [file for file in audio_files if audio_file_is_a_good_choice(file)]
+
+    if variables.DEFAULT_AUDIO_FILE != None:
+        return [variables.DEFAULT_AUDIO_FILE]        
+    else:
+        return [file for file in audio_files if audio_file_is_a_good_choice(file)]    
+
+
+
+
+
+
+
+
+
+
+
+
+def voskDescribe(audio_file_path= ""):
+    valid_image_files = getValidImageFiles()
+    valid_audio_files = getValidAudioFiles()
 
     model = Model(variables.PATH_MODEL)
     wf = wave.open(audio_file_path, "rb")
@@ -100,6 +127,7 @@ def voskDescribe(audio_file_path= ""):
             # and it returns an empty dictionary
             # {'text': ''}
             continue
+
         for obj in sentence['result']:
             new_word = buildBoomer(obj, valid_image_files, valid_audio_files)
 
@@ -110,5 +138,6 @@ def voskDescribe(audio_file_path= ""):
                 valid_audio_files.remove(new_word.audio["file"])
 
             word_list.append(new_word)  # and add it to list
+
     wf.close()  # close audiofile
     return word_list

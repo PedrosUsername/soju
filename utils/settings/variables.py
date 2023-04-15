@@ -13,15 +13,7 @@ DEFAULT_BOOM_TRIGGER = "start"
 
 # ########################################## soju.json IMAGE CONF.
 
-# COMPOSE
-#       -> image/video will overlay original clip
-# CONCAT
-#       -> image/video will interrupt video to show up
-# F_COMPOSE
-#       -> image (doesn't work with videos) will overlay original clip.
-#       it's faster than COMPOSE but it has lots of limitations
-
-DEFAULT_IMAGE_CONCAT_STRATEGY = "F_COMPOSE"      
+DEFAULT_IMAGE_CONCAT_STRATEGY = "F_COMPOSE"          # COMPOSE | F_COMPOSE | CONCAT
 
 DEFAULT_IMAGE_FOLDER = "./assets/image/mommy/"
 ALLOW_IMAGE_REPETITION = False
