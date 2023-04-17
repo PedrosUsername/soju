@@ -60,45 +60,55 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
 
     boomers_top, boomers_mid, boomers_bot = filterBoomers(og_clip.duration, boomers)
 
-    clip = videofilepath
-    for boomer in boomers_mid:
+    if len(boomers_mid) > 0:
+        outputfilename = generate_output_file_name(videofilepath)
+        call_params = ffmpeg_utils.buildCall(videofilepath, outputfilename, boomers_mid)
+        
+        for p in call_params:
+            print(str(p), end= "\n\n\n")
 
-        if boomer["image"] is not None and boomer["image"]["conf"] is not None:
-            if boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.FAST_COMPOSE_ENUM:
-                ffmpeg_utils.quickOverlay(clip, boomer, "overlay.mp4", variables.DEFAULT_TMP_FILE_PATH)
+        ffmpeg_utils.executeFfmpegCall(
+            params= call_params
+        )
+    aux = """    
+        clip = videofilepath
+        for boomer in boomers_mid:
 
-                output_file = generate_output_file_name(videofilepath)
-                
-                if (boomer["audio"] is not None and boomer["audio"]["files"] is not None and len(boomer["audio"]["files"]) > 0):
-                    ffmpeg_utils.slowAmix(variables.DEFAULT_TMP_FILE_PATH + "overlay.mp4", boomer, output_file)
-                else:
-                    ffmpeg_utils.copy(from_= variables.DEFAULT_TMP_FILE_PATH + "overlay.mp4", to_= output_file)
+            if boomer["image"] is not None and boomer["image"]["conf"] is not None:
+                if boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.FAST_COMPOSE_ENUM:
+                    ffmpeg_utils.quickOverlay(clip, boomer, "overlay.mp4", variables.DEFAULT_TMP_FILE_PATH)
 
-                clip = output_file
+                    output_file = generate_output_file_name(videofilepath)
+                    
+                    if (boomer["audio"] is not None and boomer["audio"]["file"] is not None):
+                        ffmpeg_utils.slowAmix(variables.DEFAULT_TMP_FILE_PATH + "overlay.mp4", boomer, output_file)
+                    else:
+                        ffmpeg_utils.copy(from_= variables.DEFAULT_TMP_FILE_PATH + "overlay.mp4", to_= output_file)
 
-            elif boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.COMPOSE_ENUM:
-                ffmpeg_utils.splitClip(clip, boomer, variables.DEFAULT_TMP_FILE_PATH)
-                editUpperHalfVideo(boomer, variables.DEFAULT_TMP_FILE_PATH)
+                    clip = output_file
 
-                output_file = generate_output_file_name(videofilepath)
-                
-                ffmpeg_utils.concatClipHalves(output_file, variables.DEFAULT_TMP_FILE_PATH)
-                clip = output_file
+                elif boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.COMPOSE_ENUM:
+                    ffmpeg_utils.splitClip(clip, boomer, variables.DEFAULT_TMP_FILE_PATH)
+                    editUpperHalfVideo(boomer, variables.DEFAULT_TMP_FILE_PATH)
+
+                    output_file = generate_output_file_name(videofilepath)
+                    
+                    ffmpeg_utils.concatClipHalves(output_file, variables.DEFAULT_TMP_FILE_PATH)
+                    clip = output_file
 
 
-            elif boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
-                ffmpeg_utils.splitClip(clip, boomer, variables.DEFAULT_TMP_FILE_PATH)
-                editUpperHalfVideo(boomer, variables.DEFAULT_TMP_FILE_PATH)
+                elif boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
+                    ffmpeg_utils.splitClip(clip, boomer, variables.DEFAULT_TMP_FILE_PATH)
+                    editUpperHalfVideo(boomer, variables.DEFAULT_TMP_FILE_PATH)
 
-                clip_extend(boomers_mid, boomer["image"]["conf"]["max_duration"])
-                output_file = generate_output_file_name(videofilepath)
-                
-                ffmpeg_utils.concatClipHalves(output_file, variables.DEFAULT_TMP_FILE_PATH)
-                clip = output_file
-
+                    clip_extend(boomers_mid, boomer["image"]["conf"]["max_duration"])
+                    output_file = generate_output_file_name(videofilepath)
+                    
+                    ffmpeg_utils.concatClipHalves(output_file, variables.DEFAULT_TMP_FILE_PATH)
+                    clip = output_file
+    """
     time_end = time.time() - time_start
-    print("\n")
-    print("it took {:.2f} seconds to make it goofy".format(time_end))
+    print("\nclip is ready! it took {:.2f} seconds to make it goofy".format(time_end))
 
 
 
@@ -116,7 +126,8 @@ def editUpperHalfVideo(boomer= None, tmp_dir= ""):
 
     upper_half = get_and_prepare_clip_for_moviepy_edition(upper_half_file_tmp)
     media = reach_goofyahh_image(boomer)
-    audioarray = boomer["audio"]["files"] if (boomer["audio"] is not None and boomer["audio"]["files"] is not None) else []
+    audio = reach_goofyahh_audio(boomer)
+
 
     upper_half = merge_image_video(
         media,
@@ -124,10 +135,9 @@ def editUpperHalfVideo(boomer= None, tmp_dir= ""):
         boomer
     )
 
-    upper_half = merge_audioarray_video(
-        audioarray,
+    upper_half = merge_audio_video(
         upper_half,
-        boomer
+        audio
     )
 
     upper_half.write_videofile(
@@ -321,6 +331,16 @@ def reach_goofyahh_audio(filename):
 
 
 
+def reach_goofyahh_audio(boomer):
+    filename = boomer["audio"]["file"] if boomer["audio"] is not None else None
+    goofy_audio = '{0}{1}'.format(variables.DEFAULT_AUDIO_PATH, filename) if filename is not None else variables.DEFAULT_NULL_AUDIO_FILE
+    audio = AudioFileClip(goofy_audio)
+    # return audio                                             # no audio fadeout ?
+    return audio.fx(afx.audio_fadeout, audio.duration * (2/3)) # yes audio fadeout ?
+
+
+
+
 
 def clip_extend(boomers, extra= variables.MAX_IMAGE_DURATION):
     for boomer in boomers:
@@ -407,7 +427,7 @@ def get_boom_trigger(boomer= None):
     if boomer is None:
         return variables.DEFAULT_BOOM_TRIGGER if variables.DEFAULT_BOOM_TRIGGER is not None else "end"
     else:
-        return boomer["image"]["conf"]["boom_trigger"]
+        return boomer["word"]["trigger"]
 
 
 

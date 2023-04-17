@@ -5,6 +5,23 @@ from .settings import variables
 
 
 
+FFMPEG_PATH = variables.FFMPEG_PATH
+FFMPEG_OUTPUT_SPECS = variables.FFMPEG_OUTPUT_SPECS
+IMAGE_FOLDER = variables.DEFAULT_IMAGE_FOLDER
+AUDIO_FOLDER = variables.DEFAULT_AUDIO_FOLDER
+
+
+
+
+
+
+
+
+
+
+
+
+
 def get_boomers(jsonfilepath):
     describe_json = []
     with open(jsonfilepath, 'r') as f:
@@ -36,10 +53,24 @@ def get_boomers(jsonfilepath):
 
 
 def get_boom_trigger(boomer= None):
-    if boomer is None:
+    if not boomer or not boomer["word"] or not boomer["word"]["trigger"]:
         return variables.DEFAULT_BOOM_TRIGGER if variables.DEFAULT_BOOM_TRIGGER is not None else "end"
     else:
-        return boomer["image"]["conf"]["boom_trigger"]
+        return boomer["word"]["trigger"]
+    
+
+def getBoomerBoominTime(boomer= None):
+    if not boomer or not boomer["word"] or not boomer["word"][get_boom_trigger()]:
+        return 0
+    else:
+        return boomer["word"][get_boom_trigger()]
+    
+
+def getBoomerImageDuration(boomer= None):
+    if not boomer or not boomer["image"] or not boomer["image"]["conf"] or not boomer["image"]["conf"]["max_duration"]:
+        return 0
+    else:
+        return boomer["image"]["conf"]["max_duration"]
     
 
 
@@ -107,8 +138,8 @@ def quickOverlay(videofilepath= "", boomer= None, output_file= "overlay.mp4", tm
     if boomer["image"]["file"] == None:
         return
     
-    media = variables.DEFAULT_IMAGE_PATH + boomer["image"]["file"]
-    bommin_time_start = boomer["word"][boomer["image"]["conf"]["boom_trigger"]]
+    media = variables.DEFAULT_IMAGE_FOLDER + boomer["image"]["file"]
+    bommin_time_start = boomer["word"][boomer["word"]["trigger"]]
     boomin_time_end = bommin_time_start + boomer["image"]["conf"]["max_duration"]
 
     subprocess.run([
@@ -129,13 +160,13 @@ def quickOverlay(videofilepath= "", boomer= None, output_file= "overlay.mp4", tm
 
 
 def amixUpperHalf(boomer= None, tmp_dir= "."):
-    if boomer["audio"]["files"] == None or len(boomer["audio"]["files"]) < 1:
+    if boomer["audio"]["file"] == None:
         return
     
     upper_half_file_tmp = "{}/upper_half_0.mp4".format(tmp_dir)
     upper_half_file_final = "{}/upper_half.mp4".format(tmp_dir)
 
-    media = variables.DEFAULT_AUDIO_PATH + boomer["audio"]["files"][0]
+    media = variables.DEFAULT_AUDIO_FOLDER + boomer["audio"]["file"]
 
     subprocess.run([
         variables.FFMPEG_PATH,
@@ -165,10 +196,10 @@ def amixUpperHalf(boomer= None, tmp_dir= "."):
 
 
 def slowAmix(videofilepath= "", boomer= [], output_file= "amix.mp4"):
-    if boomer["audio"]["files"] == None:
+    if boomer["audio"] is None or boomer["audio"]["file"] is None:
         return
     
-    media = variables.DEFAULT_AUDIO_PATH + boomer["audio"]["files"][0]
+    media = variables.DEFAULT_AUDIO_FOLDER + boomer["audio"]["file"]
     boomin_time = boomer["word"][get_boom_trigger(boomer)]
 
     subprocess.run([
@@ -198,6 +229,152 @@ def slowAmix(videofilepath= "", boomer= [], output_file= "amix.mp4"):
 
 
 
+
+def executeFfmpegCall(params= []):
+    subprocess.run(
+        params
+    )
+
+
+
+
+
+def buildCall(videofilepath, outputfilepath= "output.mp4", boomers= None):
+    image_file_boomers = [ b for b in boomers if b["image"] != None and b["image"]["file"] != None ]
+    audio_file_boomers = [ b for b in boomers if b["audio"] != None and b["audio"]["file"] != None ]
+    media_inputs = buildMediaInputs(image_file_boomers, audio_file_boomers)
+
+    main_label = "[0]"
+    filter_params = ""
+
+    if len(image_file_boomers) > 0:
+        filter_params = filter_params + buildImageOverlayFilterParams(image_file_boomers, main_label= main_label, first_file_idx= 1)
+
+
+    if len(image_file_boomers) > 0 and len(audio_file_boomers) > 0:
+        filter_params = filter_params + ";"
+
+    stream_mapping = []
+    if len(audio_file_boomers) > 0:
+        filter_params = filter_params + buildAudioAmixFilterParams(audio_file_boomers, main_label= main_label, first_file_idx= len(image_file_boomers) + 1)
+        stream_mapping = ["-map", "[outv]", "-map", "[outa]"]
+
+    ffmpeg = FFMPEG_PATH
+    output_specs = FFMPEG_OUTPUT_SPECS
+
+
+    return [
+        ffmpeg,
+        "-y",
+        "-i",
+        videofilepath,
+        *media_inputs,
+        "-filter_complex",
+        filter_params,
+        *stream_mapping,
+        *output_specs,
+        outputfilepath
+    ]
+
+
+
+
+
+
+
+
+def buildMediaInputs(image_file_boomers= [], audio_file_boomers= []):
+    media_inputs = []
+    
+    for file in image_file_boomers:
+        media_inputs = media_inputs + ["-i"] + [IMAGE_FOLDER + file["image"]["file"]]
+
+    for file in audio_file_boomers:
+        media_inputs = media_inputs + ["-i"] + [AUDIO_FOLDER + file["audio"]["file"]]
+
+    return media_inputs
+
+
+
+
+
+
+
+def buildImageOverlayFilterParams(boomers= [], main_label= "[0]", first_file_idx= 0):
+    filter_params = ""
+
+    head = boomers[:1]
+    for boomer in head:
+        boomin_time_start = getBoomerBoominTime(boomer)
+        boomin_time_end = boomin_time_start + getBoomerImageDuration(boomer)
+        filter_params = filter_params + """
+{0}[{1}] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, {2}, {3})'
+""".format(
+            main_label,
+            first_file_idx,
+            boomin_time_start,
+            boomin_time_end
+        )
+
+    tail = boomers[1:]
+    for idx, boomer in enumerate(tail, first_file_idx + 1):
+        boomin_time_start = getBoomerBoominTime(boomer)
+        boomin_time_end = boomin_time_start + getBoomerImageDuration(boomer)
+        filter_params = filter_params + """[overlaid];
+[overlaid][{0}] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, {1}, {2})'
+""".format(
+            idx,
+            boomin_time_start,
+            boomin_time_end
+        )
+
+    return filter_params
+
+
+
+
+
+
+
+
+
+
+
+def buildAudioAmixFilterParams(boomers= [], main_label= "[0]", first_file_idx= 0):
+    filter_params = ""
+
+    head = boomers[:1]
+    for boomer in head:
+        boomin_time_start = getBoomerBoominTime(boomer)
+        # boomin_time_end = boomin_time_start + getBoomerImageDuration(boomer)
+        filter_params = filter_params + """
+{0} trim= end= {2}, setpts=PTS-STARTPTS [botv]; {0} atrim= end= {2}, asetpts=PTS-STARTPTS [bota];
+{0} trim= start= {2}, setpts=PTS-STARTPTS [uppv]; {0} atrim= start= {2},asetpts=PTS-STARTPTS [uppa];
+
+[uppa] [{1}] amix= dropout_transition=0, dynaudnorm [uppa_mix];
+
+[botv] [bota] [uppv] [uppa_mix] concat=n=2:v=1:a=1 [outv] [outa]
+""".format(
+            main_label,
+            first_file_idx,
+            boomin_time_start
+        )
+
+    tail = boomers[1:]
+    for idx, boomer in enumerate(tail, first_file_idx + 1):
+        boomin_time_start = getBoomerBoominTime(boomer)
+        # boomin_time_end = boomin_time_start + getBoomerImageDuration(boomer)
+        filter_params = filter_params + """;
+[outa] asplit=2 [outa1] [outa2];
+[outa1] atrim= end= {0}, asetpts=PTS-STARTPTS [bota];
+[outa2] atrim= start= {0},asetpts=PTS-STARTPTS [uppa];
+
+[uppa] [{1}] amix= dropout_transition=0, dynaudnorm [uppa_mix];
+
+[bota] [uppa_mix] concat=n=2:v=0:a=1 [outa]
+""".format(boomin_time_start, idx)        
+        
+    return filter_params
 
 
 
@@ -274,10 +451,10 @@ def splitClipByBoomers(video_file_path="", boomers= [], tmp_dir= "."):
 
 def buildAudio(boomers= None, tmp_dir= "."):
     for counter, boomer in enumerate(boomers, 1):
-        if boomer["audio"] is None or boomer["audio"]["files"] is None or len(boomer["audio"]["files"]) < 1:
+        if boomer["audio"] is None or boomer["audio"]["file"] is None or len(boomer["audio"]["file"]) < 1:
             boomer_audio = variables.DEFAULT_NULL_AUDIO_FILE
         else:
-            boomer_audio = '{0}{1}'.format(variables.DEFAULT_AUDIO_PATH, boomer["audio"]["files"][0] if boomer["audio"]["files"][0] is not None else variables.DEFAULT_NULL_AUDIO_FILE)
+            boomer_audio = '{0}{1}'.format(variables.DEFAULT_AUDIO_FOLDER, boomer["audio"]["file"] if boomer["audio"]["file"] is not None else variables.DEFAULT_NULL_AUDIO_FILE)
             
         current_temp_file_name = "v_clip_piece_{}.mp4".format(counter)
         output_temp_file_name = "ready_clip_piece_{}.mp4".format(counter)
@@ -312,10 +489,10 @@ def concatClips(concat_file, tmp_dir):
     ])
 
 def quickAmix(videofilepath= "", boomer= [], output_file= "amix.mp4", tmp_dir= "."):
-    if boomer["audio"]["files"] == None:
+    if boomer["audio"]["file"] == None:
         return
     
-    media = variables.DEFAULT_AUDIO_PATH + boomer["audio"]["files"][0]
+    media = variables.DEFAULT_AUDIO_FOLDER + boomer["audio"]["file"]
     bommin_time_start = boomer["word"][boomer["image"]["conf"]["boom_trigger"]]
 
     subprocess.run([

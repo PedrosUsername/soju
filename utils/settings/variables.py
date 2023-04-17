@@ -1,6 +1,6 @@
 # start   -> boom will be inserted at ["boomers"]["word"]["start"] seconds
 # end     -> boom will be inserted at ["boomers"]["word"]["end"] seconds
-DEFAULT_BOOM_TRIGGER = "start"
+DEFAULT_BOOM_TRIGGER = "end"
 
 
 
@@ -15,13 +15,13 @@ DEFAULT_BOOM_TRIGGER = "start"
 
 DEFAULT_IMAGE_CONCAT_STRATEGY = "F_COMPOSE"          # COMPOSE | F_COMPOSE | CONCAT
 
-DEFAULT_IMAGE_FOLDER = "./assets/image/mommy/"
-ALLOW_IMAGE_REPETITION = False
+DEFAULT_IMAGE_FOLDER = "./assets/image/cursed/"
+ALLOW_IMAGE_REPETITION = True
 IGNORE_IMAGE_FILE_LIST = []
 
 DEFAULT_IMAGE_FILE = None
 
-MAX_IMAGE_DURATION = 0.36
+MAX_IMAGE_DURATION = 0.6
 DEFAULT_IMAGE_VOLUME = 0
 
 DEFAULT_NULL_IMAGE_FILE = "./assets/image/null.png"

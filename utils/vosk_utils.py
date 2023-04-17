@@ -35,13 +35,13 @@ def buildBoomer(obj, image_files, audio_files):
     obj["word"] = {
         "content": obj["word"],
         "start": obj["start"],
-        "end": obj["end"]
+        "end": obj["end"],
+        "trigger": variables.DEFAULT_BOOM_TRIGGER
     }
 
     obj["image"] = {
         "file": image_file,
         "conf": {
-            "boom_trigger": variables.DEFAULT_BOOM_TRIGGER,
             "height": variables.DEFAULT_IMAGE_RESOLUTION_HEIGHT,
             "width": variables.DEFAULT_IMAGE_RESOLUTION_WIDTH,
             "position": {
