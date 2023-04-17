@@ -63,7 +63,7 @@ def getBoomerBoominTime(boomer= None):
     if not boomer or not boomer["word"] or not boomer["word"][get_boom_trigger()]:
         return 0
     else:
-        return boomer["word"][get_boom_trigger()]
+        return boomer["word"][get_boom_trigger(boomer)]
     
 
 def getBoomerImageDuration(boomer= None):
