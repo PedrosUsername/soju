@@ -62,7 +62,15 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
 
     if len(boomers_mid) > 0:
         outputfilename = generate_output_file_name(videofilepath)
-        call_params = ffmpeg_utils.buildCall(videofilepath, outputfilename, boomers_mid)
+
+        og_clip_params = {
+            "file": videofilepath,
+            "duration": og_clip.duration,
+            "width": og_clip.size[0],
+            "height": og_clip.size[1]
+        }
+        
+        call_params = ffmpeg_utils.buildCall(og_clip_params, outputfilename, boomers_mid)
         
         for p in call_params:
             print(str(p), end= "\n\n\n")

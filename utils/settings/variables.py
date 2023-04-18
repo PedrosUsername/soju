@@ -26,8 +26,8 @@ DEFAULT_IMAGE_VOLUME = 0
 
 DEFAULT_NULL_IMAGE_FILE = "./assets/image/null.png"
 
-DEFAULT_IMAGE_RESOLUTION_HEIGHT = 1080               # 1080 px |  n | 0 | -n
-DEFAULT_IMAGE_RESOLUTION_WIDTH = 1920                # 1920 px | -n | 0 |  n
+DEFAULT_IMAGE_RESOLUTION_HEIGHT = 1080               # 1080 px | 0 | -n
+DEFAULT_IMAGE_RESOLUTION_WIDTH = 1920                # http://trac.ffmpeg.org/wiki/Scaling
 DEFAULT_IMAGE_POSITION_X = 0                         # float relative to screen size
 DEFAULT_IMAGE_POSITION_Y = 0                         # https://zulko.github.io/moviepy/getting_started/compositing.html?highlight=position#positioning-clips
 
@@ -66,8 +66,8 @@ DEFAULT_NULL_AUDIO_FILE = "./assets/audio/null.mp3"
 
 
 # general confs
-OUTPUT_RESOLUTION_HEIGHT = 0               # 1080 px |  n | 0 | -n
-OUTPUT_RESOLUTION_WIDTH = 0                # 1920 px | -n | 0 |  n
+OUTPUT_RESOLUTION_HEIGHT = 0               # http://trac.ffmpeg.org/wiki/Scaling
+OUTPUT_RESOLUTION_WIDTH = 0                # 1920 px | -n | 0
 
 PATH_MODEL = "./models/en-model"
 

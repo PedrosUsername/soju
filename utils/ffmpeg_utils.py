@@ -9,6 +9,8 @@ FFMPEG_PATH = variables.FFMPEG_PATH
 FFMPEG_OUTPUT_SPECS = variables.FFMPEG_OUTPUT_SPECS
 IMAGE_FOLDER = variables.DEFAULT_IMAGE_FOLDER
 AUDIO_FOLDER = variables.DEFAULT_AUDIO_FOLDER
+IMAGE_SIZE_TOLERANCE = 69
+OG_MAIN_CLIP_PARAMS = {}
 
 
 
@@ -50,37 +52,65 @@ def get_boomers(jsonfilepath):
 
 
 
-def getBoomerImageWidth(boomer= None):
-    if not boomer or not boomer["image"] or not boomer["image"]["conf"] or not boomer["image"]["conf"]["width"]:
-        return 0
-    else:
-        return boomer["image"]["conf"]["width"]
+def getBoomerImageWidth(boomer= None, main_clip_width= 0):
+    if (
+        not boomer
+        or not boomer.get("image")
+        or not boomer.get("image").get("conf")
+        or not boomer.get("image").get("conf").get("width")
+    ):
+        return -1
+    elif (main_clip_width + IMAGE_SIZE_TOLERANCE) < boomer.get("image").get("conf").get("width"):
+        return main_clip_width + IMAGE_SIZE_TOLERANCE
+    else:    
+        return abs(boomer.get("image").get("conf").get("width"))
     
-def getBoomerImageHeight(boomer= None):
-    if not boomer or not boomer["image"] or not boomer["image"]["conf"] or not boomer["image"]["conf"]["height"]:
-        return 0
-    else:
-        return boomer["image"]["conf"]["height"]    
+def getBoomerImageHeight(boomer= None, main_clip_height= 0):
+    if (
+        not boomer
+        or not boomer.get("image")
+        or not boomer.get("image").get("conf")
+        or not boomer.get("image").get("conf").get("height")
+    ):
+        return main_clip_height + IMAGE_SIZE_TOLERANCE
+    elif (main_clip_height + IMAGE_SIZE_TOLERANCE) < boomer.get("image").get("conf").get("height"):
+        return main_clip_height + IMAGE_SIZE_TOLERANCE
+    else:    
+        return abs(boomer.get("image").get("conf").get("height"))    
 
 def get_boom_trigger(boomer= None):
-    if not boomer or not boomer["word"] or not boomer["word"]["trigger"]:
-        return variables.DEFAULT_BOOM_TRIGGER if variables.DEFAULT_BOOM_TRIGGER is not None else "end"
+    if (
+        not boomer
+        or not boomer.get("word")
+        or not boomer.get("word").get("trigger")
+    ):
+        return variables.DEFAULT_BOOM_TRIGGER if variables.DEFAULT_BOOM_TRIGGER else "end"
     else:
-        return boomer["word"]["trigger"]
+        return boomer.get("word").get("trigger")
     
 
 def getBoomerBoominTime(boomer= None):
-    if not boomer or not boomer["word"] or not boomer["word"][get_boom_trigger()]:
+    trigg = get_boom_trigger(boomer)
+    if (
+        not boomer
+        or not boomer.get("word")
+        or not boomer.get("word").get(trigg)
+    ):
         return 0
     else:
-        return boomer["word"][get_boom_trigger(boomer)]
+        return boomer.get("word").get(trigg)
     
 
 def getBoomerImageDuration(boomer= None):
-    if not boomer or not boomer["image"] or not boomer["image"]["conf"] or not boomer["image"]["conf"]["max_duration"]:
+    if (
+        not boomer
+        or not boomer.get("image") 
+        or not boomer.get("image").get("conf")
+        or not boomer.get("image").get("conf").get("max_duration")
+    ):
         return 0
     else:
-        return boomer["image"]["conf"]["max_duration"]
+        return boomer.get("image").get("conf").get("max_duration")
     
 
 
@@ -250,24 +280,25 @@ def cleanFilterParams(params= "", filth= ""):
     return params[:(len(filth) * -1)]
 
 
-def buildCall(videofilepath, outputfilepath= "output.mp4", boomers= None):
-    image_file_boomers = [ b for b in boomers if b["image"] != None and b["image"]["file"] != None ]
-    audio_file_boomers = [ b for b in boomers if b["audio"] != None and b["audio"]["file"] != None ]
+def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
+    main_clip_file = main_clip_params.get("file")
+
+    image_file_boomers = [ b for b in boomers if b.get("image") and b.get("image").get("file") ]
+    audio_file_boomers = [ b for b in boomers if b.get("audio") and b.get("audio").get("file") ]
     media_inputs = buildMediaInputs(image_file_boomers, audio_file_boomers)
 
-    filter_params = "[0] scale= w= 0:h= 0 [clip]; "
     stream_mapping = []
-
+    filter_params = ""
     separator = ""
     fout_label = ""
 
     if len(image_file_boomers) > 0:
-        main_label = "[clip]"
+        main_label = "[0]"
         separator = "; "
         fout_label = "[outv]"
 
         filter_params = (
-            filter_params + buildImageOverlayFilterParams(image_file_boomers, inp= main_label, out= fout_label, first_file_idx= 1)
+            filter_params + buildImageOverlayFilterParams(image_file_boomers, inp= main_label, out= fout_label, first_file_idx= 1, main_clip_params= main_clip_params)
             + fout_label
             + separator
         )
@@ -298,7 +329,7 @@ def buildCall(videofilepath, outputfilepath= "output.mp4", boomers= None):
         ffmpeg,
         "-y",
         "-i",
-        videofilepath,
+        main_clip_file,
         *media_inputs,
         "-filter_complex",
         filter_params,
@@ -331,13 +362,16 @@ def buildMediaInputs(image_file_boomers= [], audio_file_boomers= []):
 
 
 
-def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_file_idx= 0):
+def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_file_idx= 0, main_clip_params= {}):
     filter_params = ""
+    main_clip_width = main_clip_params.get("width") if main_clip_params.get("width") else 0
+    main_clip_height = main_clip_params.get("height") if main_clip_params.get("height") else 0
 
     head = boomers[:1]
     for boomer in head:
-        img_width = getBoomerImageWidth(boomer)
-        img_height = getBoomerImageHeight(boomer)        
+        img_width = getBoomerImageWidth(boomer, main_clip_width)
+        img_height = getBoomerImageHeight(boomer, main_clip_height)
+
         boomin_time_start = getBoomerBoominTime(boomer)
         boomin_time_end = boomin_time_start + getBoomerImageDuration(boomer)
         filter_params = filter_params + """
