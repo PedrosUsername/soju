@@ -50,7 +50,17 @@ def get_boomers(jsonfilepath):
 
 
 
-
+def getBoomerImageWidth(boomer= None):
+    if not boomer or not boomer["image"] or not boomer["image"]["conf"] or not boomer["image"]["conf"]["width"]:
+        return 0
+    else:
+        return boomer["image"]["conf"]["width"]
+    
+def getBoomerImageHeight(boomer= None):
+    if not boomer or not boomer["image"] or not boomer["image"]["conf"] or not boomer["image"]["conf"]["height"]:
+        return 0
+    else:
+        return boomer["image"]["conf"]["height"]    
 
 def get_boom_trigger(boomer= None):
     if not boomer or not boomer["word"] or not boomer["word"]["trigger"]:
@@ -236,7 +246,8 @@ def executeFfmpegCall(params= []):
     )
 
 
-
+def cleanFilterParams(params= "", filth= ""):
+    return params[:(len(filth) * -1)]
 
 
 def buildCall(videofilepath, outputfilepath= "output.mp4", boomers= None):
@@ -244,24 +255,44 @@ def buildCall(videofilepath, outputfilepath= "output.mp4", boomers= None):
     audio_file_boomers = [ b for b in boomers if b["audio"] != None and b["audio"]["file"] != None ]
     media_inputs = buildMediaInputs(image_file_boomers, audio_file_boomers)
 
-    main_label = "[0]"
-    filter_params = ""
+    filter_params = "[0] scale= w= 0:h= 0 [clip]; "
+    stream_mapping = []
+
+    separator = ""
+    fout_label = ""
 
     if len(image_file_boomers) > 0:
-        filter_params = filter_params + buildImageOverlayFilterParams(image_file_boomers, main_label= main_label, first_file_idx= 1)
+        main_label = "[clip]"
+        separator = "; "
+        fout_label = "[outv]"
+
+        filter_params = (
+            filter_params + buildImageOverlayFilterParams(image_file_boomers, inp= main_label, out= fout_label, first_file_idx= 1)
+            + fout_label
+            + separator
+        )
+
+    stream_mapping = stream_mapping + ["-map", fout_label]
 
 
-    if len(image_file_boomers) > 0 and len(audio_file_boomers) > 0:
-        filter_params = filter_params + ";"
-
-    stream_mapping = []
     if len(audio_file_boomers) > 0:
-        filter_params = filter_params + buildAudioAmixFilterParams(audio_file_boomers, main_label= main_label, first_file_idx= len(image_file_boomers) + 1)
-        stream_mapping = ["-map", "[outv]", "-map", "[outa]"]
+        main_label = "[0]"
+        separator = "; "
+        fout_label = "[outa]"
+
+        filter_params = (
+            filter_params
+            + buildAudioAmixFilterParams(audio_file_boomers, inp= main_label, out= fout_label, first_file_idx= len(image_file_boomers) + 1)
+            + fout_label
+            + separator
+        )
+
+        stream_mapping = stream_mapping + ["-map", fout_label]
+    
 
     ffmpeg = FFMPEG_PATH
     output_specs = FFMPEG_OUTPUT_SPECS
-
+    filter_params = cleanFilterParams(filter_params, filth= separator)
 
     return [
         ffmpeg,
@@ -300,32 +331,43 @@ def buildMediaInputs(image_file_boomers= [], audio_file_boomers= []):
 
 
 
-def buildImageOverlayFilterParams(boomers= [], main_label= "[0]", first_file_idx= 0):
+def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_file_idx= 0):
     filter_params = ""
 
     head = boomers[:1]
     for boomer in head:
+        img_width = getBoomerImageWidth(boomer)
+        img_height = getBoomerImageHeight(boomer)        
         boomin_time_start = getBoomerBoominTime(boomer)
         boomin_time_end = boomin_time_start + getBoomerImageDuration(boomer)
         filter_params = filter_params + """
-{0}[{1}] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, {2}, {3})'
+[{1}] scale= w= {4}:h= {5} [img];
+{0}[img] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, {2}, {3})'
 """.format(
-            main_label,
+            inp,
             first_file_idx,
             boomin_time_start,
-            boomin_time_end
+            boomin_time_end,
+            img_width,
+            img_height
         )
 
     tail = boomers[1:]
     for idx, boomer in enumerate(tail, first_file_idx + 1):
+        img_width = getBoomerImageWidth(boomer)
+        img_height = getBoomerImageHeight(boomer)        
         boomin_time_start = getBoomerBoominTime(boomer)
         boomin_time_end = boomin_time_start + getBoomerImageDuration(boomer)
-        filter_params = filter_params + """[overlaid];
-[overlaid][{0}] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, {1}, {2})'
+        filter_params = filter_params + """{0};
+[{1}] scale= w= {4}:h= {5} [img];
+{0}[img] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, {2}, {3})'
 """.format(
+            out,
             idx,
             boomin_time_start,
-            boomin_time_end
+            boomin_time_end,
+            img_width,
+            img_height
         )
 
     return filter_params
@@ -340,7 +382,7 @@ def buildImageOverlayFilterParams(boomers= [], main_label= "[0]", first_file_idx
 
 
 
-def buildAudioAmixFilterParams(boomers= [], main_label= "[0]", first_file_idx= 0):
+def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_file_idx= 0):
     filter_params = ""
 
     head = boomers[:1]
@@ -348,14 +390,15 @@ def buildAudioAmixFilterParams(boomers= [], main_label= "[0]", first_file_idx= 0
         boomin_time_start = getBoomerBoominTime(boomer)
         # boomin_time_end = boomin_time_start + getBoomerImageDuration(boomer)
         filter_params = filter_params + """
-{0} trim= end= {2}, setpts=PTS-STARTPTS [botv]; {0} atrim= end= {2}, asetpts=PTS-STARTPTS [bota];
-{0} trim= start= {2}, setpts=PTS-STARTPTS [uppv]; {0} atrim= start= {2},asetpts=PTS-STARTPTS [uppa];
+{0} asplit=2\n[fin2] [fin4];
+[fin2] atrim= end= {2}, asetpts=PTS-STARTPTS\n[bota];
+[fin4] atrim= start= {2},asetpts=PTS-STARTPTS\n[uppa];
 
-[uppa] [{1}] amix= dropout_transition=0, dynaudnorm [uppa_mix];
+[uppa] [{1}] amix= dropout_transition=0, dynaudnorm\n[uppa_mix];
 
-[botv] [bota] [uppv] [uppa_mix] concat=n=2:v=1:a=1 [outv] [outa]
+[bota] [uppa_mix] concat=n=2:v=0:a=1
 """.format(
-            main_label,
+            inp,
             first_file_idx,
             boomin_time_start
         )
@@ -364,15 +407,15 @@ def buildAudioAmixFilterParams(boomers= [], main_label= "[0]", first_file_idx= 0
     for idx, boomer in enumerate(tail, first_file_idx + 1):
         boomin_time_start = getBoomerBoominTime(boomer)
         # boomin_time_end = boomin_time_start + getBoomerImageDuration(boomer)
-        filter_params = filter_params + """;
-[outa] asplit=2 [outa1] [outa2];
-[outa1] atrim= end= {0}, asetpts=PTS-STARTPTS [bota];
-[outa2] atrim= start= {0},asetpts=PTS-STARTPTS [uppa];
+        filter_params = filter_params + """{2};
+{2} asplit=2\n[outa1] [outa2];
+[outa1] atrim= end= {0}, asetpts=PTS-STARTPTS\n[bota];
+[outa2] atrim= start= {0},asetpts=PTS-STARTPTS\n[uppa];
 
-[uppa] [{1}] amix= dropout_transition=0, dynaudnorm [uppa_mix];
+[uppa] [{1}] amix= dropout_transition=0, dynaudnorm\n[uppa_mix];
 
-[bota] [uppa_mix] concat=n=2:v=0:a=1 [outa]
-""".format(boomin_time_start, idx)        
+[bota] [uppa_mix] concat=n=2:v=0:a=1
+""".format(boomin_time_start, idx, out)        
         
     return filter_params
 
@@ -405,6 +448,46 @@ def copy(from_= "", to_= ""):
 
 """
 ffmpeg -y -r 30 -i ready_clip_piece_0.mp4 -r 30 -i ready_clip_piece_1.mp4 -r 30 -i ready_clip_piece_2.mp4 -r 30 -i ready_clip_piece_3.mp4 -r 30 -i ready_clip_piece_4.mp4 -filter_complex "[0:v] [0:a] [1:v] [1:a] [2:v] [2:a] [3:v] [3:a] [4:v] [4:a] concat=n=5:v=1:a=1 [outv] [outa]" -map "[outv]" -map "[outa]" -r 30 -c:v h264 -c:a mp3 -b:v 64k -b:a 196k -ar 44100 -preset fast -crf 22 -s 1280x720 -pix_fmt yuv420p -video_track_timescale 90000 outpooooot.mp4
+
+1 image 0 audio:
+    -filter_complex
+    [0][1] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, 1.32029, 1.92029)'
+
+1 image 1 audio:
+    -filter_complex
+    [0][1] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, 1.32029, 1.92029)';
+
+    [0] trim= end= 1.32029, setpts=PTS-STARTPTS [botv]; [0] atrim= end= 1.32029, asetpts=PTS-STARTPTS [bota];
+    [0] trim= start= 1.32029, setpts=PTS-STARTPTS [uppv]; [0] atrim= start= 1.32029,asetpts=PTS-STARTPTS [uppa];
+    [uppa] [2] amix= dropout_transition=0, dynaudnorm [uppa_mix];
+    [botv] [bota] [uppv] [uppa_mix] concat=n=2:v=1:a=1 [outv] [outa]
+
+0 image 1 audio:
+    -filter_complex
+    [0] trim= end= 1.32029, setpts=PTS-STARTPTS [botv]; [0] atrim= end= 1.32029, asetpts=PTS-STARTPTS [bota];
+    [0] trim= start= 1.32029, setpts=PTS-STARTPTS [uppv]; [0] atrim= start= 1.32029,asetpts=PTS-STARTPTS [uppa];
+    [uppa] [1] amix= dropout_transition=0, dynaudnorm [uppa_mix];
+    [botv] [bota] [uppv] [uppa_mix] concat=n=2:v=1:a=1 [outv] [outa]
+
+2 image 0 audio:
+    -filter_complex
+    [0][1] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, 1.32029, 1.92029)' [overlaid];
+
+    [overlaid][2] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, 4.83, 5.43)'
+
+0 image 2 audio:
+    [0] trim= end= 1.32029, setpts=PTS-STARTPTS [botv]; [0] atrim= end= 1.32029, asetpts=PTS-STARTPTS [bota];
+    [0] trim= start= 1.32029, setpts=PTS-STARTPTS [uppv]; [0] atrim= start= 1.32029,asetpts=PTS-STARTPTS [uppa];
+    [uppa] [1] amix= dropout_transition=0, dynaudnorm [uppa_mix];
+    [botv] [bota] [uppv] [uppa_mix] concat=n=2:v=1:a=1 [outv] [outa];
+
+    [outa] asplit=2 [outa1] [outa2];
+    [outa1] atrim= end= 4.83, asetpts=PTS-STARTPTS [bota];
+    [outa2] atrim= start= 4.83,asetpts=PTS-STARTPTS [uppa];
+
+    [uppa] [2] amix= dropout_transition=0, dynaudnorm [uppa_mix];
+
+    [bota] [uppa_mix] concat=n=2:v=0:a=1 [outa]    
 """
 
 
