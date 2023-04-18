@@ -1,6 +1,6 @@
 # start   -> boom will be inserted at ["boomers"]["word"]["start"] seconds
 # end     -> boom will be inserted at ["boomers"]["word"]["end"] seconds
-DEFAULT_BOOM_TRIGGER = "end"
+DEFAULT_BOOM_TRIGGER = "start"
 
 
 
@@ -21,13 +21,13 @@ IGNORE_IMAGE_FILE_LIST = []
 
 DEFAULT_IMAGE_FILE = None
 
-MAX_IMAGE_DURATION = 0.6
+MAX_IMAGE_DURATION = 0.4
 DEFAULT_IMAGE_VOLUME = 0
 
 DEFAULT_NULL_IMAGE_FILE = "./assets/image/null.png"
 
 DEFAULT_IMAGE_RESOLUTION_HEIGHT = 1080               # 1080 px | 0 | -n
-DEFAULT_IMAGE_RESOLUTION_WIDTH = 1920                # http://trac.ffmpeg.org/wiki/Scaling
+DEFAULT_IMAGE_RESOLUTION_WIDTH = None                # http://trac.ffmpeg.org/wiki/Scaling
 DEFAULT_IMAGE_POSITION_X = 0                         # float relative to screen size
 DEFAULT_IMAGE_POSITION_Y = 0                         # https://zulko.github.io/moviepy/getting_started/compositing.html?highlight=position#positioning-clips
 

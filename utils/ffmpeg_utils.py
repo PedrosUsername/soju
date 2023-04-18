@@ -78,6 +78,8 @@ def getBoomerImageHeight(boomer= None, main_clip_height= 0):
     else:    
         return abs(boomer.get("image").get("conf").get("height"))    
 
+
+
 def get_boom_trigger(boomer= None):
     if (
         not boomer
@@ -111,6 +113,18 @@ def getBoomerImageDuration(boomer= None):
         return 0
     else:
         return boomer.get("image").get("conf").get("max_duration")
+    
+
+def getBoomerAudioDuration(boomer= None):
+    if (
+        not boomer
+        or not boomer.get("audio") 
+        or not boomer.get("audio").get("conf")
+        or not boomer.get("audio").get("conf").get("max_duration")
+    ):
+        return 0
+    else:
+        return boomer.get("audio").get("conf").get("max_duration")
     
 
 
@@ -388,8 +402,8 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
 
     tail = boomers[1:]
     for idx, boomer in enumerate(tail, first_file_idx + 1):
-        img_width = getBoomerImageWidth(boomer)
-        img_height = getBoomerImageHeight(boomer)        
+        img_width = getBoomerImageWidth(boomer, main_clip_width)
+        img_height = getBoomerImageHeight(boomer, main_clip_height)        
         boomin_time_start = getBoomerBoominTime(boomer)
         boomin_time_end = boomin_time_start + getBoomerImageDuration(boomer)
         filter_params = filter_params + """{0};
@@ -422,34 +436,43 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
     head = boomers[:1]
     for boomer in head:
         boomin_time_start = getBoomerBoominTime(boomer)
-        # boomin_time_end = boomin_time_start + getBoomerImageDuration(boomer)
+        boomin_time_end = getBoomerAudioDuration(boomer)
+
         filter_params = filter_params + """
 {0} asplit=2\n[fin2] [fin4];
 [fin2] atrim= end= {2}, asetpts=PTS-STARTPTS\n[bota];
 [fin4] atrim= start= {2},asetpts=PTS-STARTPTS\n[uppa];
 
-[uppa] [{1}] amix= dropout_transition=0, dynaudnorm\n[uppa_mix];
+[{1}] atrim= end= {3} [b_audio];
+[uppa] [b_audio] amix= dropout_transition=0, dynaudnorm\n[uppa_mix];
 
 [bota] [uppa_mix] concat=n=2:v=0:a=1
 """.format(
             inp,
             first_file_idx,
-            boomin_time_start
+            boomin_time_start,
+            boomin_time_end
         )
 
     tail = boomers[1:]
     for idx, boomer in enumerate(tail, first_file_idx + 1):
         boomin_time_start = getBoomerBoominTime(boomer)
-        # boomin_time_end = boomin_time_start + getBoomerImageDuration(boomer)
-        filter_params = filter_params + """{2};
-{2} asplit=2\n[outa1] [outa2];
-[outa1] atrim= end= {0}, asetpts=PTS-STARTPTS\n[bota];
-[outa2] atrim= start= {0},asetpts=PTS-STARTPTS\n[uppa];
+        boomin_time_end = getBoomerAudioDuration(boomer)
+        filter_params = filter_params + """{0};
+{0} asplit=2\n[outa1] [outa2];
+[outa1] atrim= end= {2}, asetpts=PTS-STARTPTS\n[bota];
+[outa2] atrim= start= {2},asetpts=PTS-STARTPTS\n[uppa];
 
-[uppa] [{1}] amix= dropout_transition=0, dynaudnorm\n[uppa_mix];
+[{1}] atrim= end= {3} [b_audio];
+[uppa] [b_audio] amix= dropout_transition=0, dynaudnorm\n[uppa_mix];
 
 [bota] [uppa_mix] concat=n=2:v=0:a=1
-""".format(boomin_time_start, idx, out)        
+""".format(
+        out,
+        idx,
+        boomin_time_start,
+        boomin_time_end
+    )        
         
     return filter_params
 
