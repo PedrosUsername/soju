@@ -44,21 +44,15 @@ def buildBoomer(obj, image_files, audio_files):
         "conf": {
             "height": variables.DEFAULT_IMAGE_RESOLUTION_HEIGHT,
             "width": variables.DEFAULT_IMAGE_RESOLUTION_WIDTH,
-            "position": {
-                "x": variables.DEFAULT_IMAGE_POSITION_X,
-                "y": variables.DEFAULT_IMAGE_POSITION_Y
-            },
-            "imageconcatstrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
-            "max_duration": variables.MAX_IMAGE_DURATION,
-            "volume": variables.DEFAULT_IMAGE_VOLUME
+            "mergestrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
+            "duration": variables.MAX_IMAGE_DURATION,
         }
     }
 
     obj["audio"] = {
         "file": audio_file,
         "conf": {
-            "max_duration": variables.MAX_AUDIO_DURATION,
-            "volume": variables.DEFAULT_SOUND_VOLUME
+            "duration": variables.MAX_AUDIO_DURATION,
         }
     }
 

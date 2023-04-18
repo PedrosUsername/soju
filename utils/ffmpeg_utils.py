@@ -108,11 +108,11 @@ def getBoomerImageDuration(boomer= None):
         not boomer
         or not boomer.get("image") 
         or not boomer.get("image").get("conf")
-        or not boomer.get("image").get("conf").get("max_duration")
+        or not boomer.get("image").get("conf").get("duration")
     ):
         return 0
     else:
-        return boomer.get("image").get("conf").get("max_duration")
+        return boomer.get("image").get("conf").get("duration")
     
 
 def getBoomerAudioDuration(boomer= None):
@@ -120,11 +120,11 @@ def getBoomerAudioDuration(boomer= None):
         not boomer
         or not boomer.get("audio") 
         or not boomer.get("audio").get("conf")
-        or not boomer.get("audio").get("conf").get("max_duration")
+        or not boomer.get("audio").get("conf").get("duration")
     ):
         return 0
     else:
-        return boomer.get("audio").get("conf").get("max_duration")
+        return boomer.get("audio").get("conf").get("duration")
     
 
 
@@ -194,7 +194,7 @@ def quickOverlay(videofilepath= "", boomer= None, output_file= "overlay.mp4", tm
     
     media = variables.DEFAULT_IMAGE_FOLDER + boomer["image"]["file"]
     bommin_time_start = boomer["word"][boomer["word"]["trigger"]]
-    boomin_time_end = bommin_time_start + boomer["image"]["conf"]["max_duration"]
+    boomin_time_end = bommin_time_start + boomer["image"]["conf"]["duration"]
 
     subprocess.run([
         variables.FFMPEG_PATH,
