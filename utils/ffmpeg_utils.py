@@ -40,18 +40,6 @@ def get_boomers(jsonfilepath):
 
 
 
-
-
-    
-
-
-
-
-
-
-
-
-
 def getBoomerImageWidth(boomer= None, main_clip_width= 0):
     if (
         not boomer
@@ -65,6 +53,14 @@ def getBoomerImageWidth(boomer= None, main_clip_width= 0):
     else:    
         return abs(boomer.get("image").get("conf").get("width"))
     
+
+
+
+
+
+
+
+
 def getBoomerImageHeight(boomer= None, main_clip_height= 0):
     if (
         not boomer
@@ -77,6 +73,12 @@ def getBoomerImageHeight(boomer= None, main_clip_height= 0):
         return main_clip_height + IMAGE_SIZE_TOLERANCE
     else:    
         return abs(boomer.get("image").get("conf").get("height"))    
+
+
+
+
+
+
 
 
 
@@ -103,6 +105,12 @@ def getBoomerBoominTime(boomer= None):
         return boomer.get("word").get(trigg)
     
 
+
+
+
+
+
+
 def getBoomerImageDuration(boomer= None):
     if (
         not boomer
@@ -114,6 +122,15 @@ def getBoomerImageDuration(boomer= None):
     else:
         return boomer.get("image").get("conf").get("duration")
     
+
+
+
+
+
+
+
+
+
 
 def getBoomerAudioDuration(boomer= None):
     if (
@@ -301,7 +318,8 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
     audio_file_boomers = [ b for b in boomers if b.get("audio") and b.get("audio").get("file") ]
     media_inputs = buildMediaInputs(image_file_boomers, audio_file_boomers)
 
-    stream_mapping = []
+    v_mapping = ["-map", "0:v"]
+    a_mapping = ["-map", "0:a"]
     filter_params = ""
     separator = ""
     fout_label = ""
@@ -317,7 +335,7 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
             + separator
         )
 
-    stream_mapping = stream_mapping + ["-map", fout_label]
+        v_mapping = ["-map", fout_label]
 
 
     if len(audio_file_boomers) > 0:
@@ -332,7 +350,7 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
             + separator
         )
 
-        stream_mapping = stream_mapping + ["-map", fout_label]
+        a_mapping = ["-map", fout_label]
     
 
     ffmpeg = FFMPEG_PATH
@@ -347,7 +365,8 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
         *media_inputs,
         "-filter_complex",
         filter_params,
-        *stream_mapping,
+        *v_mapping,
+        *a_mapping,
         *output_specs,
         outputfilepath
     ]
@@ -441,9 +460,9 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
         filter_params = filter_params + """
 {0} asplit=2\n[fin2] [fin4];
 [fin2] atrim= end= {2}, asetpts=PTS-STARTPTS\n[bota];
-[fin4] atrim= start= {2},asetpts=PTS-STARTPTS\n[uppa];
+[fin4] atrim= start= {2}, asetpts=PTS-STARTPTS\n[uppa];
 
-[{1}] atrim= end= {3} [b_audio];
+[{1}] atrim= end= {3}, asetpts=PTS-STARTPTS\n[b_audio];
 [uppa] [b_audio] amix= dropout_transition=0, dynaudnorm\n[uppa_mix];
 
 [bota] [uppa_mix] concat=n=2:v=0:a=1
@@ -463,7 +482,7 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
 [outa1] atrim= end= {2}, asetpts=PTS-STARTPTS\n[bota];
 [outa2] atrim= start= {2},asetpts=PTS-STARTPTS\n[uppa];
 
-[{1}] atrim= end= {3} [b_audio];
+[{1}] atrim= end= {3}, asetpts=PTS-STARTPTS\n[b_audio];
 [uppa] [b_audio] amix= dropout_transition=0, dynaudnorm\n[uppa_mix];
 
 [bota] [uppa_mix] concat=n=2:v=0:a=1
