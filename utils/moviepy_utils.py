@@ -38,7 +38,7 @@ def filterBoomers(og_clip_duration= 0, boomers= []):
     out_of_bounds_boomers_top = []
 
     for boomer in boomers:
-        boomin_time = boomer["word"][get_boom_trigger(boomer)]
+        boomin_time = getBoominTime(boomer)
         if boomin_time > 0 and boomin_time < og_clip_duration:
             regular_boomers = regular_boomers + [boomer]
         elif boomin_time <= 0:
@@ -124,7 +124,7 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
 def editUpperHalfVideo(boomer= None, tmp_dir= ""):
     print("\n")
     print('Soju - Working on boomer [ "{}" ]'.format(boomer["word"]["content"]))
-    print("""soju - Boomin' at second [ {:.2f} ]""".format(boomer["word"][get_boom_trigger(boomer)]))
+    print("""soju - Boomin' at second [ {:.2f} ]""".format(boomer["word"][getBoomTrigger(boomer)]))
     print("""soju - visual media [ {} ]""".format(boomer["image"]["file"]))
     print("""soju - audio media [ {} ]""".format(str(boomer["audio"]["files"])))
     print("\n")
@@ -161,7 +161,7 @@ def buildvisuals(boomers= None, tmp_dir= ""):
     for counter, boomer in enumerate(boomers, 1):
         clip = get_and_prepare_clip_for_moviepy_edition("{}/clip_piece_{}.mp4".format(tmp_dir, counter))
 
-        boomin_time = boomer["word"][get_boom_trigger(boomer)]
+        boomin_time = boomer["word"][getBoomTrigger(boomer)]
         image = reach_goofyahh_image(boomer)
         audioarray = boomer["audio"]["files"] if (boomer["audio"] is not None and boomer["audio"]["files"] is not None) else []
 
@@ -431,12 +431,28 @@ def getClipWithMoviePy(videofilepath, audio= True):
 
 
 
-def get_boom_trigger(boomer= None):
-    if boomer is None:
-        return variables.DEFAULT_BOOM_TRIGGER if variables.DEFAULT_BOOM_TRIGGER is not None else "end"
+def getBoomTrigger(boomer= None):
+    if (
+        not boomer
+        or not boomer.get("word")
+        or not boomer.get("word").get("trigger")
+    ):
+        return variables.DEFAULT_BOOM_TRIGGER if variables.DEFAULT_BOOM_TRIGGER else "end"
     else:
-        return boomer["word"]["trigger"]
+        return boomer.get("word").get("trigger")
 
+
+def getBoominTime(boomer= None):
+    boom_trigger = getBoomTrigger(boomer)
+
+    if (
+        not boomer
+        or not boomer.get("word")
+        or not boomer.get("word").get(boom_trigger)
+    ):
+        return 0
+    else:
+        return boomer.get("word").get(boom_trigger)
 
 
 

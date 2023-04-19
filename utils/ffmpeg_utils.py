@@ -82,7 +82,7 @@ def getBoomerImageHeight(boomer= None, main_clip_height= 0):
 
 
 
-def get_boom_trigger(boomer= None):
+def getBoomTrigger(boomer= None):
     if (
         not boomer
         or not boomer.get("word")
@@ -94,7 +94,7 @@ def get_boom_trigger(boomer= None):
     
 
 def getBoomerBoominTime(boomer= None):
-    trigg = get_boom_trigger(boomer)
+    trigg = getBoomTrigger(boomer)
     if (
         not boomer
         or not boomer.get("word")
@@ -146,7 +146,7 @@ def getBoomerAudioDuration(boomer= None):
 
 
 def splitClip(video_file_path="", boomer= [], tmp_dir= "."):
-    boomin_time = boomer["word"][get_boom_trigger(boomer)]
+    boomin_time = boomer["word"][getBoomTrigger(boomer)]
 
     bottom_half_file = "{}/bottom_half.mp4".format(tmp_dir)
     upper_half_file = "{}/upper_half_0.mp4".format(tmp_dir)
@@ -271,7 +271,7 @@ def slowAmix(videofilepath= "", boomer= [], output_file= "amix.mp4"):
         return
     
     media = variables.DEFAULT_AUDIO_FOLDER + boomer["audio"]["file"]
-    boomin_time = boomer["word"][get_boom_trigger(boomer)]
+    boomin_time = boomer["word"][getBoomTrigger(boomer)]
 
     subprocess.run([
         variables.FFMPEG_PATH,
@@ -320,17 +320,26 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
 
     v_mapping = ["-map", "0:v"]
     a_mapping = ["-map", "0:a"]
+
+    filter_params_label = "-filter_complex"
     filter_params = ""
-    separator = ""
+    
+    separator = "; "
     fout_label = ""
 
     if len(image_file_boomers) > 0:
         main_label = "[0]"
-        separator = "; "
         fout_label = "[outv]"
 
         filter_params = (
-            filter_params + buildImageOverlayFilterParams(image_file_boomers, inp= main_label, out= fout_label, first_file_idx= 1, main_clip_params= main_clip_params)
+            filter_params
+            + buildImageOverlayFilterParams (
+                image_file_boomers,
+                inp= main_label,
+                out= fout_label,
+                first_file_idx= 1,
+                main_clip_params= main_clip_params
+            )
             + fout_label
             + separator
         )
@@ -340,12 +349,16 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
 
     if len(audio_file_boomers) > 0:
         main_label = "[0]"
-        separator = "; "
         fout_label = "[outa]"
 
         filter_params = (
             filter_params
-            + buildAudioAmixFilterParams(audio_file_boomers, inp= main_label, out= fout_label, first_file_idx= len(image_file_boomers) + 1)
+            + buildAudioAmixFilterParams (
+                audio_file_boomers,
+                inp= main_label,
+                out= fout_label,
+                first_file_idx= len(image_file_boomers) + 1
+            )
             + fout_label
             + separator
         )
@@ -357,19 +370,30 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
     output_specs = FFMPEG_OUTPUT_SPECS
     filter_params = cleanFilterParams(filter_params, filth= separator)
 
-    return [
+
+    ffmpegCall = [
         ffmpeg,
         "-y",
         "-i",
         main_clip_file,
-        *media_inputs,
-        "-filter_complex",
-        filter_params,
+        *media_inputs
+    ]
+
+    if len(media_inputs) > 0:
+        ffmpegCall = ffmpegCall + [
+            filter_params_label,
+            filter_params
+        ]
+        
+    ffmpegCall = ffmpegCall + [
         *v_mapping,
         *a_mapping,
         *output_specs,
         outputfilepath
     ]
+
+    return ffmpegCall
+
 
 
 
@@ -572,7 +596,7 @@ ffmpeg -y -r 30 -i ready_clip_piece_0.mp4 -r 30 -i ready_clip_piece_1.mp4 -r 30 
 def splitClipByBoomers(video_file_path="", boomers= [], tmp_dir= "."):
     former_boomin_time = 0
     for counter, boomer in enumerate(boomers):
-        boomin_time = boomer["word"][get_boom_trigger(boomer)]
+        boomin_time = boomer["word"][getBoomTrigger(boomer)]
         current_temp_file_name = "clip_piece_{}.mp4".format(counter)
 
         if counter == 0:
