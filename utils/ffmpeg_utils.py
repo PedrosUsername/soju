@@ -389,8 +389,9 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
         v_mapping = ["-map", fout_label_v]
         a_mapping = ["-map", fout_label_a]
 
+
     if len(image_files) > 0:
-        main_label = "[outv]"
+        main_label = "[outv]" if len(video_files) > 0 else "[0]"
         fout_label = "[outv]"
 
         filter_params = (
@@ -408,8 +409,9 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
 
         v_mapping = ["-map", fout_label]
 
+
     if len(audio_files) > 0:
-        main_label = "[0]"
+        main_label =  "[outa]" if len(video_files) > 0 else "[0]"
         fout_label = "[outa]"
 
         filter_params = (
