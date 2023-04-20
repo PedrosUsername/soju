@@ -9,8 +9,8 @@ FFMPEG_PATH = variables.FFMPEG_PATH
 FFMPEG_OUTPUT_SPECS = variables.FFMPEG_OUTPUT_SPECS
 IMAGE_FOLDER = variables.DEFAULT_IMAGE_FOLDER
 AUDIO_FOLDER = variables.DEFAULT_AUDIO_FOLDER
-IMAGE_SIZE_TOLERANCE = 69
-OG_MAIN_CLIP_PARAMS = {}
+VIDEO_FOLDER = variables.DEFAULT_VIDEO_FOLDER
+OVERLAY_SIZE_TOLERANCE = 69
 
 
 
@@ -48,16 +48,11 @@ def getBoomerImageWidth(boomer= None, main_clip_width= 0):
         or not boomer.get("image").get("conf").get("width")
     ):
         return -1
-    elif (main_clip_width + IMAGE_SIZE_TOLERANCE) < boomer.get("image").get("conf").get("width"):
-        return main_clip_width + IMAGE_SIZE_TOLERANCE
+    elif (main_clip_width + OVERLAY_SIZE_TOLERANCE) < boomer.get("image").get("conf").get("width"):
+        return main_clip_width + OVERLAY_SIZE_TOLERANCE
     else:    
         return abs(boomer.get("image").get("conf").get("width"))
     
-
-
-
-
-
 
 
 
@@ -68,15 +63,43 @@ def getBoomerImageHeight(boomer= None, main_clip_height= 0):
         or not boomer.get("image").get("conf")
         or not boomer.get("image").get("conf").get("height")
     ):
-        return main_clip_height + IMAGE_SIZE_TOLERANCE
-    elif (main_clip_height + IMAGE_SIZE_TOLERANCE) < boomer.get("image").get("conf").get("height"):
-        return main_clip_height + IMAGE_SIZE_TOLERANCE
+        return main_clip_height + OVERLAY_SIZE_TOLERANCE
+    elif (main_clip_height + OVERLAY_SIZE_TOLERANCE) < boomer.get("image").get("conf").get("height"):
+        return main_clip_height + OVERLAY_SIZE_TOLERANCE
     else:    
         return abs(boomer.get("image").get("conf").get("height"))    
 
 
 
 
+def getBoomerVideoWidth(boomer= None, main_clip_width= 0):
+    if (
+        not boomer
+        or not boomer.get("video")
+        or not boomer.get("video").get("conf")
+        or not boomer.get("video").get("conf").get("width")
+    ):
+        return -1
+    elif (main_clip_width + OVERLAY_SIZE_TOLERANCE) < boomer.get("video").get("conf").get("width"):
+        return main_clip_width + OVERLAY_SIZE_TOLERANCE
+    else:    
+        return abs(boomer.get("video").get("conf").get("width"))
+
+
+
+
+def getBoomerVideoHeight(boomer= None, main_clip_height= 0):
+    if (
+        not boomer
+        or not boomer.get("video")
+        or not boomer.get("video").get("conf")
+        or not boomer.get("video").get("conf").get("height")
+    ):
+        return main_clip_height + OVERLAY_SIZE_TOLERANCE
+    elif (main_clip_height + OVERLAY_SIZE_TOLERANCE) < boomer.get("video").get("conf").get("height"):
+        return main_clip_height + OVERLAY_SIZE_TOLERANCE
+    else:    
+        return abs(boomer.get("video").get("conf").get("height"))    
 
 
 
@@ -92,6 +115,11 @@ def getBoomTrigger(boomer= None):
     else:
         return boomer.get("word").get("trigger")
     
+
+
+
+
+
 
 def getBoomerBoominTime(boomer= None):
     trigg = getBoomTrigger(boomer)
@@ -121,10 +149,6 @@ def getBoomerImageDuration(boomer= None):
         return 0
     else:
         return boomer.get("image").get("conf").get("duration")
-    
-
-
-
 
 
 
@@ -142,6 +166,20 @@ def getBoomerAudioDuration(boomer= None):
         return 0
     else:
         return boomer.get("audio").get("conf").get("duration")
+    
+
+
+
+def getBoomerVideoDuration(boomer= None):
+    if (
+        not boomer
+        or not boomer.get("video") 
+        or not boomer.get("video").get("conf")
+        or not boomer.get("video").get("conf").get("duration")
+    ):
+        return 0
+    else:
+        return boomer.get("video").get("conf").get("duration")
     
 
 
@@ -314,9 +352,10 @@ def cleanFilterParams(params= "", filth= ""):
 def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
     main_clip_file = main_clip_params.get("file")
 
-    image_file_boomers = [ b for b in boomers if b.get("image") and b.get("image").get("file") ]
-    audio_file_boomers = [ b for b in boomers if b.get("audio") and b.get("audio").get("file") ]
-    media_inputs = buildMediaInputs(image_file_boomers, audio_file_boomers)
+    image_files = [ b for b in boomers if b.get("image") and b.get("image").get("file") ]
+    audio_files = [ b for b in boomers if b.get("audio") and b.get("audio").get("file") ]
+    video_files = [ b for b in boomers if b.get("video") and b.get("video").get("file") ]
+    media_inputs = buildMediaInputs(image_files, audio_files, video_files)
 
     v_mapping = ["-map", "0:v"]
     a_mapping = ["-map", "0:a"]
@@ -325,19 +364,42 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
     filter_params = ""
     
     separator = "; "
-    fout_label = ""
 
-    if len(image_file_boomers) > 0:
+    if len(video_files) > 0:
         main_label = "[0]"
+        fout_label_v = "[outv]"
+        fout_label_a = "[outa]"
+
+        filter_params = (
+            filter_params
+            + buildVideoOverlayFilterParams (
+                video_files,
+                inp= main_label,
+                out_v= fout_label_v,
+                out_a= fout_label_a,
+                first_file_idx= 1,
+                main_clip_params= main_clip_params,
+                separator= separator
+            )
+            + fout_label_v
+            + fout_label_a
+            + separator            
+        )
+
+        v_mapping = ["-map", fout_label_v]
+        a_mapping = ["-map", fout_label_a]
+
+    if len(image_files) > 0:
+        main_label = "[outv]"
         fout_label = "[outv]"
 
         filter_params = (
             filter_params
             + buildImageOverlayFilterParams (
-                image_file_boomers,
+                image_files,
                 inp= main_label,
                 out= fout_label,
-                first_file_idx= 1,
+                first_file_idx= len(video_files) + 1,
                 main_clip_params= main_clip_params
             )
             + fout_label
@@ -346,18 +408,17 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
 
         v_mapping = ["-map", fout_label]
 
-
-    if len(audio_file_boomers) > 0:
+    if len(audio_files) > 0:
         main_label = "[0]"
         fout_label = "[outa]"
 
         filter_params = (
             filter_params
             + buildAudioAmixFilterParams (
-                audio_file_boomers,
+                audio_files,
                 inp= main_label,
                 out= fout_label,
-                first_file_idx= len(image_file_boomers) + 1
+                first_file_idx= len(video_files) + len(image_files) + 1
             )
             + fout_label
             + separator
@@ -402,13 +463,16 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
 
 
 
-def buildMediaInputs(image_file_boomers= [], audio_file_boomers= []):
+def buildMediaInputs(image_files= [], audio_files= [], video_files= []):
     media_inputs = []
     
-    for file in image_file_boomers:
+    for file in video_files:
+        media_inputs = media_inputs + ["-i"] + [VIDEO_FOLDER + file["video"]["file"]]
+
+    for file in image_files:
         media_inputs = media_inputs + ["-i"] + [IMAGE_FOLDER + file["image"]["file"]]
 
-    for file in audio_file_boomers:
+    for file in audio_files:
         media_inputs = media_inputs + ["-i"] + [AUDIO_FOLDER + file["audio"]["file"]]
 
     return media_inputs
@@ -479,7 +543,7 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
     head = boomers[:1]
     for boomer in head:
         boomin_time_start = getBoomerBoominTime(boomer)
-        boomin_time_end = getBoomerAudioDuration(boomer)
+        duration = getBoomerAudioDuration(boomer)
 
         filter_params = filter_params + """
 {0} asplit=2\n[fin2] [fin4];
@@ -494,13 +558,13 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
             inp,
             first_file_idx,
             boomin_time_start,
-            boomin_time_end
+            duration
         )
 
     tail = boomers[1:]
     for idx, boomer in enumerate(tail, first_file_idx + 1):
         boomin_time_start = getBoomerBoominTime(boomer)
-        boomin_time_end = getBoomerAudioDuration(boomer)
+        duration = getBoomerAudioDuration(boomer)
         filter_params = filter_params + """{0};
 {0} asplit=2\n[outa1] [outa2];
 [outa1] atrim= end= {2}, asetpts=PTS-STARTPTS\n[bota];
@@ -514,11 +578,108 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
         out,
         idx,
         boomin_time_start,
-        boomin_time_end
+        duration
     )        
         
     return filter_params
 
+
+
+def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_a= "[outa]", first_file_idx= 0, main_clip_params= {}, separator= "; "):
+    filter_params = ""
+    main_clip_width = main_clip_params.get("width") if main_clip_params.get("width") else 0
+    main_clip_height = main_clip_params.get("height") if main_clip_params.get("height") else 0
+
+    head = boomers[:1]
+    for boomer in head:
+        vid_width = getBoomerVideoWidth(boomer, main_clip_width)
+        vid_height = getBoomerVideoHeight(boomer, main_clip_height)
+
+        boomin_time_start = getBoomerBoominTime(boomer)
+        duration = getBoomerVideoDuration(boomer)
+        filter_params = filter_params + """        
+{0} split=2 
+[fin1] [fin3];
+[fin1] trim= end= {2}, setpts=PTS-STARTPTS
+[botv];
+[fin3] trim= start= {2}, setpts=PTS-STARTPTS
+[uppv];
+
+[{1}] trim= end= {3}, setpts=PTS-STARTPTS
+[b_video];
+[b_video] scale= w= {4}:h= {5}
+[b_video];
+[uppv] [b_video] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, 0, {3})'
+[uppv_mix];
+
+{0} asplit=2 
+[fin2] [fin4];
+[fin2] atrim= end= {2}, asetpts=PTS-STARTPTS
+[bota];
+[fin4] atrim= start= {2}, asetpts=PTS-STARTPTS
+[uppa];
+
+[{1}] atrim= end= {3}, asetpts=PTS-STARTPTS
+[b_audio];
+[uppa] [b_audio] amix= dropout_transition=0, dynaudnorm
+[uppa_mix];
+ 
+[botv] [bota] [uppv_mix] [uppa_mix] concat=n=2:v=1:a=1
+""".format(
+            inp,
+            first_file_idx,
+            boomin_time_start,
+            duration,
+            vid_width,
+            vid_height,
+        )
+
+    tail = boomers[1:]
+    for idx, boomer in enumerate(tail, first_file_idx + 1):
+        vid_width = getBoomerVideoWidth(boomer, main_clip_width)
+        vid_height = getBoomerVideoHeight(boomer, main_clip_height)     
+
+        boomin_time_start = getBoomerBoominTime(boomer)
+        duration = getBoomerVideoDuration(boomer)
+        filter_params = filter_params + """{0}{6};
+{0} split=2 
+[fin1] [fin3];
+[fin1] trim= end= {2}, setpts=PTS-STARTPTS
+[botv];
+[fin3] trim= start= {2}, setpts=PTS-STARTPTS
+[uppv];
+
+[{1}] trim= end= {3}, setpts=PTS-STARTPTS
+[b_video];
+[b_video] scale= w= {4}:h= {5}
+[b_video];
+[uppv] [b_video] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, 0, {3})'
+[uppv_mix];
+
+{6} asplit=2 
+[fin2] [fin4];
+[fin2] atrim= end= {2}, asetpts=PTS-STARTPTS
+[bota];
+[fin4] atrim= start= {2}, asetpts=PTS-STARTPTS
+[uppa];
+
+[{1}] atrim= end= {3}, asetpts=PTS-STARTPTS
+[b_audio];
+[uppa] [b_audio] amix= dropout_transition=0, dynaudnorm
+[uppa_mix];
+ 
+[botv] [bota] [uppv_mix] [uppa_mix] concat=n=2:v=1:a=1
+""".format(
+            out_v,
+            idx,
+            boomin_time_start,
+            duration,
+            vid_width,
+            vid_height,
+            out_a
+        )
+
+    return filter_params
 
 
 
@@ -538,6 +699,7 @@ def copy(from_= "", to_= ""):
 
 
 
+    
 
 # merge video w audio
 # ffmpeg -i ./assets/video/vox.mp4 -i ./assets/audio/vineboom.mp3 -filter_complex '[0:a][1:a] amix [y]' -c:v copy -c:a aac -map 0:v -map [y]:a output.mp4

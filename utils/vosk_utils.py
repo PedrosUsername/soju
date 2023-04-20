@@ -18,6 +18,9 @@ def image_file_is_a_good_choice(image_file= ""):
 def audio_file_is_a_good_choice(audio_file= ""):
     return os.path.isfile('{0}{1}'.format(variables.DEFAULT_AUDIO_FOLDER, audio_file)) and audio_file not in variables.IGNORE_AUDIO_FILE_LIST
 
+def video_file_is_a_good_choice(video_file= ""):
+    return os.path.isfile('{0}{1}'.format(variables.DEFAULT_VIDEO_FOLDER, video_file)) and video_file not in variables.IGNORE_VIDEO_FILE_LIST
+
 def getFile(files= []):
     if len(files) > 0:
         return random.choice(files)
@@ -28,9 +31,15 @@ def getFile(files= []):
 
 
 
-def buildBoomer(obj, image_files, audio_files):
+
+
+
+
+
+def buildBoomer(obj, image_files, audio_files, video_files):
     image_file = getFile(image_files)
     audio_file = getFile(audio_files)
+    video_file = getFile(video_files)
 
     obj["word"] = {
         "content": obj["word"],
@@ -47,12 +56,23 @@ def buildBoomer(obj, image_files, audio_files):
             "mergestrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
             "duration": variables.MAX_IMAGE_DURATION,
         }
-    }
+    }    
 
     obj["audio"] = {
         "file": audio_file,
         "conf": {
             "duration": variables.MAX_AUDIO_DURATION,
+        }
+    }
+
+    obj["video"] = {
+        "file": video_file,
+        "conf": {
+            "height": variables.DEFAULT_VIDEO_RESOLUTION_HEIGHT,
+            "width": variables.DEFAULT_VIDEO_RESOLUTION_WIDTH,
+            "mergestrategy": variables.DEFAULT_VIDEO_MERGE_STRATEGY,
+            "duration": variables.MAX_VIDEO_DURATION,
+            "volume": variables.DEFAULT_VIDEO_VOLUME,
         }
     }
 
@@ -80,6 +100,15 @@ def getValidAudioFiles():
         return [variables.DEFAULT_AUDIO_FILE]        
     else:
         return [file for file in audio_files if audio_file_is_a_good_choice(file)]    
+    
+
+def getValidVideoFiles():
+    video_files = os.listdir(variables.DEFAULT_VIDEO_FOLDER)
+
+    if variables.DEFAULT_VIDEO_FILE != None:
+        return [variables.DEFAULT_VIDEO_FILE]
+    else:
+        return [file for file in video_files if video_file_is_a_good_choice(file)]
 
 
 
@@ -95,6 +124,7 @@ def getValidAudioFiles():
 def voskDescribe(audio_file_path= ""):
     valid_image_files = getValidImageFiles()
     valid_audio_files = getValidAudioFiles()
+    valid_video_files = getValidVideoFiles()
 
     model = Model(variables.PATH_MODEL)
     wf = wave.open(audio_file_path, "rb")
@@ -123,13 +153,16 @@ def voskDescribe(audio_file_path= ""):
             continue
 
         for obj in sentence['result']:
-            new_word = buildBoomer(obj, valid_image_files, valid_audio_files)
+            new_word = buildBoomer(obj, valid_image_files, valid_audio_files, valid_video_files)
 
             if variables.ALLOW_IMAGE_REPETITION is False and new_word.image["file"] in valid_image_files:
                 valid_image_files.remove(new_word.image["file"])
 
             if variables.ALLOW_AUDIO_REPETITION is False and new_word.audio["file"] in valid_audio_files:
                 valid_audio_files.remove(new_word.audio["file"])
+
+            if variables.ALLOW_VIDEO_REPETITION is False and new_word.video["file"] in valid_audio_files:
+                valid_video_files.remove(new_word.video["file"])
 
             word_list.append(new_word)  # and add it to list
 

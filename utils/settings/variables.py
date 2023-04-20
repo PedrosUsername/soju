@@ -65,6 +65,41 @@ DEFAULT_NULL_AUDIO_FILE = "./assets/audio/null.mp3"
 
 
 
+
+
+
+
+
+
+
+# ########################################## soju.json VIDEO CONF.
+
+DEFAULT_VIDEO_MERGE_STRATEGY = "F_COMPOSE"          # COMPOSE | F_COMPOSE | CONCAT
+
+DEFAULT_VIDEO_FOLDER = "./assets/video/clips/"
+ALLOW_VIDEO_REPETITION = True
+IGNORE_VIDEO_FILE_LIST = []
+
+DEFAULT_VIDEO_FILE = None
+
+MAX_VIDEO_DURATION = 0.4
+DEFAULT_VIDEO_VOLUME = 0
+
+DEFAULT_VIDEO_RESOLUTION_HEIGHT = 1080               # 1080 px | 0 | -n
+DEFAULT_VIDEO_RESOLUTION_WIDTH = None                # http://trac.ffmpeg.org/wiki/Scaling
+DEFAULT_VIDEO_POSITION_X = 0                         # float relative to screen size
+DEFAULT_VIDEO_POSITION_Y = 0                         # https://zulko.github.io/moviepy/getting_started/compositing.html?highlight=position#positioning-clips
+
+# ################################################################
+
+
+
+
+
+
+
+
+
 # general confs
 OUTPUT_RESOLUTION_HEIGHT = 0               # http://trac.ffmpeg.org/wiki/Scaling
 OUTPUT_RESOLUTION_WIDTH = 0                # 1920 px | -n | 0
