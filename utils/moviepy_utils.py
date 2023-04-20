@@ -234,7 +234,7 @@ def getNullBoomer():
 				"files": [],
 				"conf": {
 					"max_duration": variables.MAX_AUDIO_DURATION,
-					"volume": variables.DEFAULT_SOUND_VOLUME
+					"volume": variables.DEFAULT_AUDIO_VOLUME
 				}
 			}
         }

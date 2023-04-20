@@ -62,6 +62,7 @@ def buildBoomer(obj, image_files, audio_files, video_files):
         "file": audio_file,
         "conf": {
             "duration": variables.MAX_AUDIO_DURATION,
+            "volume": variables.DEFAULT_AUDIO_VOLUME
         }
     }
 
@@ -161,7 +162,7 @@ def voskDescribe(audio_file_path= ""):
             if variables.ALLOW_AUDIO_REPETITION is False and new_word.audio["file"] in valid_audio_files:
                 valid_audio_files.remove(new_word.audio["file"])
 
-            if variables.ALLOW_VIDEO_REPETITION is False and new_word.video["file"] in valid_audio_files:
+            if variables.ALLOW_VIDEO_REPETITION is False and new_word.video["file"] in valid_video_files:
                 valid_video_files.remove(new_word.video["file"])
 
             word_list.append(new_word)  # and add it to list

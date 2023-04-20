@@ -168,6 +168,21 @@ def getBoomerVideoVolume(boomer= None):
             return 1
     else:
         return boomer.get("video").get("conf").get("volume")
+    
+
+def getBoomerAudioVolume(boomer= None):
+    if (
+        not boomer
+        or not boomer.get("video")
+        or not boomer.get("video").get("conf")
+        or not boomer.get("audio").get("conf").get("volume")
+    ):
+        if boomer.get("audio").get("conf").get("volume") == 0:
+            return 0
+        else:
+            return 1
+    else:
+        return boomer.get("audio").get("conf").get("volume")    
 
 
 
@@ -539,41 +554,60 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
     for boomer in head:
         boomin_time_start = getBoomerBoominTime(boomer)
         duration = getBoomerAudioDuration(boomer)
+        volume = getBoomerAudioVolume(boomer)
 
         filter_params = filter_params + """
-{0} asplit=2\n[fin2] [fin4];
-[fin2] atrim= end= {2}, asetpts=PTS-STARTPTS\n[bota];
-[fin4] atrim= start= {2}, asetpts=PTS-STARTPTS\n[uppa];
+{0} asplit=2
+[fin2] [fin4];
+[fin2] atrim= end= {2}, asetpts=PTS-STARTPTS
+[bota];
+[fin4] atrim= start= {2}, asetpts=PTS-STARTPTS
+[uppa];
 
-[{1}] atrim= end= {3}, asetpts=PTS-STARTPTS\n[b_audio];
-[uppa] [b_audio] amix= dropout_transition=0, dynaudnorm\n[uppa_mix];
+[{1}] atrim= end= {3}, asetpts=PTS-STARTPTS
+[b_audio];
+[b_audio] volume= {4}
+[b_audio];
+[uppa] [b_audio] amix= dropout_transition=0, dynaudnorm
+[uppa_mix];
 
 [bota] [uppa_mix] concat=n=2:v=0:a=1
 """.format(
             inp,
             first_file_idx,
             boomin_time_start,
-            duration
+            duration,
+            volume
         )
 
     tail = boomers[1:]
     for idx, boomer in enumerate(tail, first_file_idx + 1):
         boomin_time_start = getBoomerBoominTime(boomer)
         duration = getBoomerAudioDuration(boomer)
-        filter_params = filter_params + """{0};
-{0} asplit=2\n[outa1] [outa2];
-[outa1] atrim= end= {2}, asetpts=PTS-STARTPTS\n[bota];
-[outa2] atrim= start= {2},asetpts=PTS-STARTPTS\n[uppa];
+        volume = getBoomerAudioVolume(boomer)
 
-[{1}] atrim= end= {3}, asetpts=PTS-STARTPTS\n[b_audio];
-[uppa] [b_audio] amix= dropout_transition=0, dynaudnorm\n[uppa_mix];
+        filter_params = filter_params + """{0};
+{0} asplit=2
+[outa1] [outa2];
+[outa1] atrim= end= {2}, asetpts=PTS-STARTPTS
+[bota];
+[outa2] atrim= start= {2},asetpts=PTS-STARTPTS
+[uppa];
+
+[{1}] atrim= end= {3}, asetpts=PTS-STARTPTS
+[b_audio];
+[b_audio] volume= {4}
+[b_audio];
+[uppa] [b_audio] amix= dropout_transition=0, dynaudnorm
+[uppa_mix];
 
 [bota] [uppa_mix] concat=n=2:v=0:a=1
 """.format(
         out,
         idx,
         boomin_time_start,
-        duration
+        duration,
+        volume
     )        
         
     return filter_params
