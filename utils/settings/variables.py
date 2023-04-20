@@ -16,15 +16,12 @@ DEFAULT_BOOM_TRIGGER = "end"
 DEFAULT_IMAGE_CONCAT_STRATEGY = "F_COMPOSE"          # COMPOSE | F_COMPOSE | CONCAT
 
 DEFAULT_IMAGE_FOLDER = "./assets/image/cursed/"
-ALLOW_IMAGE_REPETITION = True
+ALLOW_IMAGE_REPETITION = False
 IGNORE_IMAGE_FILE_LIST = []
 
-DEFAULT_IMAGE_FILE = None
+DEFAULT_IMAGE_FILE = "vibecheckemoji.png"
 
 MAX_IMAGE_DURATION = 0.4
-DEFAULT_IMAGE_VOLUME = 0
-
-DEFAULT_NULL_IMAGE_FILE = "./assets/image/null.png"
 
 DEFAULT_IMAGE_RESOLUTION_HEIGHT = 1080               # 1080 px | 0 | -n
 DEFAULT_IMAGE_RESOLUTION_WIDTH = None                # http://trac.ffmpeg.org/wiki/Scaling
@@ -45,7 +42,7 @@ DEFAULT_IMAGE_POSITION_Y = 0                         # https://zulko.github.io/m
 # ########################################## soju.json AUDIO CONF.
 
 DEFAULT_AUDIO_FOLDER = "./assets/audio/cringe/"
-ALLOW_AUDIO_REPETITION = True
+ALLOW_AUDIO_REPETITION = False
 IGNORE_AUDIO_FILE_LIST = []
 
 DEFAULT_AUDIO_FILE = "vineboom.mp3"
@@ -80,7 +77,7 @@ DEFAULT_VIDEO_FOLDER = "./assets/video/clips/"
 ALLOW_VIDEO_REPETITION = True
 IGNORE_VIDEO_FILE_LIST = []
 
-DEFAULT_VIDEO_FILE = None
+DEFAULT_VIDEO_FILE = "oooooo.mp4"
 
 MAX_VIDEO_DURATION = 0.4
 DEFAULT_VIDEO_VOLUME = 0
@@ -101,13 +98,12 @@ DEFAULT_VIDEO_POSITION_Y = 0                         # https://zulko.github.io/m
 
 
 # general confs
+OVERLAY_SIZE_TOLERANCE = 69
 OUTPUT_RESOLUTION_HEIGHT = 0               # http://trac.ffmpeg.org/wiki/Scaling
 OUTPUT_RESOLUTION_WIDTH = 0                # 1920 px | -n | 0
 
 PATH_MODEL = "./models/en-model"
-
 DEFAULT_OUTPUT_PATH = "./"
-
 PATH_DEFAULT_JSON_FILE = "./assets/json/"
 
 

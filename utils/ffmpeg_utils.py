@@ -10,7 +10,7 @@ FFMPEG_OUTPUT_SPECS = variables.FFMPEG_OUTPUT_SPECS
 IMAGE_FOLDER = variables.DEFAULT_IMAGE_FOLDER
 AUDIO_FOLDER = variables.DEFAULT_AUDIO_FOLDER
 VIDEO_FOLDER = variables.DEFAULT_VIDEO_FOLDER
-OVERLAY_SIZE_TOLERANCE = 69
+OVERLAY_SIZE_TOLERANCE = variables.OVERLAY_SIZE_TOLERANCE
 
 
 
@@ -54,8 +54,6 @@ def getBoomerImageWidth(boomer= None, main_clip_width= 0):
         return abs(boomer.get("image").get("conf").get("width"))
     
 
-
-
 def getBoomerImageHeight(boomer= None, main_clip_height= 0):
     if (
         not boomer
@@ -68,9 +66,7 @@ def getBoomerImageHeight(boomer= None, main_clip_height= 0):
         return main_clip_height + OVERLAY_SIZE_TOLERANCE
     else:    
         return abs(boomer.get("image").get("conf").get("height"))    
-
-
-
+    
 
 def getBoomerVideoWidth(boomer= None, main_clip_width= 0):
     if (
@@ -84,9 +80,7 @@ def getBoomerVideoWidth(boomer= None, main_clip_width= 0):
         return main_clip_width + OVERLAY_SIZE_TOLERANCE
     else:    
         return abs(boomer.get("video").get("conf").get("width"))
-
-
-
+    
 
 def getBoomerVideoHeight(boomer= None, main_clip_height= 0):
     if (
@@ -102,9 +96,6 @@ def getBoomerVideoHeight(boomer= None, main_clip_height= 0):
         return abs(boomer.get("video").get("conf").get("height"))    
 
 
-
-
-
 def getBoomTrigger(boomer= None):
     if (
         not boomer
@@ -114,11 +105,6 @@ def getBoomTrigger(boomer= None):
         return variables.DEFAULT_BOOM_TRIGGER if variables.DEFAULT_BOOM_TRIGGER else "end"
     else:
         return boomer.get("word").get("trigger")
-    
-
-
-
-
 
 
 def getBoomerBoominTime(boomer= None):
@@ -131,12 +117,6 @@ def getBoomerBoominTime(boomer= None):
         return 0
     else:
         return boomer.get("word").get(trigg)
-    
-
-
-
-
-
 
 
 def getBoomerImageDuration(boomer= None):
@@ -151,11 +131,6 @@ def getBoomerImageDuration(boomer= None):
         return boomer.get("image").get("conf").get("duration")
 
 
-
-
-
-
-
 def getBoomerAudioDuration(boomer= None):
     if (
         not boomer
@@ -168,8 +143,6 @@ def getBoomerAudioDuration(boomer= None):
         return boomer.get("audio").get("conf").get("duration")
     
 
-
-
 def getBoomerVideoDuration(boomer= None):
     if (
         not boomer
@@ -180,7 +153,27 @@ def getBoomerVideoDuration(boomer= None):
         return 0
     else:
         return boomer.get("video").get("conf").get("duration")
-    
+
+
+def getBoomerVideoVolume(boomer= None):
+    if (
+        not boomer
+        or not boomer.get("video")
+        or not boomer.get("video").get("conf")
+        or not boomer.get("video").get("conf").get("volume")
+    ):
+        if boomer.get("video").get("conf").get("volume") == 0:
+            return 0
+        else:
+            return 1
+    else:
+        return boomer.get("video").get("conf").get("volume")
+
+
+
+
+
+
 
 
 def splitClip(video_file_path="", boomer= [], tmp_dir= "."):
@@ -599,6 +592,7 @@ def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_
 
         boomin_time_start = getBoomerBoominTime(boomer)
         duration = getBoomerVideoDuration(boomer)
+        volume = getBoomerVideoVolume(boomer)
         filter_params = filter_params + """        
 {0} split=2 
 [fin1] [fin3];
@@ -623,6 +617,8 @@ def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_
 
 [{1}] atrim= end= {3}, asetpts=PTS-STARTPTS
 [b_audio];
+[b_audio] volume= {6}
+[b_audio];
 [uppa] [b_audio] amix= dropout_transition=0, dynaudnorm
 [uppa_mix];
  
@@ -634,6 +630,7 @@ def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_
             duration,
             vid_width,
             vid_height,
+            volume
         )
 
     tail = boomers[1:]
@@ -643,6 +640,7 @@ def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_
 
         boomin_time_start = getBoomerBoominTime(boomer)
         duration = getBoomerVideoDuration(boomer)
+        volume = getBoomerVideoVolume(boomer)        
         filter_params = filter_params + """{0}{6};
 {0} split=2 
 [fin1] [fin3];
@@ -667,6 +665,8 @@ def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_
 
 [{1}] atrim= end= {3}, asetpts=PTS-STARTPTS
 [b_audio];
+[b_audio] volume= {7}
+[b_audio];
 [uppa] [b_audio] amix= dropout_transition=0, dynaudnorm
 [uppa_mix];
  
@@ -678,7 +678,8 @@ def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_
             duration,
             vid_width,
             vid_height,
-            out_a
+            out_a,
+            volume
         )
 
     return filter_params

@@ -227,8 +227,7 @@ def getNullBoomer():
                         "y": variables.DEFAULT_IMAGE_POSITION_Y
                     },
                     "imageconcatstrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
-                    "max_duration": variables.MAX_IMAGE_DURATION,
-                    "volume": variables.DEFAULT_IMAGE_VOLUME
+                    "duration": variables.MAX_IMAGE_DURATION,
                 }
             },
             "audio": {
