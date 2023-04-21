@@ -185,9 +185,42 @@ def getBoomerAudioVolume(boomer= None):
         return boomer.get("audio").get("conf").get("volume")    
 
 
+def classifyImageFiles(image_files):
+    image_files_compose = []
+    image_files_concat = []
+
+    for b in image_files:
+        if (
+            b.get("image").get("conf")
+            and b.get("image").get("conf").get("mergestrategy") == "COMPOSE"
+        ):
+            image_files_compose = image_files_compose + [b]
+        elif(
+            b.get("image").get("conf")
+            and b.get("image").get("conf").get("mergestrategy") == "CONCAT"
+        ):
+            image_files_concat = image_files_concat + [b]
+
+    return (image_files_compose, image_files_concat)
 
 
+def classifyVideoFiles(video_files):
+    video_files_compose = []
+    video_files_concat = []
 
+    for b in video_files:
+        if (
+            b.get("video").get("conf")
+            and b.get("video").get("conf").get("mergestrategy") == "COMPOSE"
+        ):
+            video_files_compose = video_files_compose + [b]
+        elif(
+            b.get("video").get("conf")
+            and b.get("video").get("conf").get("mergestrategy") == "CONCAT"
+        ):
+            video_files_concat = video_files_concat + [b]
+
+    return (video_files_compose, video_files_concat)
 
 
 
@@ -358,12 +391,25 @@ def cleanFilterParams(params= "", filth= ""):
 
 
 def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
+    ffmpeg = FFMPEG_PATH
+    output_specs = FFMPEG_OUTPUT_SPECS
+
     main_clip_file = main_clip_params.get("file")
 
+    video_files = [ b for b in boomers if b.get("video") and b.get("video").get("file") ]
     image_files = [ b for b in boomers if b.get("image") and b.get("image").get("file") ]
     audio_files = [ b for b in boomers if b.get("audio") and b.get("audio").get("file") ]
-    video_files = [ b for b in boomers if b.get("video") and b.get("video").get("file") ]
-    media_inputs = buildMediaInputs(image_files, audio_files, video_files)
+
+    video_files_compose, video_files_concat = classifyVideoFiles(video_files)
+    image_files_compose, image_files_concat = classifyImageFiles(image_files)
+
+    media_inputs = buildMediaInputs(
+        video_files_compose= video_files_compose,
+        image_files_compose= image_files_compose,
+        audio_files= audio_files,
+        video_files_concat= [],
+        image_files_concat= []
+    )
 
     v_mapping = ["-map", "0:v"]
     a_mapping = ["-map", "0:a"]
@@ -373,7 +419,7 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
     
     separator = "; "
 
-    if len(video_files) > 0:
+    if len(video_files_compose) > 0:
         main_label = "[0]"
         fout_label_v = "[outv]"
         fout_label_a = "[outa]"
@@ -381,7 +427,7 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
         filter_params = (
             filter_params
             + buildVideoOverlayFilterParams (
-                video_files,
+                video_files_compose,
                 inp= main_label,
                 out_v= fout_label_v,
                 out_a= fout_label_a,
@@ -398,17 +444,17 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
         a_mapping = ["-map", fout_label_a]
 
 
-    if len(image_files) > 0:
-        main_label = "[outv]" if len(video_files) > 0 else "[0]"
+    if len(image_files_compose) > 0:
+        main_label = "[outv]" if len(video_files_compose) > 0 else "[0]"
         fout_label = "[outv]"
 
         filter_params = (
             filter_params
             + buildImageOverlayFilterParams (
-                image_files,
+                image_files_compose,
                 inp= main_label,
                 out= fout_label,
-                first_file_idx= len(video_files) + 1,
+                first_file_idx= len(video_files_compose) + 1,
                 main_clip_params= main_clip_params
             )
             + fout_label
@@ -419,7 +465,7 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
 
 
     if len(audio_files) > 0:
-        main_label =  "[outa]" if len(video_files) > 0 else "[0]"
+        main_label =  "[outa]" if len(video_files_compose) > 0 else "[0]"
         fout_label = "[outa]"
 
         filter_params = (
@@ -428,7 +474,7 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
                 audio_files,
                 inp= main_label,
                 out= fout_label,
-                first_file_idx= len(video_files) + len(image_files) + 1
+                first_file_idx= len(video_files_compose) + len(image_files_compose) + 1
             )
             + fout_label
             + separator
@@ -437,10 +483,7 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
         a_mapping = ["-map", fout_label]
     
 
-    ffmpeg = FFMPEG_PATH
-    output_specs = FFMPEG_OUTPUT_SPECS
     filter_params = cleanFilterParams(filter_params, filth= separator)
-
 
     ffmpegCall = [
         ffmpeg,
@@ -450,7 +493,7 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
         *media_inputs
     ]
 
-    if len(media_inputs) > 0:
+    if (len(media_inputs) > 0):
         ffmpegCall = ffmpegCall + [
             filter_params_label,
             filter_params
@@ -473,17 +516,30 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
 
 
 
-def buildMediaInputs(image_files= [], audio_files= [], video_files= []):
+def buildMediaInputs(
+        video_files_compose= [],
+        video_files_concat= [],
+        image_files_compose= [],
+        image_files_concat= [],
+        audio_files= []
+):
     media_inputs = []
     
-    for file in video_files:
+    for file in video_files_compose:
         media_inputs = media_inputs + ["-i"] + [VIDEO_FOLDER + file["video"]["file"]]
 
-    for file in image_files:
+    for file in image_files_compose:
         media_inputs = media_inputs + ["-i"] + [IMAGE_FOLDER + file["image"]["file"]]
 
     for file in audio_files:
         media_inputs = media_inputs + ["-i"] + [AUDIO_FOLDER + file["audio"]["file"]]
+
+    for file in video_files_concat:
+        media_inputs = media_inputs + ["-i"] + [VIDEO_FOLDER + file["video"]["file"]]
+
+    for file in image_files_concat:
+        media_inputs = media_inputs + ["-i"] + [IMAGE_FOLDER + file["image"]["file"]]        
+
 
     return media_inputs
 
@@ -614,7 +670,7 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
 
 
 
-def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_a= "[outa]", first_file_idx= 0, main_clip_params= {}, separator= "; "):
+def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_a= "[outa]", first_file_idx= 0, main_clip_params= {}):
     filter_params = ""
     main_clip_width = main_clip_params.get("width") if main_clip_params.get("width") else 0
     main_clip_height = main_clip_params.get("height") if main_clip_params.get("height") else 0
@@ -745,51 +801,11 @@ def copy(from_= "", to_= ""):
 # ffmpeg -r 1 -loop 1 -i ./assets/image/cursed/aaa.jpeg -i ./assets/audio/vineboom.mp3 -c:a copy -r 1 -vcodec libx264 -shortest output.mp4
 # https://superuser.com/questions/1041816/combine-one-image-one-audio-file-to-make-one-video-using-ffmpeg?answertab=createdasc#tab-top
 
+
 """
-ffmpeg -y -r 30 -i ready_clip_piece_0.mp4 -r 30 -i ready_clip_piece_1.mp4 -r 30 -i ready_clip_piece_2.mp4 -r 30 -i ready_clip_piece_3.mp4 -r 30 -i ready_clip_piece_4.mp4 -filter_complex "[0:v] [0:a] [1:v] [1:a] [2:v] [2:a] [3:v] [3:a] [4:v] [4:a] concat=n=5:v=1:a=1 [outv] [outa]" -map "[outv]" -map "[outa]" -r 30 -c:v h264 -c:a mp3 -b:v 64k -b:a 196k -ar 44100 -preset fast -crf 22 -s 1280x720 -pix_fmt yuv420p -video_track_timescale 90000 outpooooot.mp4
-
-1 image 0 audio:
-    -filter_complex
-    [0][1] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, 1.32029, 1.92029)'
-
-1 image 1 audio:
-    -filter_complex
-    [0][1] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, 1.32029, 1.92029)';
-
-    [0] trim= end= 1.32029, setpts=PTS-STARTPTS [botv]; [0] atrim= end= 1.32029, asetpts=PTS-STARTPTS [bota];
-    [0] trim= start= 1.32029, setpts=PTS-STARTPTS [uppv]; [0] atrim= start= 1.32029,asetpts=PTS-STARTPTS [uppa];
-    [uppa] [2] amix= dropout_transition=0, dynaudnorm [uppa_mix];
-    [botv] [bota] [uppv] [uppa_mix] concat=n=2:v=1:a=1 [outv] [outa]
-
-0 image 1 audio:
-    -filter_complex
-    [0] trim= end= 1.32029, setpts=PTS-STARTPTS [botv]; [0] atrim= end= 1.32029, asetpts=PTS-STARTPTS [bota];
-    [0] trim= start= 1.32029, setpts=PTS-STARTPTS [uppv]; [0] atrim= start= 1.32029,asetpts=PTS-STARTPTS [uppa];
-    [uppa] [1] amix= dropout_transition=0, dynaudnorm [uppa_mix];
-    [botv] [bota] [uppv] [uppa_mix] concat=n=2:v=1:a=1 [outv] [outa]
-
-2 image 0 audio:
-    -filter_complex
-    [0][1] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, 1.32029, 1.92029)' [overlaid];
-
-    [overlaid][2] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, 4.83, 5.43)'
-
-0 image 2 audio:
-    [0] trim= end= 1.32029, setpts=PTS-STARTPTS [botv]; [0] atrim= end= 1.32029, asetpts=PTS-STARTPTS [bota];
-    [0] trim= start= 1.32029, setpts=PTS-STARTPTS [uppv]; [0] atrim= start= 1.32029,asetpts=PTS-STARTPTS [uppa];
-    [uppa] [1] amix= dropout_transition=0, dynaudnorm [uppa_mix];
-    [botv] [bota] [uppv] [uppa_mix] concat=n=2:v=1:a=1 [outv] [outa];
-
-    [outa] asplit=2 [outa1] [outa2];
-    [outa1] atrim= end= 4.83, asetpts=PTS-STARTPTS [bota];
-    [outa2] atrim= start= 4.83,asetpts=PTS-STARTPTS [uppa];
-
-    [uppa] [2] amix= dropout_transition=0, dynaudnorm [uppa_mix];
-
-    [bota] [uppa_mix] concat=n=2:v=0:a=1 [outa]    
+concat
+ffmpeg -i assets/video/vox.mp4 -i assets/video/clips/therock_sus.mp4 -filter_complex "[0:v]scale=w=1920:h=1080, setsar=1, setpts=PTS-STARTPTS [v0]; [1:v]scale=w=1920:h=1080, setsar=1, setpts=PTS-STARTPTS [v1]; [v0][0:a][v1][1:a] concat=n=2:v=1:a=1 [v] [a]" -map "[v]" -map "[a]"  -r 30 -c:v h264 -c:a mp3 -b:v 64k -b:a 196k -ar 44100 -preset fast -crf 22 -s 1280x720 -pix_fmt yuv420p -video_track_timescale 90000 out.mp4
 """
-
-
 
 
 def splitClipByBoomers(video_file_path="", boomers= [], tmp_dir= "."):

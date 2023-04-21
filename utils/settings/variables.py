@@ -13,7 +13,7 @@ DEFAULT_BOOM_TRIGGER = "end"
 
 # ########################################## soju.json IMAGE CONF.
 
-DEFAULT_IMAGE_CONCAT_STRATEGY = "F_COMPOSE"          # COMPOSE | F_COMPOSE | CONCAT
+DEFAULT_IMAGE_CONCAT_STRATEGY = "COMPOSE"          # COMPOSE | CONCAT
 
 DEFAULT_IMAGE_FOLDER = "./assets/image/cursed/"
 ALLOW_IMAGE_REPETITION = False
@@ -71,7 +71,7 @@ DEFAULT_NULL_AUDIO_FILE = "./assets/audio/null.mp3"
 
 # ########################################## soju.json VIDEO CONF.
 
-DEFAULT_VIDEO_MERGE_STRATEGY = "F_COMPOSE"          # COMPOSE | F_COMPOSE | CONCAT
+DEFAULT_VIDEO_MERGE_STRATEGY = "COMPOSE"          # COMPOSE | CONCAT
 
 DEFAULT_VIDEO_FOLDER = "./assets/video/clips/"
 ALLOW_VIDEO_REPETITION = False
