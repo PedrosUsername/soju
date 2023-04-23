@@ -10,6 +10,8 @@ FFMPEG_OUTPUT_SPECS = variables.FFMPEG_OUTPUT_SPECS
 IMAGE_FOLDER = variables.DEFAULT_IMAGE_FOLDER
 AUDIO_FOLDER = variables.DEFAULT_AUDIO_FOLDER
 VIDEO_FOLDER = variables.DEFAULT_VIDEO_FOLDER
+FFMPEG_FPS = int(variables.FFMPEG_FPS)
+FFMPEG_AR = int(variables.FFMPEG_SAMPLE_RATE)
 OVERLAY_SIZE_TOLERANCE = variables.OVERLAY_SIZE_TOLERANCE
 
 
@@ -30,9 +32,6 @@ def get_boomers(jsonfilepath):
         describe_json = f.read()
 
     return json.loads(describe_json)["boomers"]
-
-
-
 
 
 
@@ -116,7 +115,7 @@ def getBoomerBoominTime(boomer= None):
     ):
         return 0
     else:
-        return boomer.get("word").get(trigg)
+        return float(boomer.get("word").get(trigg))
 
 
 def getBoomerImageDuration(boomer= None):
@@ -403,11 +402,16 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
     video_files_compose, video_files_concat = classifyVideoFiles(video_files)
     image_files_compose, image_files_concat = classifyImageFiles(image_files)
 
+    video_files_concat.sort(key= getBoomerBoominTime, reverse= True)
+    image_files_concat.sort(key= getBoomerBoominTime, reverse= True)
+
+
+
     media_inputs = buildMediaInputs(
         video_files_compose= video_files_compose,
         image_files_compose= image_files_compose,
         audio_files= audio_files,
-        video_files_concat= [],
+        video_files_concat= video_files_concat,
         image_files_concat= []
     )
 
@@ -432,8 +436,7 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
                 out_v= fout_label_v,
                 out_a= fout_label_a,
                 first_file_idx= 1,
-                main_clip_params= main_clip_params,
-                separator= separator
+                main_clip_params= main_clip_params
             )
             + fout_label_v
             + fout_label_a
@@ -481,6 +484,32 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
         )
 
         a_mapping = ["-map", fout_label]
+
+    
+    if len(video_files_concat) > 0:
+        main_label_v = "[outv]" if (len(video_files_compose) + len(image_files_compose)) > 0 else "[0]"
+        main_label_a = "[outa]" if (len(video_files_compose) + len(audio_files)) > 0 else "[0]"
+        fout_label_v = "[outv]"
+        fout_label_a = "[outa]"
+
+        filter_params = (
+            filter_params
+            + buildVideoConcatFilterParams (
+                video_files_concat,
+                inp_v= main_label_v,
+                inp_a= main_label_a,                
+                out_v= fout_label_v,
+                out_a= fout_label_a,
+                first_file_idx= len(video_files_compose) + len(image_files_compose) + len(audio_files) + 1,
+                main_clip_params= main_clip_params
+            )
+            + fout_label_v
+            + fout_label_a
+            + separator            
+        )
+
+        v_mapping = ["-map", fout_label_v]
+        a_mapping = ["-map", fout_label_a]
     
 
     filter_params = cleanFilterParams(filter_params, filth= separator)
@@ -563,7 +592,7 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
         boomin_time_end = boomin_time_start + getBoomerImageDuration(boomer)
         filter_params = filter_params + """
 [{1}] scale= w= {4}:h= {5} [img];
-{0}[img] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, {2}, {3})'
+{0}[img] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, {2}, {3})', setpts=PTS-STARTPTS, setsar=1
 """.format(
             inp,
             first_file_idx,
@@ -581,7 +610,7 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
         boomin_time_end = boomin_time_start + getBoomerImageDuration(boomer)
         filter_params = filter_params + """{0};
 [{1}] scale= w= {4}:h= {5} [img];
-{0}[img] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, {2}, {3})'
+{0}[img] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, {2}, {3})', setpts=PTS-STARTPTS, setsar=1
 """.format(
             out,
             idx,
@@ -615,16 +644,17 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
         filter_params = filter_params + """
 {0} asplit=2
 [fin2] [fin4];
+
 [fin2] atrim= end= {2}, asetpts=PTS-STARTPTS
 [bota];
+
 [fin4] atrim= start= {2}, asetpts=PTS-STARTPTS
 [uppa];
 
-[{1}] atrim= end= {3}, asetpts=PTS-STARTPTS
-[b_audio];
-[b_audio] volume= {4}
-[b_audio];
-[uppa] [b_audio] amix= dropout_transition=0, dynaudnorm
+[{1}] atrim= end= {3}, volume= {4}, asetpts=PTS-STARTPTS
+[aud];
+
+[uppa] [aud] amix= dropout_transition=0, dynaudnorm
 [uppa_mix];
 
 [bota] [uppa_mix] concat=n=2:v=0:a=1
@@ -645,16 +675,17 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
         filter_params = filter_params + """{0};
 {0} asplit=2
 [outa1] [outa2];
+
 [outa1] atrim= end= {2}, asetpts=PTS-STARTPTS
 [bota];
+
 [outa2] atrim= start= {2},asetpts=PTS-STARTPTS
 [uppa];
 
-[{1}] atrim= end= {3}, asetpts=PTS-STARTPTS
-[b_audio];
-[b_audio] volume= {4}
-[b_audio];
-[uppa] [b_audio] amix= dropout_transition=0, dynaudnorm
+[{1}] atrim= end= {3}, volume= {4}, asetpts=PTS-STARTPTS
+[aud];
+
+[uppa] [aud] amix= dropout_transition=0, dynaudnorm
 [uppa_mix];
 
 [bota] [uppa_mix] concat=n=2:v=0:a=1
@@ -684,31 +715,34 @@ def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_
         duration = getBoomerVideoDuration(boomer)
         volume = getBoomerVideoVolume(boomer)
         filter_params = filter_params + """        
+
 {0} split=2 
 [fin1] [fin3];
+
 [fin1] trim= end= {2}, setpts=PTS-STARTPTS
 [botv];
+
 [fin3] trim= start= {2}, setpts=PTS-STARTPTS
 [uppv];
 
-[{1}] trim= end= {3}, setpts=PTS-STARTPTS
+[{1}] trim= end= {3}, scale= w= {4}:h= {5}, setpts=PTS-STARTPTS
 [b_video];
-[b_video] scale= w= {4}:h= {5}
-[b_video];
+
 [uppv] [b_video] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, 0, {3})'
 [uppv_mix];
 
 {0} asplit=2 
 [fin2] [fin4];
+
 [fin2] atrim= end= {2}, asetpts=PTS-STARTPTS
 [bota];
+
 [fin4] atrim= start= {2}, asetpts=PTS-STARTPTS
 [uppa];
 
-[{1}] atrim= end= {3}, asetpts=PTS-STARTPTS
+[{1}] atrim= end= {3}, volume= {6}, asetpts=PTS-STARTPTS
 [b_audio];
-[b_audio] volume= {6}
-[b_audio];
+
 [uppa] [b_audio] amix= dropout_transition=0, dynaudnorm
 [uppa_mix];
  
@@ -732,31 +766,34 @@ def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_
         duration = getBoomerVideoDuration(boomer)
         volume = getBoomerVideoVolume(boomer)        
         filter_params = filter_params + """{0}{6};
+
 {0} split=2 
 [fin1] [fin3];
+
 [fin1] trim= end= {2}, setpts=PTS-STARTPTS
 [botv];
+
 [fin3] trim= start= {2}, setpts=PTS-STARTPTS
 [uppv];
 
-[{1}] trim= end= {3}, setpts=PTS-STARTPTS
+[{1}] trim= end= {3}, scale= w= {4}:h= {5}, setpts=PTS-STARTPTS
 [b_video];
-[b_video] scale= w= {4}:h= {5}
-[b_video];
+
 [uppv] [b_video] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, 0, {3})'
 [uppv_mix];
 
 {6} asplit=2 
 [fin2] [fin4];
+
 [fin2] atrim= end= {2}, asetpts=PTS-STARTPTS
 [bota];
+
 [fin4] atrim= start= {2}, asetpts=PTS-STARTPTS
 [uppa];
 
-[{1}] atrim= end= {3}, asetpts=PTS-STARTPTS
+[{1}] atrim= end= {3}, volume= {7}, asetpts=PTS-STARTPTS
 [b_audio];
-[b_audio] volume= {7}
-[b_audio];
+
 [uppa] [b_audio] amix= dropout_transition=0, dynaudnorm
 [uppa_mix];
  
@@ -773,6 +810,94 @@ def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_
         )
 
     return filter_params
+
+
+
+
+
+def buildVideoConcatFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v= "[outv]", out_a= "[outa]", first_file_idx= 0, main_clip_params= {}):
+    filter_params = ""
+    main_clip_width = main_clip_params.get("width") if main_clip_params.get("width") else 0
+    main_clip_height = main_clip_params.get("height") if main_clip_params.get("height") else 0
+
+    duration = 0
+
+    head = boomers[:1]
+    for boomer in head:
+        boomin_time_start = getBoomerBoominTime(boomer)
+        duration = getBoomerVideoDuration(boomer)
+        volume = getBoomerVideoVolume(boomer)
+
+        filter_params = filter_params + f"""
+{inp_v} split=2 
+[fin1] [fin3];
+
+[fin1] trim= end= {boomin_time_start}, setpts=PTS-STARTPTS, setsar=1
+[botv];
+
+[fin3] trim= start= {boomin_time_start}, setpts=PTS-STARTPTS, setsar=1
+[uppv];
+
+{inp_a} asplit=2 
+[fin2] [fin4];
+
+[fin2] atrim= end= {boomin_time_start}, asetpts=PTS-STARTPTS
+[bota];
+
+[fin4] atrim= start= {boomin_time_start}, asetpts=PTS-STARTPTS
+[uppa];
+
+[{first_file_idx}] trim= end= {duration}, scale=w={main_clip_width}:h={main_clip_height}, setpts=PTS-STARTPTS, setsar=1
+[vid];
+
+[{first_file_idx}] atrim= end= {duration}, volume= {volume}, asetpts=PTS-STARTPTS
+[aud];
+
+[botv] [bota] [vid] [aud] [uppv] [uppa] concat=n=3:v=1:a=1
+"""
+
+    tail = boomers[1:]
+
+
+    for idx, boomer in enumerate(tail, first_file_idx + 1):
+
+        boomin_time_start = getBoomerBoominTime(boomer)
+        duration = getBoomerVideoDuration(boomer)
+        volume = getBoomerVideoVolume(boomer)
+
+        filter_params = filter_params + f"""{out_v}{out_a};
+
+
+        
+{out_v} split=2 
+[fin1] [fin3];
+
+[fin1] trim= end= {boomin_time_start}, setpts=PTS-STARTPTS, setsar=1
+[botv];
+
+[fin3] trim= start= {boomin_time_start}, setpts=PTS-STARTPTS, setsar=1
+[uppv];
+
+{out_a} asplit=2 
+[fin2] [fin4];
+
+[fin2] atrim= end= {boomin_time_start}, asetpts=PTS-STARTPTS
+[bota];
+
+[fin4] atrim= start= {boomin_time_start}, asetpts=PTS-STARTPTS
+[uppa];
+
+[{idx}] trim= end= {duration}, scale=w={main_clip_width}:h={main_clip_height}, setpts=PTS-STARTPTS, setsar=1
+[vid];
+
+[{idx}] atrim= end= {duration}, volume= {volume}, asetpts=PTS-STARTPTS
+[aud];
+
+[botv] [bota] [vid] [aud] [uppv] [uppa] concat=n=3:v=1:a=1
+"""
+
+    return filter_params    
+
 
 
 
@@ -803,8 +928,10 @@ def copy(from_= "", to_= ""):
 
 
 """
-concat
+concat video-video
 ffmpeg -i assets/video/vox.mp4 -i assets/video/clips/therock_sus.mp4 -filter_complex "[0:v]scale=w=1920:h=1080, setsar=1, setpts=PTS-STARTPTS [v0]; [1:v]scale=w=1920:h=1080, setsar=1, setpts=PTS-STARTPTS [v1]; [v0][0:a][v1][1:a] concat=n=2:v=1:a=1 [v] [a]" -map "[v]" -map "[a]"  -r 30 -c:v h264 -c:a mp3 -b:v 64k -b:a 196k -ar 44100 -preset fast -crf 22 -s 1280x720 -pix_fmt yuv420p -video_track_timescale 90000 out.mp4
+concat video-img
+ffmpeg -i assets/video/vox.mp4 -i assets/image/cursed/dog.jpg -filter_complex "[0:v]scale=w=1920:h=1080, setsar=1, setpts=PTS-STARTPTS [v0]; [1:v]scale=w=1920:h=1080, loop=loop=60:size=1:start=0, setsar=1, setpts=PTS-STARTPTS [v1]; [v0][v1] concat=n=2:v=1:a=0 [v]" -map "[v]" -map 0:a -r 30 -c:v h264 -c:a mp3 -b:v 64k -b:a 196k -ar 44100 -preset fast -crf 22 -s 1280x720 -pix_fmt yuv420p -video_track_timescale 90000 out.mp4
 """
 
 

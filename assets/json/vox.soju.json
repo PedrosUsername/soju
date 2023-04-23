@@ -20,8 +20,10 @@
 	],
 
 	"boomers": [
-		{"word": {"content": "held", "start": 3.21, "end": 3.72, "trigger": "start"}, "image": {"file": "vibecheckemoji.png", "conf": {"height": 260, "width": null, "mergestrategy": "COMPOSE", "duration": 0.4}}, "audio": {"file": "vineboom.mp3", "conf": {"duration": 0.9, "volume": 1}}, "video": {"file": "mhm.mp4", "conf": {"height": 1080, "width": null, "mergestrategy": "CONCAT", "duration": 0.4, "volume": 1}}},
-		{"word": {"content": "comforted", "start": 4.14, "end": 4.83, "trigger": "start"}, "image": {"file": "vibecheckemoji.png", "conf": {"height": 260, "width": null, "mergestrategy": "CONCAT", "duration": 0.4}}, "audio": {"file": null, "conf": {"duration": 0.9, "volume": 1}}, "video": {"file": "mhm.mp4", "conf": {"height": 1080, "width": null, "mergestrategy": "CONCAT", "duration": 0.4, "volume": 1}}}
+		{"word": {"content": "mommy", "start": 1.32029, "end": 1.83, "trigger": "start"}, "image": {"file": null, "conf": {"height": 1080, "width": null, "mergestrategy": "COMPOSE", "duration": 0.4}}, "audio": {"file": null, "conf": {"duration": 0.9, "volume": 1}}, "video": {"file": "kkkk.mp4", "conf": {"height": 1080, "width": null, "mergestrategy": "CONCAT", "duration": 5, "volume": 0.1}}},
+		{"word": {"content": "milk", "start": 2.190759, "end": 2.67, "trigger": "start"}, "image": {"file": null, "conf": {"height": 1080, "width": null, "mergestrategy": "COMPOSE", "duration": 0.4}}, "audio": {"file": null, "conf": {"duration": 0.9, "volume": 1}}, "video": {"file": "therocksus.mp4", "conf": {"height": 1080, "width": null, "mergestrategy": "CONCAT", "duration": 0.5, "volume": 0.1}}},
+		{"word": {"content": "held", "start": 3.21, "end": 3.72, "trigger": "start"}, "image": {"file": null, "conf": {"height": 1080, "width": null, "mergestrategy": "COMPOSE", "duration": 0.4}}, "audio": {"file": null, "conf": {"duration": 0.9, "volume": 1}}, "video": {"file": "mhm.mp4", "conf": {"height": 1080, "width": null, "mergestrategy": "COMPOSE", "duration": 0.4, "volume": 1}}},
+		{"word": {"content": "comforted", "start": 4.14, "end": 4.83, "trigger": "start"}, "image": {"file": null, "conf": {"height": 1080, "width": null, "mergestrategy": "COMPOSE", "duration": 0.4}}, "audio": {"file": "queissomeufilho.mp3", "conf": {"duration": 0.9, "volume": 1}}, "video": {"file": null, "conf": {"height": 1080, "width": null, "mergestrategy": "COMPOSE", "duration": 0.4, "volume": 1}}}
 
 	]
 }

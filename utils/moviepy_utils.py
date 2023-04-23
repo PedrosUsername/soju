@@ -82,29 +82,6 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
         clip = videofilepath
         for boomer in boomers_mid:
 
-            if boomer["image"] is not None and boomer["image"]["conf"] is not None:
-                if boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.FAST_COMPOSE_ENUM:
-                    ffmpeg_utils.quickOverlay(clip, boomer, "overlay.mp4", variables.DEFAULT_TMP_FILE_PATH)
-
-                    output_file = generate_output_file_name(videofilepath)
-                    
-                    if (boomer["audio"] is not None and boomer["audio"]["file"] is not None):
-                        ffmpeg_utils.slowAmix(variables.DEFAULT_TMP_FILE_PATH + "overlay.mp4", boomer, output_file)
-                    else:
-                        ffmpeg_utils.copy(from_= variables.DEFAULT_TMP_FILE_PATH + "overlay.mp4", to_= output_file)
-
-                    clip = output_file
-
-                elif boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.COMPOSE_ENUM:
-                    ffmpeg_utils.splitClip(clip, boomer, variables.DEFAULT_TMP_FILE_PATH)
-                    editUpperHalfVideo(boomer, variables.DEFAULT_TMP_FILE_PATH)
-
-                    output_file = generate_output_file_name(videofilepath)
-                    
-                    ffmpeg_utils.concatClipHalves(output_file, variables.DEFAULT_TMP_FILE_PATH)
-                    clip = output_file
-
-
                 elif boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
                     ffmpeg_utils.splitClip(clip, boomer, variables.DEFAULT_TMP_FILE_PATH)
                     editUpperHalfVideo(boomer, variables.DEFAULT_TMP_FILE_PATH)
