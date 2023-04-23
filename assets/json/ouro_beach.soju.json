@@ -65,19 +65,7 @@
 	],
 
 	"boomers": [
-		{"word": {"content": "beach", "start": 13.14, "end": 13.86, "trigger": "start"}, "image": {"file": "fuccboiemoji.jpg", "conf": {"height": 830, "width": null, "mergestrategy": "F_COMPOSE", "duration": 0.4}} },
-		{"word": {"content": "beach", "start": 14.97, "end": 15.66, "trigger": "start"}, "image": {"file": "obunga2.png", "conf": {"height": 830, "width": null, "mergestrategy": "F_COMPOSE", "duration": 0.4}}},
-		{"word": {"content": "beach", "start": 17.01, "end": 17.82, "trigger": "start"}, "image": {"file": "dolphinman.jpeg", "conf": {"height": 830, "width": null, "mergestrategy": "F_COMPOSE", "duration": 0.4}}},
-		{"word": {"content": "beach", "start": 19.17, "end": 19.92, "trigger": "start"}, "image": {"file": "thickkrabs.jpg", "conf": {"height": 830, "width": null, "mergestrategy": "F_COMPOSE", "duration": 0.4}}},
-		{"word": {"content": "being", "start": 21.96, "end": 22.44, "trigger": "start"}, "image": {"file": "sadcat.jpeg", "conf": {"height": 830, "width": null, "mergestrategy": "F_COMPOSE", "duration": 0.4}}},
-		{"word": {"content": "beach", "start": 24.42, "end": 25.17, "trigger": "start"}, "image": {"file": "nickyoung.jpg", "conf": {"height": 830, "width": null, "mergestrategy": "F_COMPOSE", "duration": 0.4}}},
-		{"word": {"content": "beach", "start": 27.33041, "end": 28.02, "trigger": "start"}, "image": {"file": "vibecheckemojialt.png", "conf": {"height": 830, "width": null, "mergestrategy": "F_COMPOSE", "duration": 0.4}}},
-		{"word": {"content": "beach", "start": 35.52, "end": 36.21, "trigger": "start"}, "image": {"file": "lightskin.png", "conf": {"height": 830, "width": null, "mergestrategy": "F_COMPOSE", "duration": 0.4}}},
-		{"word": {"content": "beach", "start": 40.41, "end": 41.16, "trigger": "start"}, "image": {"file": "sadcat.jpeg", "conf": {"height": 830, "width": null, "mergestrategy": "F_COMPOSE", "duration": 0.4}}},
-
-		{"word": {"content": "way", "start": 43.964875, "end": 44.339923, "trigger": "start"}, "image": {"file": "cowboyemoji.jpg", "conf": {"height": 830, "width": null, "mergestrategy": "F_COMPOSE", "duration": 0.4}}},
-		{"word": {"content": "the", "start": 44.355, "end": 44.876514, "trigger": "start"}, "image": {"file": "thechairman.png", "conf": {"height": 830, "width": null, "mergestrategy": "F_COMPOSE", "duration": 0.4}}},
-
-		{"word": {"content": "beach", "start": 49.5, "end": 50.49, "trigger": "start"}, "image": {"file": "dolphinman.jpeg", "conf": {"height": 830, "width": null, "mergestrategy": "F_COMPOSE", "duration": 0.4}}}
+		{"word": {"content": "beach", "start": 13.14, "end": 13.86, "trigger": "end"}, "image": {"file": "fuccboiemoji.jpg", "conf": {"height": 830, "width": null, "mergestrategy": "CONCAT", "duration": 0.4}} },
+		{"word": {"content": "beach", "start": 14.97, "end": 15.66, "trigger": "end"}, "image": {"file": "obunga2.png", "conf": {"height": 830, "width": null, "mergestrategy": "CONCAT", "duration": 0.4}}}
 	]
 }

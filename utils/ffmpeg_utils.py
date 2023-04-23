@@ -412,7 +412,7 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
         image_files_compose= image_files_compose,
         audio_files= audio_files,
         video_files_concat= video_files_concat,
-        image_files_concat= []
+        image_files_concat= image_files_concat
     )
 
     v_mapping = ["-map", "0:v"]
@@ -510,6 +510,33 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
 
         v_mapping = ["-map", fout_label_v]
         a_mapping = ["-map", fout_label_a]
+
+
+
+    if len(image_files_concat) > 0:
+        main_label_v = "[outv]" if (len(video_files_concat) + len(video_files_compose) + len(image_files_compose)) > 0 else "[0]"
+        main_label_a = "[outa]" if (len(video_files_concat) + len(video_files_compose) + len(audio_files)) > 0 else "[0]"
+        fout_label_v = "[outv]"
+        fout_label_a = "[outa]"
+
+        filter_params = (
+            filter_params
+            + buildImageConcatFilterParams (
+                image_files_concat,
+                inp_v= main_label_v,
+                inp_a= main_label_a,                
+                out_v= fout_label_v,
+                out_a= fout_label_a,
+                first_file_idx= len(video_files_concat) + len(video_files_compose) + len(image_files_compose) + len(audio_files) + 1,
+                main_clip_params= main_clip_params
+            )
+            + fout_label_v
+            + fout_label_a
+            + separator            
+        )
+
+        v_mapping = ["-map", fout_label_v]
+        a_mapping = ["-map", fout_label_a]        
     
 
     filter_params = cleanFilterParams(filter_params, filth= separator)
@@ -891,6 +918,91 @@ def buildVideoConcatFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v=
 [vid];
 
 [{idx}] atrim= end= {duration}, volume= {volume}, asetpts=PTS-STARTPTS
+[aud];
+
+[botv] [bota] [vid] [aud] [uppv] [uppa] concat=n=3:v=1:a=1
+"""
+
+    return filter_params    
+
+
+
+
+
+def buildImageConcatFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v= "[outv]", out_a= "[outa]", first_file_idx= 0, main_clip_params= {}):
+    filter_params = ""
+    main_clip_width = main_clip_params.get("width") if main_clip_params.get("width") else 0
+    main_clip_height = main_clip_params.get("height") if main_clip_params.get("height") else 0
+
+    duration = 0
+
+    head = boomers[:1]
+    for boomer in head:
+        boomin_time_start = getBoomerBoominTime(boomer)
+        duration = getBoomerImageDuration(boomer)
+
+        filter_params = filter_params + f"""
+{inp_v} split=2 
+[fin1] [fin3];
+
+[fin1] trim= end= {boomin_time_start}, setpts=PTS-STARTPTS, setsar=1
+[botv];
+
+[fin3] trim= start= {boomin_time_start}, setpts=PTS-STARTPTS, setsar=1
+[uppv];
+
+{inp_a} asplit=2 
+[fin2] [fin4];
+
+[fin2] atrim= end= {boomin_time_start}, asetpts=PTS-STARTPTS
+[bota];
+
+[fin4] atrim= start= {boomin_time_start}, asetpts=PTS-STARTPTS
+[uppa];
+
+[{first_file_idx}] loop= loop=-1:size=1:start=0, trim= end= {duration}, scale=w={main_clip_width}:h={main_clip_height}, setpts=PTS-STARTPTS, setsar=1
+[vid];
+
+anullsrc=r=44100:cl=mono, atrim= end= {duration}
+[aud];
+
+[botv] [bota] [vid] [aud] [uppv] [uppa] concat=n=3:v=1:a=1
+"""
+
+    tail = boomers[1:]
+
+
+    for idx, boomer in enumerate(tail, first_file_idx + 1):
+
+        boomin_time_start = getBoomerBoominTime(boomer)
+        duration = getBoomerImageDuration(boomer)
+
+        filter_params = filter_params + f"""{out_v}{out_a};
+
+
+        
+{out_v} split=2 
+[fin1] [fin3];
+
+[fin1] trim= end= {boomin_time_start}, setpts=PTS-STARTPTS, setsar=1
+[botv];
+
+[fin3] trim= start= {boomin_time_start}, setpts=PTS-STARTPTS, setsar=1
+[uppv];
+
+{out_a} asplit=2 
+[fin2] [fin4];
+
+[fin2] atrim= end= {boomin_time_start}, asetpts=PTS-STARTPTS
+[bota];
+
+[fin4] atrim= start= {boomin_time_start}, asetpts=PTS-STARTPTS
+[uppa];
+
+[{idx}] loop= loop=-1:size=1:start=0, trim= end= {duration}, scale=w={main_clip_width}:h={main_clip_height}, setpts=PTS-STARTPTS, setsar=1
+[vid];
+
+anullsrc=r=44100:cl=mono, atrim= end= {duration}
 [aud];
 
 [botv] [bota] [vid] [aud] [uppv] [uppa] concat=n=3:v=1:a=1
