@@ -65,7 +65,6 @@
 	],
 
 	"boomers": [
-		{"word": {"content": "beach", "start": 13.14, "end": 13.86, "trigger": "end"}, "image": {"file": "fuccboiemoji.jpg", "conf": {"height": 830, "width": null, "mergestrategy": "CONCAT", "duration": 0.4}} },
-		{"word": {"content": "beach", "start": 14.97, "end": 15.66, "trigger": "end"}, "image": {"file": "obunga2.png", "conf": {"height": 830, "width": null, "mergestrategy": "CONCAT", "duration": 0.4}}}
+
 	]
 }

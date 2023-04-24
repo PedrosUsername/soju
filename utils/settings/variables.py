@@ -16,12 +16,12 @@ DEFAULT_BOOM_TRIGGER = "end"
 DEFAULT_IMAGE_CONCAT_STRATEGY = "COMPOSE"          # COMPOSE | CONCAT
 
 DEFAULT_IMAGE_FOLDER = "./assets/image/cursed/"
-ALLOW_IMAGE_REPETITION = False
+ALLOW_IMAGE_REPETITION = True
 IGNORE_IMAGE_FILE_LIST = []
 
-DEFAULT_IMAGE_FILE = "vibecheckemoji.png"
+DEFAULT_IMAGE_FILE = None
 
-MAX_IMAGE_DURATION = 0.4
+MAX_IMAGE_DURATION = 0.3
 
 DEFAULT_IMAGE_RESOLUTION_HEIGHT = 1080               # 1080 px | 0 | -n
 DEFAULT_IMAGE_RESOLUTION_WIDTH = None                # http://trac.ffmpeg.org/wiki/Scaling
@@ -42,12 +42,12 @@ DEFAULT_IMAGE_POSITION_Y = 0                         # https://zulko.github.io/m
 # ########################################## soju.json AUDIO CONF.
 
 DEFAULT_AUDIO_FOLDER = "./assets/audio/cringe/"
-ALLOW_AUDIO_REPETITION = False
+ALLOW_AUDIO_REPETITION = True
 IGNORE_AUDIO_FILE_LIST = []
 
-DEFAULT_AUDIO_FILE = "vineboom.mp3"
+DEFAULT_AUDIO_FILE = None
 
-MAX_AUDIO_DURATION = 0.9
+MAX_AUDIO_DURATION = 0.3
 DEFAULT_AUDIO_VOLUME = 1
 
 DEFAULT_NULL_AUDIO_FILE = "./assets/audio/null.mp3"
@@ -74,13 +74,13 @@ DEFAULT_NULL_AUDIO_FILE = "./assets/audio/null.mp3"
 DEFAULT_VIDEO_MERGE_STRATEGY = "COMPOSE"          # COMPOSE | CONCAT
 
 DEFAULT_VIDEO_FOLDER = "./assets/video/clips/"
-ALLOW_VIDEO_REPETITION = False
+ALLOW_VIDEO_REPETITION = True
 IGNORE_VIDEO_FILE_LIST = []
 
-DEFAULT_VIDEO_FILE = "mhm.mp4"
+DEFAULT_VIDEO_FILE = None
 
-MAX_VIDEO_DURATION = 0.4
-DEFAULT_VIDEO_VOLUME = 1
+MAX_VIDEO_DURATION = 0.3
+DEFAULT_VIDEO_VOLUME = 0.5
 
 DEFAULT_VIDEO_RESOLUTION_HEIGHT = 1080               # 1080 px | 0 | -n
 DEFAULT_VIDEO_RESOLUTION_WIDTH = None                # http://trac.ffmpeg.org/wiki/Scaling
