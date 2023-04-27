@@ -26,6 +26,37 @@ OVERLAY_SIZE_TOLERANCE = variables.OVERLAY_SIZE_TOLERANCE
 
 
 
+
+
+
+
+def get_only_audio(videofilepath= None, outputfilepath= "./"):
+    ffmpeg = FFMPEG_PATH
+
+    print(outputfilepath, end="\n\n\n")
+
+    a_mapping = ["-map", "0:a"]
+
+    ffmpegCall = [
+        ffmpeg,
+        "-y",
+        "-i",
+        videofilepath,
+        *a_mapping,
+        "-ac",
+        "1",
+        outputfilepath
+    ]
+
+    executeFfmpegCall(ffmpegCall)
+
+
+
+
+
+
+
+
 def get_boomers(jsonfilepath):
     describe_json = []
     with open(jsonfilepath, 'r') as f:
@@ -223,112 +254,6 @@ def classifyVideoFiles(video_files):
 
 
 
-def splitClip(video_file_path="", boomer= [], tmp_dir= "."):
-    boomin_time = boomer["word"][getBoomTrigger(boomer)]
-
-    bottom_half_file = "{}/bottom_half.mp4".format(tmp_dir)
-    upper_half_file = "{}/upper_half_0.mp4".format(tmp_dir)
-    
-    subprocess.run([
-        variables.FFMPEG_PATH,
-        "-y",
-        "-i",
-        video_file_path,
-        "-filter_complex",
-        """
-        [0] trim= end= {0}, setpts=PTS-STARTPTS [botv]; [0] atrim= end= {0},asetpts=PTS-STARTPTS [bota];
-        [0] trim= start= {0}, setpts=PTS-STARTPTS [uppv]; [0] atrim= start= {0},asetpts=PTS-STARTPTS [uppa]
-        """.format(str(boomin_time)),
-        "-map",
-        "[botv]",
-        "-map",
-        "[bota]",
-        *variables.FFMPEG_OUTPUT_SPECS,
-        bottom_half_file,
-        "-map",
-        "[uppv]",
-        "-map",
-        "[uppa]",
-        *variables.FFMPEG_OUTPUT_SPECS,
-        upper_half_file        
-    ])
-
-    
-
-
-def concatClipHalves(output_file, tmp_dir):
-
-    subprocess.run([
-        "ffmpeg",
-        "-y",
-        "-r",
-        variables.FFMPEG_FPS,
-        "-i",
-        tmp_dir + "/" + "bottom_half.mp4",
-        "-r",
-        variables.FFMPEG_FPS,
-        "-i",
-        tmp_dir + "/" + "upper_half.mp4",        
-        "-filter_complex",
-        "[0:v] [0:a] [1:v] [1:a] concat=n=2:v=1:a=1 [outv] [outa]",
-        "-map",
-        "[outv]",
-        "-map",
-        "[outa]",
-        *variables.FFMPEG_OUTPUT_SPECS,
-        output_file
-    ])
-
-
-
-
-
-def quickOverlay(videofilepath= "", boomer= None, output_file= "overlay.mp4", tmp_dir= "."):
-    if boomer["image"]["file"] == None:
-        return
-    
-    media = variables.DEFAULT_IMAGE_FOLDER + boomer["image"]["file"]
-    bommin_time_start = boomer["word"][boomer["word"]["trigger"]]
-    boomin_time_end = bommin_time_start + boomer["image"]["conf"]["duration"]
-
-    subprocess.run([
-        variables.FFMPEG_PATH,
-        "-y",
-        "-i",
-        videofilepath,
-        "-i",
-        media,        
-        "-filter_complex",
-        "overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t,{:.2f},{:.2f})'".format(bommin_time_start, boomin_time_end),
-        *variables.FFMPEG_OUTPUT_SPECS,
-        tmp_dir + "/" + output_file
-    ])
-
-
-
-
-
-def amixUpperHalf(boomer= None, tmp_dir= "."):
-    if boomer["audio"]["file"] == None:
-        return
-    
-    upper_half_file_tmp = "{}/upper_half_0.mp4".format(tmp_dir)
-    upper_half_file_final = "{}/upper_half.mp4".format(tmp_dir)
-
-    media = variables.DEFAULT_AUDIO_FOLDER + boomer["audio"]["file"]
-
-    subprocess.run([
-        variables.FFMPEG_PATH,
-        "-y",
-        "-i",
-        upper_half_file_tmp,
-        "-i",
-        media,        
-        "-filter_complex",
-        "[1] [0] amix",
-        *variables.FFMPEG_OUTPUT_SPECS,
-        upper_half_file_final
-    ])
 
 
 
@@ -342,38 +267,6 @@ def amixUpperHalf(boomer= None, tmp_dir= "."):
 
 
 
-
-
-def slowAmix(videofilepath= "", boomer= [], output_file= "amix.mp4"):
-    if boomer["audio"] is None or boomer["audio"]["file"] is None:
-        return
-    
-    media = variables.DEFAULT_AUDIO_FOLDER + boomer["audio"]["file"]
-    boomin_time = boomer["word"][getBoomTrigger(boomer)]
-
-    subprocess.run([
-        variables.FFMPEG_PATH,
-        "-y",
-        "-i",
-        videofilepath,
-        "-i",
-        media,
-        "-filter_complex",
-        """
-        [0] trim= end= {0}, setpts=PTS-STARTPTS [botv]; [0] atrim= end= {0},asetpts=PTS-STARTPTS [bota];
-        [0] trim= start= {0}, setpts=PTS-STARTPTS [uppv]; [0] atrim= start= {0},asetpts=PTS-STARTPTS [uppa];
-        
-        [uppa] [1] amix=dropout_transition=0,dynaudnorm [uppar];
-        
-        [botv] [bota] [uppv] [uppar] concat=n=2:v=1:a=1 [outv] [outa]
-        """.format(str(boomin_time)),
-        "-map",
-        "[outv]",
-        "-map",
-        "[outa]",
-        *variables.FFMPEG_OUTPUT_SPECS,
-        output_file
-    ])
 
 
 
@@ -1047,155 +940,3 @@ ffmpeg -i assets/video/vox.mp4 -i assets/image/cursed/dog.jpg -filter_complex "[
 """
 
 
-def splitClipByBoomers(video_file_path="", boomers= [], tmp_dir= "."):
-    former_boomin_time = 0
-    for counter, boomer in enumerate(boomers):
-        boomin_time = boomer["word"][getBoomTrigger(boomer)]
-        current_temp_file_name = "clip_piece_{}.mp4".format(counter)
-
-        if counter == 0:
-            current_temp_file_name = "ready_clip_piece_0.mp4"
-        
-        subprocess.run([
-            variables.FFMPEG_PATH,
-            "-y",
-            "-ss",
-            str(former_boomin_time),
-            "-to",
-            str(boomin_time),
-            "-i",
-            video_file_path,
-            *variables.FFMPEG_OUTPUT_SPECS,
-            "{}/{}".format(tmp_dir, current_temp_file_name)
-        ])
-
-        former_boomin_time = boomin_time
-        
-    current_temp_file_name = "clip_piece_{}.mp4".format(len(boomers))
-    
-    subprocess.run([
-        variables.FFMPEG_PATH,
-        "-y",
-        "-ss",
-        str(former_boomin_time),
-        "-i",
-        video_file_path,
-        *variables.FFMPEG_OUTPUT_SPECS,
-        "{}/{}".format(tmp_dir, current_temp_file_name)
-    ])
-
-
-
-def buildAudio(boomers= None, tmp_dir= "."):
-    for counter, boomer in enumerate(boomers, 1):
-        if boomer["audio"] is None or boomer["audio"]["file"] is None or len(boomer["audio"]["file"]) < 1:
-            boomer_audio = variables.DEFAULT_NULL_AUDIO_FILE
-        else:
-            boomer_audio = '{0}{1}'.format(variables.DEFAULT_AUDIO_FOLDER, boomer["audio"]["file"] if boomer["audio"]["file"] is not None else variables.DEFAULT_NULL_AUDIO_FILE)
-            
-        current_temp_file_name = "v_clip_piece_{}.mp4".format(counter)
-        output_temp_file_name = "ready_clip_piece_{}.mp4".format(counter)
-
-        subprocess.run([
-            variables.FFMPEG_PATH,
-            "-y",
-            "-i",
-            boomer_audio,
-            "-i",
-            "{}/{}".format(tmp_dir, current_temp_file_name),
-            "-filter_complex",
-            "[0] [1] amix",
-            *variables.FFMPEG_OUTPUT_SPECS,
-            "{}/{}".format(tmp_dir, output_temp_file_name)
-        ])
-
-
-
-def concatClips(concat_file, tmp_dir):
-    subprocess.run([
-        "ffmpeg",
-        "-y",
-        "-f",
-        "concat",
-        "-safe",
-        "0",
-        "-i",
-        tmp_dir + "/" + concat_file,
-        *variables.FFMPEG_OUTPUT_SPECS,        
-        "output_video.mp4"
-    ])
-
-def quickAmix(videofilepath= "", boomer= [], output_file= "amix.mp4", tmp_dir= "."):
-    if boomer["audio"]["file"] == None:
-        return
-    
-    media = variables.DEFAULT_AUDIO_FOLDER + boomer["audio"]["file"]
-    bommin_time_start = boomer["word"][boomer["image"]["conf"]["boom_trigger"]]
-
-    subprocess.run([
-        "ffmpeg",
-        "-y",
-        "-i",
-        videofilepath,
-        "-async",
-        "1",
-        "-itsoffset",
-        str(bommin_time_start),
-        "-i",
-        media,
-        "-filter_complex",
-        "[0:a]volume=1[a0]; [1:a]volume=1[a1]; [a1] [a0] amix=inputs=2:normalize=0",
-        *variables.FFMPEG_OUTPUT_SPECS,
-        tmp_dir + "/" + output_file
-    ])    
-
-
-
-"""
-
---------------------- video overlay ---
-
-ffmpeg
--i clip.mp4
-
--i image_1.png
--i image_2.png
-[...]
--i image_n.png
-
--filter_complex
-    [0][1] overlay= enable='between(t, bt1, bt1+duration)'
-    [out_1]; [out_1][2] overlay= enable='between(t, bt2, bt2+duration)'
-    [...]
-    [out_n-1]; [out_n-1][n] overlay= enable='between(t, btn, btn+duration)'
-
-*variables.FFMPEG_OUTPUT_SPECS,
-
-output_file.mp4
-
-
-
-
------------------------ audio overlay ---
-
-ffmpeg
--i clip.mp4
-
--i audio_1.png
--i audio_2.png
-[...]
--i audio_n.png
-
--filter_complex
-    [0] trim= end= bt1, setpts=PTS-STARTPTS [botv]; [0] atrim= end= bt1, asetpts=PTS-STARTPTS [bota];
-    [0] trim= start= bt1, setpts=PTS-STARTPTS [uppv]; [0] atrim= start= bt1,asetpts=PTS-STARTPTS [uppa];
-    
-    [uppa] [1] amix [uppa_mix];
-    
-    [botv] [bota] [uppv] [uppa_mix] concat=n=2:v=1:a=1
-
-*variables.FFMPEG_OUTPUT_SPECS,
-
-output_file.mp4
-
-"""

@@ -163,17 +163,16 @@ def buildvisuals(boomers= None, tmp_dir= ""):
         )
 
 
-def buildSojuFile(videofilepath= None, jsonfilepath= None):
+def buildSojuFile(videofilepath= None, jsonfilepath= None, outputfile= None):
     if(videofilepath is not None and jsonfilepath is None):
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            clip = VideoFileClip(videofilepath)
-            clip.audio.write_audiofile(tmp_dir + "/" + variables.TMP_AUDIO_FILE_NAME, ffmpeg_params=["-ac", "1"])
-
-            print("Soju - clip duration: {}".format(clip.duration))
+        with tempfile.TemporaryDirectory(dir="./") as tmp_dir:
+            ffmpeg_utils.get_only_audio(videofilepath, tmp_dir + "/" + variables.TMP_AUDIO_FILE_NAME)
 
             list_of_words = vosk_utils.voskDescribe(tmp_dir + "/" + variables.TMP_AUDIO_FILE_NAME)
 
-        with open(generate_soju_file_name(videofilepath), 'w') as f:
+        filename = generate_soju_file_name(videofilepath) if outputfile is None else outputfile
+
+        with open(filename, 'w') as f:
             f.writelines('{\n\t"data": [' + '\n')
             for i, word in enumerate(list_of_words):
                 comma = ',' if i < (len(list_of_words) - 1) else ''
@@ -181,9 +180,27 @@ def buildSojuFile(videofilepath= None, jsonfilepath= None):
             f.writelines('\t],\n\n')
             f.writelines('\t"boomers": [\n\n\t]\n}')
         
-        clip.close()
         return None
 
+
+async def buildSojuFileAsync(videofilepath= None, jsonfilepath= None, outputfile= None):
+    if(videofilepath is not None and jsonfilepath is None):
+        with tempfile.TemporaryDirectory(dir="./") as tmp_dir:
+            ffmpeg_utils.get_only_audio(videofilepath, tmp_dir + "/" + variables.TMP_AUDIO_FILE_NAME)
+
+            list_of_words = vosk_utils.voskDescribe(tmp_dir + "/" + variables.TMP_AUDIO_FILE_NAME)
+
+        filename = generate_soju_file_name(videofilepath) if outputfile is None else "./" + outputfile
+
+        with open(filename, 'w') as f:
+            f.writelines('{\n\t"data": [' + '\n')
+            for i, word in enumerate(list_of_words):
+                comma = ',' if i < (len(list_of_words) - 1) else ''
+                f.writelines('\t\t{0}{1}\n'.format(word.to_string(), comma))
+            f.writelines('\t],\n\n')
+            f.writelines('\t"boomers": [\n\n\t]\n}')
+        
+        return None
 
 
 
