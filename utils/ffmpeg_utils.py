@@ -33,8 +33,6 @@ OVERLAY_SIZE_TOLERANCE = variables.OVERLAY_SIZE_TOLERANCE
 def get_only_audio(videofilepath= None, outputfilepath= "./"):
     ffmpeg = FFMPEG_PATH
 
-    print(outputfilepath, end="\n\n\n")
-
     a_mapping = ["-map", "0:a"]
 
     ffmpegCall = [

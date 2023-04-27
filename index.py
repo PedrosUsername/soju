@@ -1,4 +1,5 @@
 import discord
+import tempfile
 import os
 
 import random
@@ -149,8 +150,9 @@ async def on_message(message):
             if (ffmpeg_main_input != None):
                 img, aud, vid = await get_random_media_inputs(message, ffmpeg_main_input) 
 
-            await moviepy_utils.buildSojuFileAsync(videofilepath= ffmpeg_main_input, outputfile= "discord_out.soju.json")
-
-            await message.channel.send(file= discord.File("./discord_out.soju.json"))
+            with tempfile.TemporaryDirectory(dir="./") as tmp_dir:
+                ephemeral = tmp_dir + "/"
+                outfilename = await moviepy_utils.buildSojuFileAsync(videofilepath= ffmpeg_main_input, tmp_dir= ephemeral)
+                await message.author.send(file= discord.File(tmp_dir + "/" + outfilename))
 
 client.run(TOKEN)

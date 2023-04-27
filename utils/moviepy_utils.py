@@ -183,16 +183,15 @@ def buildSojuFile(videofilepath= None, jsonfilepath= None, outputfile= None):
         return None
 
 
-async def buildSojuFileAsync(videofilepath= None, jsonfilepath= None, outputfile= None):
+async def buildSojuFileAsync(videofilepath= None, jsonfilepath= None, tmp_dir= "./"):
     if(videofilepath is not None and jsonfilepath is None):
-        with tempfile.TemporaryDirectory(dir="./") as tmp_dir:
-            ffmpeg_utils.get_only_audio(videofilepath, tmp_dir + "/" + variables.TMP_AUDIO_FILE_NAME)
+        ffmpeg_utils.get_only_audio(videofilepath, tmp_dir + variables.TMP_AUDIO_FILE_NAME)
 
-            list_of_words = vosk_utils.voskDescribe(tmp_dir + "/" + variables.TMP_AUDIO_FILE_NAME)
+        list_of_words = vosk_utils.voskDescribe(tmp_dir + variables.TMP_AUDIO_FILE_NAME)
 
-        filename = generate_soju_file_name(videofilepath) if outputfile is None else "./" + outputfile
+        filename = generate_soju_file_name_simple(videofilepath)
 
-        with open(filename, 'w') as f:
+        with open(tmp_dir + filename, 'w') as f:
             f.writelines('{\n\t"data": [' + '\n')
             for i, word in enumerate(list_of_words):
                 comma = ',' if i < (len(list_of_words) - 1) else ''
@@ -200,7 +199,7 @@ async def buildSojuFileAsync(videofilepath= None, jsonfilepath= None, outputfile
             f.writelines('\t],\n\n')
             f.writelines('\t"boomers": [\n\n\t]\n}')
         
-        return None
+        return filename
 
 
 
@@ -284,6 +283,11 @@ def get_base_file_name_from(videofilepath):
 def generate_soju_file_name(videofilepath):
     videofilename = get_base_file_name_from(videofilepath)
     return "{}{}.soju.json".format(variables.PATH_DEFAULT_JSON_FILE, videofilename)
+
+
+def generate_soju_file_name_simple(videofilepath):
+    videofilename = get_base_file_name_from(videofilepath)
+    return "{}.soju.json".format(videofilename)
 
 
 
