@@ -20,6 +20,10 @@
 	],
 
 	"boomers": [
+		{"word": {"content": "mommy", "start": 1.320292, "end": 1.83, "trigger": "end"}, "image": {"file": "sadyagoo.png", "conf": {"height": 1080, "width": null, "mergestrategy": "COMPOSE", "duration": 0.3}}, "audio": {"file": "atumalaca.mp3", "conf": {"duration": 0.3, "volume": 1}}, "video": {"file": "michaelrosen.mp4", "conf": {"height": 1080, "width": null, "mergestrategy": "COMPOSE", "duration": 0.3, "volume": 0.5}}},
+		{"word": {"content": "milk", "start": 2.190747, "end": 2.67, "trigger": "end"}, "image": {"file": "nordic.jpeg", "conf": {"height": 1080, "width": null, "mergestrategy": "COMPOSE", "duration": 0.3}}, "audio": {"file": "queissomeufilho.mp3", "conf": {"duration": 0.3, "volume": 1}}, "video": {"file": "kayodeewmi.mp4", "conf": {"height": 1080, "width": null, "mergestrategy": "COMPOSE", "duration": 0.3, "volume": 0.5}}},
+		{"word": {"content": "held", "start": 3.21, "end": 3.72, "trigger": "end"}, "image": {"file": "thiccfruit2.jpeg", "conf": {"height": 1080, "width": null, "mergestrategy": "CONCAT", "duration": 1}}, "audio": {"file": "irra.mp3", "conf": {"duration": 0.3, "volume": 1}}, "video": {"file": "nikocado.mp4", "conf": {"height": 1080, "width": null, "mergestrategy": "COMPOSE", "duration": 0.3, "volume": 0.5}}},
+		{"word": {"content": "comforted", "start": 4.14, "end": 4.83, "trigger": "end"}, "image": {"file": "zuc.jpeg", "conf": {"height": 1080, "width": null, "mergestrategy": "COMPOSE", "duration": 0.3}}, "audio": {"file": "cavalo.mp3", "conf": {"duration": 0.3, "volume": 1}}, "video": {"file": "wut.mp4", "conf": {"height": 1080, "width": null, "mergestrategy": "COMPOSE", "duration": 0.3, "volume": 0.5}}}
 
 	]
 }

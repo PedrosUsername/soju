@@ -5,7 +5,7 @@ import os
 import random
 import itertools
 
-from utils import moviepy_utils
+from utils import moviepy_utils, ffmpeg_utils
 
 
 
@@ -121,7 +121,7 @@ def get_media_input_urls(inputs= []):
 
 
 
-async def get_main_input_from_reference(message= None, allow_audio= False):
+async def get_main_input_from_message(message= None, allow_audio= False):
     if not message:
         return None
      
@@ -133,6 +133,23 @@ async def get_main_input_from_reference(message= None, allow_audio= False):
     backup = random.choice(aud) if allow_audio and len(aud) > 0 else None
 
     return random.choice(vid) if len(vid) > 0 else backup
+
+
+
+
+
+
+
+async def get_soju_file(message= None) :
+    if message is None :
+        return None
+    
+    for attach in message.attachments :
+        print(get_file_type(attach.url), end= "\n\n")
+
+    json_files = [ attachment.url for attachment in message.attachments if get_file_type(attachment.url) == '.json']
+
+    return random.choice(json_files) if len(json_files) > 0 else None
 
 
 
@@ -183,11 +200,28 @@ async def get_random_media_inputs(message= None, main_input= None):
 
 
 async def make_it_goofy(message= None, tmp_dir= "./"):
-    feedback_msg = "hueuehuehuheuhe"
-    outfilename = "hahhaha.mp3"
+    feedback_msg = ""
+    outfilename = ""
+
+    if (
+        message
+        and message.reference
+        and message.reference.message_id != None
+    ):
+        referenced_message = await message.channel.fetch_message(message.reference.message_id)
+
+        main_input_url = await get_main_input_from_message(referenced_message, allow_audio= True)
+        sojufile_url = await get_soju_file(message)
+
+        ffmpeg_copy_output = tmp_dir + "moviepy_friendly_copy.mp4"
+
+        if (main_input_url != None and sojufile_url != None) :
+            ffmpeg_utils.copy(from_= main_input_url, to_= ffmpeg_copy_output)
+            feedback_msg = moviepy_utils.makeItGoofyForDiscord(moviepycopy= ffmpeg_copy_output, videofilepath= main_input_url, jsonfilepath= sojufile_url, tmp_dir= tmp_dir)    
+            outfilename = moviepy_utils.generate_output_file_name(main_input_url, "")
 
 
-    return { "feedback": feedback_msg,  "goofyedit": outfilename}
+    return { "feedback": feedback_msg,  "goofyedit": outfilename }
 
 
 
@@ -209,7 +243,7 @@ async def build_soju_file(message= None, tmp_dir= "./"):
         and message.reference.message_id != None
     ):
         main_msg = await message.channel.fetch_message(message.reference.message_id)
-        ffmpeg_main_input = await get_main_input_from_reference(main_msg, allow_audio= True)
+        ffmpeg_main_input = await get_main_input_from_message(main_msg, allow_audio= True)
 
         if (ffmpeg_main_input != None):
 
@@ -241,9 +275,6 @@ async def build_soju_file(message= None, tmp_dir= "./"):
 
 
 
-
-async def edit_video_file(message= None):
-    return "edit_video_call"
 
 
 

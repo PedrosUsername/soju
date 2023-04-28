@@ -3,6 +3,7 @@ import ntpath
 import json
 import filetype
 import tempfile
+import requests
 
 from moviepy.editor import *
 
@@ -29,6 +30,19 @@ def get_boomers(jsonfilepath):
 
     return json.loads(describe_json)["boomers"]
 
+def get_boomers_from_url(jsonfilepath):
+    response = requests.get(jsonfilepath)
+    data = ""
+
+    if (response.status_code):
+        print("DATA", data)
+        data = response.text
+    else:
+        print("NOT DATA", data)
+
+    return json.loads(data)["boomers"]
+
+
 
 
 
@@ -52,7 +66,7 @@ def filterBoomers(og_clip_duration= 0, boomers= []):
 
 
 
-def makeItGoofy(videofilepath="", jsonfilepath= None):
+def makeItGoofy(videofilepath="", outputfile= None, jsonfilepath= None):
     time_start = time.time()
 
     og_clip = getClipWithMoviePy(videofilepath)
@@ -61,7 +75,7 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
     boomers_top, boomers_mid, boomers_bot = filterBoomers(og_clip.duration, boomers)
 
     if len(boomers_mid) > 0:
-        outputfilename = generate_output_file_name(videofilepath)
+        outputfilename = generate_output_file_name(videofilepath) if not outputfile else outputfile
 
         og_clip_params = {
             "file": videofilepath,
@@ -94,6 +108,46 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
     """
     time_end = time.time() - time_start
     print("\nclip is ready! it took {:.2f} seconds to make it goofy".format(time_end))
+
+
+
+
+
+def makeItGoofyForDiscord(moviepycopy="moviepy_friendly_copy.mp4", videofilepath="",jsonfilepath= None, tmp_dir= "./"):
+    time_start = time.time()
+
+    og_clip = getClipWithMoviePy(moviepycopy)
+    boomers = get_boomers_from_url(jsonfilepath)
+
+    boomers_top, boomers_mid, boomers_bot = filterBoomers(og_clip.duration, boomers)
+
+    if len(boomers_mid) > 0:
+        outputfilename = generate_output_file_name(videofilepath, tmp_dir)
+
+        og_clip_params = {
+            "file": videofilepath,
+            "duration": og_clip.duration,
+            "width": og_clip.size[0],
+            "height": og_clip.size[1]
+        }
+        
+        call_params = ffmpeg_utils.buildCall(og_clip_params, outputfilename, boomers_mid)
+        
+        for p in call_params:
+            print(str(p), end= "\n\n\n")
+
+        ffmpeg_utils.executeFfmpegCall(
+            params= call_params
+        )
+
+    time_end = time.time() - time_start
+    return "\nclip is ready! it took {:.2f} seconds to make it goofy".format(time_end)
+
+
+
+
+
+
 
 
 
@@ -293,9 +347,11 @@ def generate_soju_file_name_simple(videofilepath):
 
 
 
-def generate_output_file_name(videofilepath):
+def generate_output_file_name(videofilepath, path= None):
     videofilename = get_base_file_name_from(videofilepath)
-    return "{}{}.mp4".format(variables.DEFAULT_OUTPUT_PATH, videofilename)
+
+    pathtofile = path if path else variables.DEFAULT_OUTPUT_PATH
+    return "{}{}.mp4".format(pathtofile, videofilename)
 
 
 
