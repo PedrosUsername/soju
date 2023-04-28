@@ -183,7 +183,7 @@ def buildSojuFile(videofilepath= None, jsonfilepath= None, outputfile= None):
         return None
 
 
-async def buildSojuFileAsync(videofilepath= None, jsonfilepath= None, tmp_dir= "./"):
+async def buildSojuFileAsync(videofilepath= None, jsonfilepath= None, random_media= ([], [], []), tmp_dir= "./"):
     if(videofilepath is not None and jsonfilepath is None):
         ffmpeg_utils.get_only_audio(videofilepath, tmp_dir + variables.TMP_AUDIO_FILE_NAME)
 
