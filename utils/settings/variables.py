@@ -102,7 +102,7 @@ OVERLAY_SIZE_TOLERANCE = 69
 OUTPUT_RESOLUTION_HEIGHT = 0               # http://trac.ffmpeg.org/wiki/Scaling
 OUTPUT_RESOLUTION_WIDTH = 0                # 1920 px | -n | 0
 
-PATH_MODEL = "./models/en-model"
+PATH_MODEL = "/home/pedro/Videos/sojubot/models/en-model"
 DEFAULT_OUTPUT_PATH = ""
 PATH_DEFAULT_JSON_FILE = "./assets/json/"
 
