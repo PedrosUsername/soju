@@ -25,21 +25,26 @@ from . import ImageMergeStrategy
 
 def get_boomers(jsonfilepath):
     describe_json = []
+
     with open(jsonfilepath, 'r') as f:
         describe_json = f.read()
 
     return json.loads(describe_json)["boomers"]
 
+
+
+
+
+
+
+
 def get_boomers_from_url(jsonfilepath):
     response = requests.get(jsonfilepath)
-    data = ""
+    data = "{}"
 
     if (response.status_code):
-        print("DATA", data)
         data = response.text
-    else:
-        print("NOT DATA", data)
-
+    
     return json.loads(data)["boomers"]
 
 
@@ -66,7 +71,7 @@ def filterBoomers(og_clip_duration= 0, boomers= []):
 
 
 
-def makeItGoofy(videofilepath="", outputfile= None, jsonfilepath= None):
+def makeItGoofy(videofilepath="", jsonfilepath= None):
     time_start = time.time()
 
     og_clip = getClipWithMoviePy(videofilepath)
@@ -75,7 +80,7 @@ def makeItGoofy(videofilepath="", outputfile= None, jsonfilepath= None):
     boomers_top, boomers_mid, boomers_bot = filterBoomers(og_clip.duration, boomers)
 
     if len(boomers_mid) > 0:
-        outputfilename = generate_output_file_name(videofilepath) if not outputfile else outputfile
+        outputfilename = generate_output_file_name(videofilepath)
 
         og_clip_params = {
             "file": videofilepath,
@@ -113,35 +118,29 @@ def makeItGoofy(videofilepath="", outputfile= None, jsonfilepath= None):
 
 
 
-def makeItGoofyForDiscord(moviepycopy="moviepy_friendly_copy.mp4", videofilepath="",jsonfilepath= None, tmp_dir= "./"):
-    time_start = time.time()
+def makeItGoofyForDiscord(moviepycopy="moviepy_friendly_copy.mp4", main_input_url="",jsonfilepath= None, tmp_dir= "./") :
 
     og_clip = getClipWithMoviePy(moviepycopy)
     boomers = get_boomers_from_url(jsonfilepath)
 
     boomers_top, boomers_mid, boomers_bot = filterBoomers(og_clip.duration, boomers)
+    outputfilename = generate_output_file_name(main_input_url, tmp_dir)
 
-    if len(boomers_mid) > 0:
-        outputfilename = generate_output_file_name(videofilepath, tmp_dir)
+    og_clip_params = {
+        "file": main_input_url,
+        "duration": og_clip.duration,
+        "width": og_clip.size[0],
+        "height": og_clip.size[1]
+    }
+    
+    call_params = ffmpeg_utils.buildCall(og_clip_params, outputfilename, boomers_mid)
+    
+    for p in call_params :
+        print(str(p), end= "\n\n\n")
 
-        og_clip_params = {
-            "file": videofilepath,
-            "duration": og_clip.duration,
-            "width": og_clip.size[0],
-            "height": og_clip.size[1]
-        }
-        
-        call_params = ffmpeg_utils.buildCall(og_clip_params, outputfilename, boomers_mid)
-        
-        for p in call_params:
-            print(str(p), end= "\n\n\n")
+    ffmpeg_utils.executeFfmpegCall(params= call_params)
 
-        ffmpeg_utils.executeFfmpegCall(
-            params= call_params
-        )
-
-    time_end = time.time() - time_start
-    return "\nclip is ready! it took {:.2f} seconds to make it goofy".format(time_end)
+    return outputfilename
 
 
 
@@ -243,9 +242,9 @@ async def buildSojuFileAsync(videofilepath= None, jsonfilepath= None, random_med
 
         list_of_words = vosk_utils.voskDescribe(tmp_dir + variables.TMP_AUDIO_FILE_NAME)
 
-        filename = generate_soju_file_name_simple(videofilepath)
+        filename = generate_soju_file_name(videofilepath, tmp_dir)
 
-        with open(tmp_dir + filename, 'w') as f:
+        with open(filename, 'w') as f:
             f.writelines('{\n\t"data": [' + '\n')
             for i, word in enumerate(list_of_words):
                 comma = ',' if i < (len(list_of_words) - 1) else ''
@@ -334,9 +333,11 @@ def get_base_file_name_from(videofilepath):
 
 
 
-def generate_soju_file_name(videofilepath):
+def generate_soju_file_name(videofilepath, path= None):
     videofilename = get_base_file_name_from(videofilepath)
-    return "{}{}.soju.json".format(variables.PATH_DEFAULT_JSON_FILE, videofilename)
+
+    pathtofile = path if path else variables.PATH_DEFAULT_JSON_FILE
+    return "{}{}.soju.json".format(pathtofile, videofilename)
 
 
 def generate_soju_file_name_simple(videofilepath):

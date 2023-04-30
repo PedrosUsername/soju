@@ -1,6 +1,6 @@
 # start   -> boom will be inserted at ["boomers"]["word"]["start"] seconds
 # end     -> boom will be inserted at ["boomers"]["word"]["end"] seconds
-DEFAULT_BOOM_TRIGGER = "end"
+DEFAULT_BOOM_TRIGGER = "start"
 
 
 
@@ -42,10 +42,10 @@ DEFAULT_IMAGE_POSITION_Y = 0                         # https://zulko.github.io/m
 # ########################################## soju.json AUDIO CONF.
 
 DEFAULT_AUDIO_FOLDER = "./assets/audio/cringe/"
-ALLOW_AUDIO_REPETITION = True
+ALLOW_AUDIO_REPETITION = False
 IGNORE_AUDIO_FILE_LIST = []
 
-DEFAULT_AUDIO_FILE = None
+DEFAULT_AUDIO_FILE = "vineboom.mp3"
 
 MAX_AUDIO_DURATION = 0.3
 DEFAULT_AUDIO_VOLUME = 1
@@ -74,10 +74,10 @@ DEFAULT_NULL_AUDIO_FILE = "./assets/audio/null.mp3"
 DEFAULT_VIDEO_MERGE_STRATEGY = "COMPOSE"          # COMPOSE | CONCAT
 
 DEFAULT_VIDEO_FOLDER = "./assets/video/clips/"
-ALLOW_VIDEO_REPETITION = True
+ALLOW_VIDEO_REPETITION = False
 IGNORE_VIDEO_FILE_LIST = []
 
-DEFAULT_VIDEO_FILE = None
+DEFAULT_VIDEO_FILE = "kkkk.mp4"
 
 MAX_VIDEO_DURATION = 0.3
 DEFAULT_VIDEO_VOLUME = 0.5
@@ -103,7 +103,7 @@ OUTPUT_RESOLUTION_HEIGHT = 0               # http://trac.ffmpeg.org/wiki/Scaling
 OUTPUT_RESOLUTION_WIDTH = 0                # 1920 px | -n | 0
 
 PATH_MODEL = "./models/en-model"
-DEFAULT_OUTPUT_PATH = "./"
+DEFAULT_OUTPUT_PATH = ""
 PATH_DEFAULT_JSON_FILE = "./assets/json/"
 
 

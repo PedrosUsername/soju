@@ -1,5 +1,6 @@
 import discord
 import tempfile
+import json
 import os
 
 import random
@@ -40,38 +41,50 @@ def get_file_type(our_file):
 
 
 
-def is_img(input= None):
+def is_img(input= None) :
     if input == None:
         return False
     
-    if "image" in getattr(input, "type", getattr(input, "content_type", "")):
-        return True
-    else:
-        return False
-    
+    attr_type = getattr(input, "type", getattr(input, "content_type", None))
 
-
-
-def is_aud(input= None):
-    if input == None:
-        return False
-    
-    if "audio" in getattr(input, "type", getattr(input, "content_type", "")):
-        return True
-    else:
-        return False
-
-
-
-
-def is_vid(input= None):
-    if input == None:
-        return False
-    
     if (
-        "video" in getattr(input, "type", getattr(input, "content_type", ""))
-        or "gifv" in getattr(input, "type", getattr(input, "content_type", ""))
-    ):
+        attr_type != None
+        and "image" in attr_type
+    ) :
+        return True
+    else:
+        return False
+    
+
+
+
+def is_aud(input= None) :
+    if input == None:
+        return False
+    
+    attr_type = getattr(input, "type", getattr(input, "content_type", None))
+
+    if (
+        attr_type != None
+        and "audio" in attr_type
+    ) :
+        return True
+    else:
+        return False
+
+
+
+
+def is_vid(input= None) :
+    if input == None:
+        return False
+    
+    attr_type = getattr(input, "type", getattr(input, "content_type", None))
+
+    if (
+        attr_type != None
+        and ("video" in attr_type or "gifv" in attr_type)
+    ) :
         return True
     else:
         return False        
@@ -144,9 +157,6 @@ async def get_soju_file(message= None) :
     if message is None :
         return None
     
-    for attach in message.attachments :
-        print(get_file_type(attach.url), end= "\n\n")
-
     json_files = [ attachment.url for attachment in message.attachments if get_file_type(attachment.url) == '.json']
 
     return random.choice(json_files) if len(json_files) > 0 else None
@@ -199,15 +209,15 @@ async def get_random_media_inputs(message= None, main_input= None):
 
 
 
-async def make_it_goofy(message= None, tmp_dir= "./"):
-    feedback_msg = ""
-    outfilename = ""
+async def make_it_goofy(message= None, tmp_dir= "./") :
+    feedback_msg = None
+    outfilename = None
 
     if (
         message
         and message.reference
         and message.reference.message_id != None
-    ):
+    ) :
         referenced_message = await message.channel.fetch_message(message.reference.message_id)
 
         main_input_url = await get_main_input_from_message(referenced_message, allow_audio= True)
@@ -217,11 +227,22 @@ async def make_it_goofy(message= None, tmp_dir= "./"):
 
         if (main_input_url != None and sojufile_url != None) :
             ffmpeg_utils.copy(from_= main_input_url, to_= ffmpeg_copy_output)
-            feedback_msg = moviepy_utils.makeItGoofyForDiscord(moviepycopy= ffmpeg_copy_output, videofilepath= main_input_url, jsonfilepath= sojufile_url, tmp_dir= tmp_dir)    
-            outfilename = moviepy_utils.generate_output_file_name(main_input_url, "")
+            outfilename = moviepy_utils.makeItGoofyForDiscord(
+                moviepycopy= ffmpeg_copy_output,
+                main_input_url= main_input_url,
+                jsonfilepath= sojufile_url,
+                tmp_dir= tmp_dir
+            )    
 
 
-    return { "feedback": feedback_msg,  "goofyedit": outfilename }
+            feedback_msg = f"plz go check ur DMs 🤨 👀 Sent u a .mp4 file 🛝"            
+        else :
+            feedback_msg = "sorry, not enough valid input files"
+    else :
+        feedback_msg = "run time error 💀"
+
+
+    return { "feedback": feedback_msg,  "file": outfilename }
 
 
 
@@ -233,9 +254,9 @@ async def make_it_goofy(message= None, tmp_dir= "./"):
 
 
 
-async def build_soju_file(message= None, tmp_dir= "./"):
-    feedback_msg = ""
-    outfilename = ""
+async def build_soju_file(message= None, tmp_dir= "./") :
+    feedback_msg = None
+    outfilename = None
 
     if (
         message
@@ -245,28 +266,25 @@ async def build_soju_file(message= None, tmp_dir= "./"):
         main_msg = await message.channel.fetch_message(message.reference.message_id)
         ffmpeg_main_input = await get_main_input_from_message(main_msg, allow_audio= True)
 
-        if (ffmpeg_main_input != None):
+        if (ffmpeg_main_input != None) :
 
             img, aud, vid = await get_random_media_inputs(message, ffmpeg_main_input) 
 
-            try:
-                outfilename = await moviepy_utils.buildSojuFileAsync(
-                    videofilepath= ffmpeg_main_input,
-                    random_media= (img, aud, vid),
-                    tmp_dir= tmp_dir
-                )
-                feedback_msg = f"Someone ( 🤖 or something) might have slid into ur DMs... 🤨 👀 🛝"
+            outfilename = await moviepy_utils.buildSojuFileAsync(
+                videofilepath= ffmpeg_main_input,
+                random_media= (img, aud, vid),
+                tmp_dir= tmp_dir
+            )
 
-            except FileNotFoundError:
-                feedback_msg = f"Apparently the file referenced has no audio 🔊 streams\ntherefore 🧐 It can't have it's audio described"
 
-            except Exception as e:
-                # feedback_msg = f"I'm afraid Soju can't describe {get_file_type(ffmpeg_main_input)} files 😅"
-                feedback_msg = f"error 💀\n> {e}"
-        else:
-            feedback_msg = "no valid files were found for audio description 🗿🗿🗿"
+            feedback_msg = f"plz go check ur DMs 🤨 👀 Sent u a .soju.json file 🛝"
+        else :
+            feedback_msg = "sorry, not enough valid input files"
+    else :
+        feedback_msg = "run time error 💀"
 
-    return { "feedback": feedback_msg, "sojufile": outfilename }
+
+    return { "feedback": feedback_msg, "file": outfilename }
 
 
 
@@ -279,7 +297,7 @@ async def build_soju_file(message= None, tmp_dir= "./"):
 
 
 
-def is_describe_audio_call(message):
+def is_describe_audio_call(message) :
 
     if (
         message.reference
@@ -294,16 +312,19 @@ def is_describe_audio_call(message):
 
 
 
-def is_video_edit_call(message):
-
+def is_video_edit_call(message= None) :
     if (
-        message.reference
-        and message.attachments
-    ):
-        return True
-    else:
-        return False    
+        not message
+        or not message.reference
+        or not message.attachments
+    ) :
+        return False
 
+    for attachment in message.attachments :
+        if str(attachment.url).endswith("soju.json") :
+            return True
+        
+        return False
 
 
 
@@ -314,7 +335,7 @@ def is_video_edit_call(message):
 
 
 @client.event
-async def on_ready():
+async def on_ready() :
 
     print(f'We have logged in as {client.user}')
 
@@ -327,33 +348,66 @@ async def on_message(message) :
     if message.author == client.user :
         return
     
-    if message.content.startswith('!soju') :
+    elif message.content.startswith('!soju') and message.channel.guild != None :
 
         if is_describe_audio_call(message) :
-            with tempfile.TemporaryDirectory(dir="./") as tmp_dir:
+            with tempfile.TemporaryDirectory(dir="./") as tmp_dir :
                 ephemeral = tmp_dir + "/"
-                dict_ = await build_soju_file(message, ephemeral)
-                if dict_["sojufile"] :
-                    await message.author.send(file= discord.File(ephemeral + dict_["sojufile"]))
+                try :
+                    dict_ = await build_soju_file(message, ephemeral)
 
-            feedback_msg = dict_["feedback"]
+                    if dict_["file"] :
+                        await message.author.send(file= discord.File(dict_["file"]))
+                        feedback_msg = dict_["feedback"]                    
+                    else :
+                        feedback_msg = "🗿 Soju tried to build a soju.file for you, 📂 but no valid references were found for that 🗿🗿"
+                        
+                except FileNotFoundError:
+                    feedback_msg = f"🔥 We got a FileNotFound exception 🔥\nApparently the file you referenced has no audio 🔊 streams 🧐\nbut it could be something else 👍👌"
+
+                except Exception as err:
+                    feedback_msg = f"Error 💀\nI have no idea what happened lol 😂😂\n> {err}"
+
             await message.channel.send(feedback_msg, reference= message)
-
-
-        elif is_video_edit_call(message) :
-            with tempfile.TemporaryDirectory(dir="./") as tmp_dir:
-                ephemeral = tmp_dir + "/"
-                dict_ = await make_it_goofy(message, ephemeral)
-                if dict_["goofyedit"] :
-                    await message.author.send(file= discord.File(ephemeral + dict_["goofyedit"]))
-
-            feedback_msg = dict_["feedback"]
-            await message.channel.send(feedback_msg, reference= message)
-
 
         else :
             feedback_msg = "Soju's here to help u make some goofy ahh edits 🤓👍\nCheck out my documentation at 🔥 http://bointuber.netlify.app 🔥"
             await message.channel.send(feedback_msg, reference= message)
+
+
+
+
+    elif is_video_edit_call(message) :
+        with tempfile.TemporaryDirectory(dir="./") as tmp_dir :
+            ephemeral = tmp_dir + "/"
+            try :
+                dict_ = await make_it_goofy(message, ephemeral)
+
+                if dict_["file"] :
+                        await message.author.send(file= discord.File(dict_["file"]))
+                        feedback_msg = dict_["feedback"]
+                else :
+                    feedback_msg = "🗿🗿 Soju tried to make a goofy edition, but couldn't with 📂 files you provided 🗿"
+
+            except FileNotFoundError :
+                feedback_msg = f"🔥 We got a FileNotFound exception 💀\nApparently the file you referenced has no audio 🔊 streams 🧐\nbut it could be something else 👌👍"
+    
+            except KeyError as err :
+                if "video" in str(err) :
+                    feedback_msg = f"💀 We got a KeyError exception 🔥\nWe may have a problem with the video stream of the file you referenced 🧐\nbut it could be something else 👌👍"
+                else :
+                    feedback_msg = "💀 We got a KeyError exception 🔥\nSoju could not process the file you referenced..."
+
+            except ValueError as err :
+                feedback_msg = f"We got a ValueException 💀💀\nThe json file provided might have invalid json\nbut it could be something else 👍👌"
+            
+            except discord.HTTPException:
+                feedback_msg = "HTTPException: Sorry, even tho discord's standard limit for file size is 25MB, the API still limits soju to 8MB only\nSoju can't send files bigger than 8mb. Try referencing 30 second videos at best."
+
+            except Exception as err:
+                feedback_msg = f"Error 💀\nI have no idea what happened lol 😂😂\n> {err}"
+
+        await message.channel.send(feedback_msg, reference= message)
 
 
 client.run(TOKEN)
