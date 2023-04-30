@@ -97,20 +97,7 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
         ffmpeg_utils.executeFfmpegCall(
             params= call_params
         )
-    aux = """    
-        clip = videofilepath
-        for boomer in boomers_mid:
 
-                elif boomer["image"]["conf"]["imageconcatstrategy"] == ImageMergeStrategy.CONCAT_ENUM:
-                    ffmpeg_utils.splitClip(clip, boomer, variables.DEFAULT_TMP_FILE_PATH)
-                    editUpperHalfVideo(boomer, variables.DEFAULT_TMP_FILE_PATH)
-
-                    clip_extend(boomers_mid, boomer["image"]["conf"]["max_duration"])
-                    output_file = generate_output_file_name(videofilepath)
-                    
-                    ffmpeg_utils.concatClipHalves(output_file, variables.DEFAULT_TMP_FILE_PATH)
-                    clip = output_file
-    """
     time_end = time.time() - time_start
     print("\nclip is ready! it took {:.2f} seconds to make it goofy".format(time_end))
 
@@ -236,11 +223,10 @@ def buildSojuFile(videofilepath= None, jsonfilepath= None, outputfile= None):
         return None
 
 
-async def buildSojuFileAsync(videofilepath= None, jsonfilepath= None, random_media= ([], [], []), tmp_dir= "./"):
+async def buildSojuFileForDiscord(videofilepath= None, jsonfilepath= None, random_media= ([], [], []), tmp_dir= "./"):
     if(videofilepath is not None and jsonfilepath is None):
         ffmpeg_utils.get_only_audio(videofilepath, tmp_dir + variables.TMP_AUDIO_FILE_NAME)
-
-        list_of_words = vosk_utils.voskDescribe(tmp_dir + variables.TMP_AUDIO_FILE_NAME)
+        list_of_words = vosk_utils.voskDescribeForDiscord(tmp_dir + variables.TMP_AUDIO_FILE_NAME)
 
         filename = generate_soju_file_name(videofilepath, tmp_dir)
 

@@ -235,7 +235,7 @@ async def make_it_goofy(message= None, tmp_dir= "./") :
             )    
 
 
-            feedback_msg = f"plz go check ur DMs 🤨 👀 Sent u a .mp4 file 🛝"            
+            feedback_msg = "done 👍"            
         else :
             feedback_msg = "sorry, not enough valid input files"
     else :
@@ -270,14 +270,14 @@ async def build_soju_file(message= None, tmp_dir= "./") :
 
             img, aud, vid = await get_random_media_inputs(message, ffmpeg_main_input) 
 
-            outfilename = await moviepy_utils.buildSojuFileAsync(
+            outfilename = await moviepy_utils.buildSojuFileForDiscord(
                 videofilepath= ffmpeg_main_input,
                 random_media= (img, aud, vid),
                 tmp_dir= tmp_dir
             )
 
 
-            feedback_msg = f"plz go check ur DMs 🤨 👀 Sent u a .soju.json file 🛝"
+            feedback_msg = "done 👍"
         else :
             feedback_msg = "sorry, not enough valid input files"
     else :
@@ -349,6 +349,7 @@ async def on_message(message) :
         return
     
     elif message.content.startswith('!soju') and message.channel.guild != None :
+        await message.channel.send("wait a second...", reference= message)
 
         if is_describe_audio_call(message) :
             with tempfile.TemporaryDirectory(dir="./") as tmp_dir :
@@ -363,10 +364,11 @@ async def on_message(message) :
                         feedback_msg = "🗿 Soju tried to build a soju.file for you, 📂 but no valid references were found for that 🗿🗿"
                         
                 except FileNotFoundError:
-                    feedback_msg = f"🔥 We got a FileNotFound exception 🔥\nApparently the file you referenced has no audio 🔊 streams 🧐\nbut it could be something else 👍👌"
+                    feedback_msg = f"FileNotFound exception 🔥\nApparently the file you referenced has no audio 🔊 streams 🧐\nbut it could be something else 👍👌"
+            
+                except discord.HTTPException:
+                    feedback_msg = "HTTPException: Even tho discord's standard limit for file size is 25MB, the API still limits soju to 8MB only"
 
-                except Exception as err:
-                    feedback_msg = f"Error 💀\nI have no idea what happened lol 😂😂\n> {err}"
 
             await message.channel.send(feedback_msg, reference= message)
 
@@ -378,6 +380,8 @@ async def on_message(message) :
 
 
     elif is_video_edit_call(message) :
+        await message.channel.send("wait a second...", reference= message)
+
         with tempfile.TemporaryDirectory(dir="./") as tmp_dir :
             ephemeral = tmp_dir + "/"
             try :
@@ -390,7 +394,7 @@ async def on_message(message) :
                     feedback_msg = "🗿🗿 Soju tried to make a goofy edition, but couldn't with 📂 files you provided 🗿"
 
             except FileNotFoundError :
-                feedback_msg = f"🔥 We got a FileNotFound exception 💀\nApparently the file you referenced has no audio 🔊 streams 🧐\nbut it could be something else 👌👍"
+                feedback_msg = f"FileNotFound exception 💀\nApparently the file you referenced has no audio 🔊 streams 🧐\nbut it could be something else 👌👍"
     
             except KeyError as err :
                 if "video" in str(err) :
