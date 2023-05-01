@@ -15,6 +15,10 @@ intents.message_content = True
 client = discord.Client(intents=intents)
 
 TOKEN = os.getenv("DISCORD_SOJUBOT_TOKEN")
+
+
+
+
 HISTORY_LIMIT = 200
 
 

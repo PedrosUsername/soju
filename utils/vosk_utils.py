@@ -5,7 +5,7 @@ import os
 
 from vosk import Model, KaldiRecognizer
 
-from . import Boomer as custom_b
+from . import Boomer as custom_b, boomer_utils as bu
 from .settings import variables
 
 
@@ -88,49 +88,6 @@ def buildBoomer(obj, image_files, audio_files, video_files):
 
 
 
-def buildBoomerForDiscord(obj, image_files, video_files):
-    image_file = getFile(image_files)
-    video_file = getFile(video_files)
-
-    obj["word"] = {
-        "content": obj["word"],
-        "start": obj["start"],
-        "end": obj["end"],
-        "trigger": variables.DEFAULT_BOOM_TRIGGER
-    }
-
-    rand = random.choice(range(2))
-
-    if rand :
-        obj["image"] = {
-            "file": image_file,
-            "conf": {
-                "height": variables.DEFAULT_IMAGE_RESOLUTION_HEIGHT,
-                "width": variables.DEFAULT_IMAGE_RESOLUTION_WIDTH,
-                "mergestrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
-                "duration": variables.MAX_IMAGE_DURATION,
-            }
-        }
-        
-        obj["video"] = None
-    
-    else :
-        obj["video"] = {
-            "file": video_file,
-            "conf": {
-                "height": variables.DEFAULT_VIDEO_RESOLUTION_HEIGHT,
-                "width": variables.DEFAULT_VIDEO_RESOLUTION_WIDTH,
-                "mergestrategy": variables.DEFAULT_VIDEO_MERGE_STRATEGY,
-                "duration": variables.MAX_VIDEO_DURATION,
-                "volume": variables.DEFAULT_VIDEO_VOLUME,
-            }
-        }
-
-        obj["image"] = None
-
-    obj["audio"] = None
-
-    return custom_b.Boomer(obj)
 
 
 
@@ -165,58 +122,6 @@ def getValidVideoFiles():
         return [file for file in video_files if video_file_is_a_good_choice(file)]
 
 
-
-
-
-
-
-
-
-
-
-def voskDescribeForDiscord(audio_file_path= ""):
-    valid_image_files = getValidImageFiles()
-    valid_video_files = getValidVideoFiles()
-
-    model = Model(variables.PATH_MODEL)
-    wf = wave.open(audio_file_path, "rb")
-    rec = KaldiRecognizer(model, wf.getframerate())
-    rec.SetWords(True)
-
-    # recognize speech using vosk model
-    results = []
-    while True:
-        data = wf.readframes(4000)
-        if len(data) == 0:
-            break
-        if rec.AcceptWaveform(data):
-            part_result = json.loads(rec.Result())
-            results.append(part_result)
-    part_result = json.loads(rec.FinalResult())
-    results.append(part_result)
-
-    # convert list of JSON dictionaries to list of 'Word' objects
-    word_list = []
-    for sentence in results:
-        if len(sentence) == 1:
-            # sometimes there are bugs in recognition
-            # and it returns an empty dictionary
-            # {'text': ''}
-            continue
-
-        for obj in sentence['result']:
-            new_word = buildBoomerForDiscord(obj, valid_image_files, valid_video_files)
-
-            if variables.ALLOW_IMAGE_REPETITION is False and new_word.image != None and new_word.image.get("file") in valid_image_files:
-                valid_image_files.remove(new_word.image["file"])
-
-            if variables.ALLOW_VIDEO_REPETITION is False and new_word.video != None and new_word.video.get("file") in valid_video_files:
-                valid_video_files.remove(new_word.video["file"])
-
-            word_list.append(new_word)  # and add it to list
-
-    wf.close()  # close audiofile
-    return word_list
 
 
 

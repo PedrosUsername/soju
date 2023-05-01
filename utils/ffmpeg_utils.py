@@ -1,7 +1,7 @@
 import subprocess
-import json
 
 from .settings import variables
+from . import boomer_utils as bu
 
 
 
@@ -55,12 +55,6 @@ def get_only_audio(videofilepath= None, outputfilepath= "./"):
 
 
 
-def get_boomers(jsonfilepath):
-    describe_json = []
-    with open(jsonfilepath, 'r') as f:
-        describe_json = f.read()
-
-    return json.loads(describe_json)["boomers"]
 
 
 
@@ -68,149 +62,6 @@ def get_boomers(jsonfilepath):
 
 
 
-def getBoomerImageWidth(boomer= None, main_clip_width= 0):
-    if (
-        not boomer
-        or not boomer.get("image")
-        or not boomer.get("image").get("conf")
-        or not boomer.get("image").get("conf").get("width")
-    ):
-        return -1
-    elif (main_clip_width + OVERLAY_SIZE_TOLERANCE) < boomer.get("image").get("conf").get("width"):
-        return main_clip_width + OVERLAY_SIZE_TOLERANCE
-    else:    
-        return abs(boomer.get("image").get("conf").get("width"))
-    
-
-def getBoomerImageHeight(boomer= None, main_clip_height= 0):
-    if (
-        not boomer
-        or not boomer.get("image")
-        or not boomer.get("image").get("conf")
-        or not boomer.get("image").get("conf").get("height")
-    ):
-        return main_clip_height + OVERLAY_SIZE_TOLERANCE
-    elif (main_clip_height + OVERLAY_SIZE_TOLERANCE) < boomer.get("image").get("conf").get("height"):
-        return main_clip_height + OVERLAY_SIZE_TOLERANCE
-    else:    
-        return abs(boomer.get("image").get("conf").get("height"))    
-    
-
-def getBoomerVideoWidth(boomer= None, main_clip_width= 0):
-    if (
-        not boomer
-        or not boomer.get("video")
-        or not boomer.get("video").get("conf")
-        or not boomer.get("video").get("conf").get("width")
-    ):
-        return -1
-    elif (main_clip_width + OVERLAY_SIZE_TOLERANCE) < boomer.get("video").get("conf").get("width"):
-        return main_clip_width + OVERLAY_SIZE_TOLERANCE
-    else:    
-        return abs(boomer.get("video").get("conf").get("width"))
-    
-
-def getBoomerVideoHeight(boomer= None, main_clip_height= 0):
-    if (
-        not boomer
-        or not boomer.get("video")
-        or not boomer.get("video").get("conf")
-        or not boomer.get("video").get("conf").get("height")
-    ):
-        return main_clip_height + OVERLAY_SIZE_TOLERANCE
-    elif (main_clip_height + OVERLAY_SIZE_TOLERANCE) < boomer.get("video").get("conf").get("height"):
-        return main_clip_height + OVERLAY_SIZE_TOLERANCE
-    else:    
-        return abs(boomer.get("video").get("conf").get("height"))    
-
-
-def getBoomTrigger(boomer= None):
-    if (
-        not boomer
-        or not boomer.get("word")
-        or not boomer.get("word").get("trigger")
-    ):
-        return variables.DEFAULT_BOOM_TRIGGER if variables.DEFAULT_BOOM_TRIGGER else "end"
-    else:
-        return boomer.get("word").get("trigger")
-
-
-def getBoomerBoominTime(boomer= None):
-    trigg = getBoomTrigger(boomer)
-    if (
-        not boomer
-        or not boomer.get("word")
-        or not boomer.get("word").get(trigg)
-    ):
-        return 0
-    else:
-        return float(boomer.get("word").get(trigg))
-
-
-def getBoomerImageDuration(boomer= None):
-    if (
-        not boomer
-        or not boomer.get("image") 
-        or not boomer.get("image").get("conf")
-        or not boomer.get("image").get("conf").get("duration")
-    ):
-        return 0
-    else:
-        return boomer.get("image").get("conf").get("duration")
-
-
-def getBoomerAudioDuration(boomer= None):
-    if (
-        not boomer
-        or not boomer.get("audio") 
-        or not boomer.get("audio").get("conf")
-        or not boomer.get("audio").get("conf").get("duration")
-    ):
-        return 0
-    else:
-        return boomer.get("audio").get("conf").get("duration")
-    
-
-def getBoomerVideoDuration(boomer= None):
-    if (
-        not boomer
-        or not boomer.get("video") 
-        or not boomer.get("video").get("conf")
-        or not boomer.get("video").get("conf").get("duration")
-    ):
-        return 0
-    else:
-        return boomer.get("video").get("conf").get("duration")
-
-
-def getBoomerVideoVolume(boomer= None):
-    if (
-        not boomer
-        or not boomer.get("video")
-        or not boomer.get("video").get("conf")
-        or not boomer.get("video").get("conf").get("volume")
-    ):
-        if boomer.get("video").get("conf").get("volume") == 0:
-            return 0
-        else:
-            return 1
-    else:
-        return boomer.get("video").get("conf").get("volume")
-    
-
-def getBoomerAudioVolume(boomer= None):
-    if (
-        not boomer
-        or not boomer.get("video")
-        or not boomer.get("video").get("conf")
-        or not boomer.get("audio").get("conf").get("volume")
-    ):
-        if boomer.get("audio").get("conf").get("volume") == 0:
-            return 0
-        else:
-            return 1
-    else:
-        return boomer.get("audio").get("conf").get("volume")    
 
 
 def classifyImageFiles(image_files):
@@ -293,8 +144,8 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
     video_files_compose, video_files_concat = classifyVideoFiles(video_files)
     image_files_compose, image_files_concat = classifyImageFiles(image_files)
 
-    video_files_concat.sort(key= getBoomerBoominTime, reverse= True)
-    image_files_concat.sort(key= getBoomerBoominTime, reverse= True)
+    video_files_concat.sort(key= bu.getBoomerBoominTime, reverse= True)
+    image_files_concat.sort(key= bu.getBoomerBoominTime, reverse= True)
 
 
 
@@ -503,11 +354,11 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
 
     head = boomers[:1]
     for boomer in head:
-        img_width = getBoomerImageWidth(boomer, main_clip_width)
-        img_height = getBoomerImageHeight(boomer, main_clip_height)
+        img_width = bu.getBoomerImageWidth(boomer, main_clip_width)
+        img_height = bu.getBoomerImageHeight(boomer, main_clip_height)
 
-        boomin_time_start = getBoomerBoominTime(boomer)
-        boomin_time_end = boomin_time_start + getBoomerImageDuration(boomer)
+        boomin_time_start = bu.getBoomerBoominTime(boomer)
+        boomin_time_end = boomin_time_start + bu.getBoomerImageDuration(boomer)
         filter_params = filter_params + """
 [{1}] scale= w= {4}:h= {5} [img];
 {0}[img] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, {2}, {3})', setpts=PTS-STARTPTS, setsar=1
@@ -522,10 +373,10 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
 
     tail = boomers[1:]
     for idx, boomer in enumerate(tail, first_file_idx + 1):
-        img_width = getBoomerImageWidth(boomer, main_clip_width)
-        img_height = getBoomerImageHeight(boomer, main_clip_height)        
-        boomin_time_start = getBoomerBoominTime(boomer)
-        boomin_time_end = boomin_time_start + getBoomerImageDuration(boomer)
+        img_width = bu.getBoomerImageWidth(boomer, main_clip_width)
+        img_height = bu.getBoomerImageHeight(boomer, main_clip_height)        
+        boomin_time_start = bu.getBoomerBoominTime(boomer)
+        boomin_time_end = boomin_time_start + bu.getBoomerImageDuration(boomer)
         filter_params = filter_params + """{0};
 [{1}] scale= w= {4}:h= {5} [img];
 {0}[img] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, {2}, {3})', setpts=PTS-STARTPTS, setsar=1
@@ -555,9 +406,9 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
 
     head = boomers[:1]
     for boomer in head:
-        boomin_time_start = getBoomerBoominTime(boomer)
-        duration = getBoomerAudioDuration(boomer)
-        volume = getBoomerAudioVolume(boomer)
+        boomin_time_start = bu.getBoomerBoominTime(boomer)
+        duration = bu.getBoomerAudioDuration(boomer)
+        volume = bu.getBoomerAudioVolume(boomer)
 
         filter_params = filter_params + """
 {0} asplit=2
@@ -586,9 +437,9 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
 
     tail = boomers[1:]
     for idx, boomer in enumerate(tail, first_file_idx + 1):
-        boomin_time_start = getBoomerBoominTime(boomer)
-        duration = getBoomerAudioDuration(boomer)
-        volume = getBoomerAudioVolume(boomer)
+        boomin_time_start = bu.getBoomerBoominTime(boomer)
+        duration = bu.getBoomerAudioDuration(boomer)
+        volume = bu.getBoomerAudioVolume(boomer)
 
         filter_params = filter_params + """{0};
 {0} asplit=2
@@ -626,12 +477,12 @@ def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_
 
     head = boomers[:1]
     for boomer in head:
-        vid_width = getBoomerVideoWidth(boomer, main_clip_width)
-        vid_height = getBoomerVideoHeight(boomer, main_clip_height)
+        vid_width = bu.getBoomerVideoWidth(boomer, main_clip_width)
+        vid_height = bu.getBoomerVideoHeight(boomer, main_clip_height)
 
-        boomin_time_start = getBoomerBoominTime(boomer)
-        duration = getBoomerVideoDuration(boomer)
-        volume = getBoomerVideoVolume(boomer)
+        boomin_time_start = bu.getBoomerBoominTime(boomer)
+        duration = bu.getBoomerVideoDuration(boomer)
+        volume = bu.getBoomerVideoVolume(boomer)
         filter_params = filter_params + """        
 
 {0} split=2 
@@ -677,12 +528,12 @@ def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_
 
     tail = boomers[1:]
     for idx, boomer in enumerate(tail, first_file_idx + 1):
-        vid_width = getBoomerVideoWidth(boomer, main_clip_width)
-        vid_height = getBoomerVideoHeight(boomer, main_clip_height)     
+        vid_width = bu.getBoomerVideoWidth(boomer, main_clip_width)
+        vid_height = bu.getBoomerVideoHeight(boomer, main_clip_height)     
 
-        boomin_time_start = getBoomerBoominTime(boomer)
-        duration = getBoomerVideoDuration(boomer)
-        volume = getBoomerVideoVolume(boomer)        
+        boomin_time_start = bu.getBoomerBoominTime(boomer)
+        duration = bu.getBoomerVideoDuration(boomer)
+        volume = bu.getBoomerVideoVolume(boomer)        
         filter_params = filter_params + """{0}{6};
 
 {0} split=2 
@@ -742,9 +593,9 @@ def buildVideoConcatFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v=
 
     head = boomers[:1]
     for boomer in head:
-        boomin_time_start = getBoomerBoominTime(boomer)
-        duration = getBoomerVideoDuration(boomer)
-        volume = getBoomerVideoVolume(boomer)
+        boomin_time_start = bu.getBoomerBoominTime(boomer)
+        duration = bu.getBoomerVideoDuration(boomer)
+        volume = bu.getBoomerVideoVolume(boomer)
 
         filter_params = filter_params + f"""
 {inp_v} split=2 
@@ -779,9 +630,9 @@ def buildVideoConcatFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v=
 
     for idx, boomer in enumerate(tail, first_file_idx + 1):
 
-        boomin_time_start = getBoomerBoominTime(boomer)
-        duration = getBoomerVideoDuration(boomer)
-        volume = getBoomerVideoVolume(boomer)
+        boomin_time_start = bu.getBoomerBoominTime(boomer)
+        duration = bu.getBoomerVideoDuration(boomer)
+        volume = bu.getBoomerVideoVolume(boomer)
 
         filter_params = filter_params + f"""{out_v}{out_a};
 
@@ -829,8 +680,8 @@ def buildImageConcatFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v=
 
     head = boomers[:1]
     for boomer in head:
-        boomin_time_start = getBoomerBoominTime(boomer)
-        duration = getBoomerImageDuration(boomer)
+        boomin_time_start = bu.getBoomerBoominTime(boomer)
+        duration = bu.getBoomerImageDuration(boomer)
 
         filter_params = filter_params + f"""
 {inp_v} split=2 
@@ -865,8 +716,8 @@ anullsrc=r=44100:cl=mono, atrim= end= {duration}
 
     for idx, boomer in enumerate(tail, first_file_idx + 1):
 
-        boomin_time_start = getBoomerBoominTime(boomer)
-        duration = getBoomerImageDuration(boomer)
+        boomin_time_start = bu.getBoomerBoominTime(boomer)
+        duration = bu.getBoomerImageDuration(boomer)
 
         filter_params = filter_params + f"""{out_v}{out_a};
 
