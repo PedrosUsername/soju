@@ -136,10 +136,10 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
 
 
 
-def makeItGoofyForDiscord(moviepycopy="moviepy_friendly_copy.mp4", main_input_url="",jsonfilepath= None, tmp_dir= "./") :
+def makeItGoofyForDiscord(moviepycopy="moviepy_friendly_copy.mp4", main_input_url="", sojufile= None, tmp_dir= "./") :
 
     og_clip = getClipWithMoviePy(moviepycopy)
-    boomers = bu.get_boomers_from_url(jsonfilepath)
+    boomers = bu.get_boomers(sojufile)
 
     boomers_top, boomers_mid, boomers_bot = bu.filterBoomers(og_clip.duration, boomers)
     outputfilename = generate_output_file_name(main_input_url, tmp_dir)
@@ -206,80 +206,47 @@ def buildSojuFile(videofilepath= None, jsonfilepath= None, outputfile= None):
 
 
 
-async def buildSojuFileForDiscord(videofilepath= None, jsonfilepath= None, random_media= ([], [], []), tmp_dir= "./"):
-    if(videofilepath is not None and jsonfilepath is None):
+def buildSojuFileForDiscord(videofilepath= None, sojufile= None, random_media= ([], [], []), tmp_dir= "./") :
+    if(videofilepath is not None):
+        b_gen = bu.get_boomer_generator_from_dict(sojufile) if sojufile else None
+        new_gen = bu.get_boomer_generator_as_str(b_gen)
+
         ffmpeg_utils.get_only_audio(videofilepath, tmp_dir + variables.TMP_AUDIO_FILE_NAME)
-        list_of_words = vosk_utils.voskDescribe(tmp_dir + variables.TMP_AUDIO_FILE_NAME)
+
+        moviePyAudio = AudioFileClip(tmp_dir + variables.TMP_AUDIO_FILE_NAME)
+        if (moviePyAudio.duration > 59.90) :
+            raise Exception("media duration exceeds the duration limit")
+
+        list_of_words = vosk_utils.voskDescribe(tmp_dir + variables.TMP_AUDIO_FILE_NAME, b_gen)
 
         filename = generate_soju_file_name(videofilepath, tmp_dir)
 
-        with open(filename, 'w') as f:
-            f.writelines("""
-{
- 	"soju": {
+        with open(filename, 'w') as f :
+            f.writelines(
+f"""
+{{
+ 	"soju": {{
 
-		"generator": {
-			"defaults": {
-				"word": {
-					"trigger": "start"
-				},
-
-				"image": {
-					"FILE": "RANDOM",
-					"MERGESTRATEGY": "COMPOSE",
-					"DURATION": 0.3,
-					"HEIGHT": 440,
-					"WIDTH": null,               
-					"POSX": "RANDOM",
-					"POSY": "RANDOM",
-					"triggerdelay": 0
-				},
-		
-				"video": {
-					"FILE": "RANDOM",
-					"MERGESTRATEGY": "COMPOSE",
-					"DURATION": 0.3,
-					"HEIGHT": 440,
-					"WIDTH": null,               
-					"POSX": "RANDOM",
-					"POSY": "RANDOM",
-					"triggerdelay": 0.1,
-					"VOLUME": 0
-				},
-		
-				"audio": {
-					"FILE": "RANDOM",
-					"DURATION": 0.3,
-					"triggerdelay": 0,
-					"VOLUME": 0
-				},
-		
-				"general": {
-					"RESOTOLERANCE": 69,
-
-					"API": {
-						"name": "VOSK",
-						"model": "en-model-128"
-					}		
-				}
-			}
-		},
+		"generator": {new_gen},
 
 		"generated": [
-""")
+"""
+            )
+            
             for i, word in enumerate(list_of_words):
                 comma = ',' if i < (len(list_of_words) - 1) else ''
                 f.writelines('\t\t\t{0}{1}\n'.format(word.to_string(), comma))
 
-            f.writelines("""
-        ],
+            f.writelines(
+"""
+                ],
 
-        "boomers": [
+                "boomers": [
 
-        ]
-    }
+                ]
+        }
 }            
-            """)
+"""         )
 
         
         return filename

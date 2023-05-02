@@ -5,7 +5,7 @@ import os
 
 from vosk import Model, KaldiRecognizer
 
-from . import Boomer as custom_b, boomer_utils as bu
+from . import boomer_utils as bu
 from .settings import variables
 
 
@@ -36,48 +36,6 @@ def getFile(files= []):
 
 
 
-def buildBoomer(obj, image_files, audio_files, video_files):
-    image_file = getFile(image_files)
-    audio_file = getFile(audio_files)
-    video_file = getFile(video_files)
-
-    obj["word"] = {
-        "content": obj["word"],
-        "start": obj["start"],
-        "end": obj["end"],
-        "trigger": variables.DEFAULT_BOOM_TRIGGER
-    }
-
-    obj["image"] = {
-        "file": image_file,
-        "conf": {
-            "height": variables.DEFAULT_IMAGE_RESOLUTION_HEIGHT,
-            "width": variables.DEFAULT_IMAGE_RESOLUTION_WIDTH,
-            "mergestrategy": variables.DEFAULT_IMAGE_CONCAT_STRATEGY,
-            "duration": variables.MAX_IMAGE_DURATION,
-        }
-    }    
-
-    obj["audio"] = {
-        "file": audio_file,
-        "conf": {
-            "duration": variables.MAX_AUDIO_DURATION,
-            "volume": variables.DEFAULT_AUDIO_VOLUME
-        }
-    }
-
-    obj["video"] = {
-        "file": video_file,
-        "conf": {
-            "height": variables.DEFAULT_VIDEO_RESOLUTION_HEIGHT,
-            "width": variables.DEFAULT_VIDEO_RESOLUTION_WIDTH,
-            "mergestrategy": variables.DEFAULT_VIDEO_MERGE_STRATEGY,
-            "duration": variables.MAX_VIDEO_DURATION,
-            "volume": variables.DEFAULT_VIDEO_VOLUME,
-        }
-    }
-
-    return custom_b.Boomer(obj)
 
 
 
@@ -139,7 +97,7 @@ def getValidVideoFiles():
 
 
 
-def voskDescribe(audio_file_path= ""):
+def voskDescribe(audio_file_path= "", generator= None):
     valid_image_files = getValidImageFiles()
     valid_audio_files = getValidAudioFiles()
     valid_video_files = getValidVideoFiles()
@@ -171,7 +129,7 @@ def voskDescribe(audio_file_path= ""):
             continue
 
         for obj in sentence['result']:
-            new_word = buildBoomer(obj, valid_image_files, valid_audio_files, valid_video_files)
+            new_word = bu.buildBoomer(obj, valid_image_files, valid_audio_files, valid_video_files, generator)
 
             if variables.ALLOW_IMAGE_REPETITION is False and new_word.image["file"] in valid_image_files:
                 valid_image_files.remove(new_word.image["file"])
