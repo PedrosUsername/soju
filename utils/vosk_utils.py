@@ -98,6 +98,8 @@ def getValidVideoFiles():
 
 
 def voskDescribe(audio_file_path= "", generator= None):
+    default_boomer_structure = bu.get_boomer_generator_as_dict(generator).get("defaults")    
+
     valid_image_files = getValidImageFiles()
     valid_audio_files = getValidAudioFiles()
     valid_video_files = getValidVideoFiles()
@@ -129,7 +131,13 @@ def voskDescribe(audio_file_path= "", generator= None):
             continue
 
         for obj in sentence['result']:
-            new_word = bu.buildBoomer(obj, valid_image_files, valid_audio_files, valid_video_files, generator)
+            new_word = bu.buildBoomer(
+                obj,
+                valid_image_files,
+                valid_audio_files,
+                valid_video_files,
+                default_boomer_structure
+            )
 
             if variables.ALLOW_IMAGE_REPETITION is False and new_word.image["file"] in valid_image_files:
                 valid_image_files.remove(new_word.image["file"])

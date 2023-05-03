@@ -1,6 +1,8 @@
 # start   -> boom will be inserted at ["boomers"]["word"]["start"] seconds
 # end     -> boom will be inserted at ["boomers"]["word"]["end"] seconds
-DEFAULT_BOOM_TRIGGER = '"start"'
+DEFAULT_BOOM_TRIGGER = "start"
+MAX_MEDIA_INSERT_DURATION = 8
+MAX_MEDIA_VOLUME = 1
 
 
 
@@ -13,9 +15,9 @@ DEFAULT_BOOM_TRIGGER = '"start"'
 
 # ########################################## soju.json IMAGE CONF.
 
-DEFAULT_IMAGE_MERGE_STRATEGY = '"COMPOSE"'          # COMPOSE | CONCAT
+DEFAULT_IMAGE_MERGE_STRATEGY = "COMPOSE"          # COMPOSE | CONCAT
 
-DEFAULT_IMAGE_FOLDER = "./assets/image/cursed/"
+DEFAULT_IMAGE_FOLDER = ""
 ALLOW_IMAGE_REPETITION = True
 IGNORE_IMAGE_FILE_LIST = []
 
@@ -26,8 +28,8 @@ DEFAULT_IMAGE_TRIGGER_DELAY = 0
 
 DEFAULT_IMAGE_RESOLUTION_HEIGHT = 1080               # 1080 px | 0 | -n
 DEFAULT_IMAGE_RESOLUTION_WIDTH = None                # http://trac.ffmpeg.org/wiki/Scaling
-DEFAULT_IMAGE_POSITION_X = '"CENTER"'                       # float relative to screen size
-DEFAULT_IMAGE_POSITION_Y = '"CENTER"'                       # https://zulko.github.io/moviepy/getting_started/compositing.html?highlight=position#positioning-clips
+DEFAULT_IMAGE_POSITION_X = "CENTER"                       # float relative to screen size
+DEFAULT_IMAGE_POSITION_Y = "CENTER"                       # https://zulko.github.io/moviepy/getting_started/compositing.html?highlight=position#positioning-clips
 
 # ################################################################
 
@@ -46,7 +48,7 @@ DEFAULT_AUDIO_FOLDER = "./assets/audio/cringe/"
 ALLOW_AUDIO_REPETITION = False
 IGNORE_AUDIO_FILE_LIST = []
 
-DEFAULT_AUDIO_FILE = '"vineboom.mp3"'
+DEFAULT_AUDIO_FILE = "vineboom.mp3"
 
 DEFAULT_AUDIO_DURATION = 0.3
 DEFAULT_AUDIO_TRIGGER_DELAY = 0
@@ -73,7 +75,7 @@ DEFAULT_NULL_AUDIO_FILE = "./assets/audio/null.mp3"
 
 # ########################################## soju.json VIDEO CONF.
 
-DEFAULT_VIDEO_MERGE_STRATEGY = '"COMPOSE"'          # COMPOSE | CONCAT
+DEFAULT_VIDEO_MERGE_STRATEGY = "COMPOSE"          # COMPOSE | CONCAT
 
 DEFAULT_VIDEO_FOLDER = "./assets/video/clips/"
 ALLOW_VIDEO_REPETITION = True
@@ -87,8 +89,8 @@ DEFAULT_VIDEO_VOLUME = 0
 
 DEFAULT_VIDEO_RESOLUTION_HEIGHT = 1080               # 1080 px | 0 | -n
 DEFAULT_VIDEO_RESOLUTION_WIDTH = None                # http://trac.ffmpeg.org/wiki/Scaling
-DEFAULT_VIDEO_POSITION_X = '"CENTER"'                         # float relative to screen size
-DEFAULT_VIDEO_POSITION_Y = '"CENTER"'                         # https://zulko.github.io/moviepy/getting_started/compositing.html?highlight=position#positioning-clips
+DEFAULT_VIDEO_POSITION_X = "CENTER"                         # float relative to screen size
+DEFAULT_VIDEO_POSITION_Y = "CENTER"                         # https://zulko.github.io/moviepy/getting_started/compositing.html?highlight=position#positioning-clips
 
 # ################################################################
 
@@ -102,8 +104,8 @@ DEFAULT_VIDEO_POSITION_Y = '"CENTER"'                         # https://zulko.gi
 
 # general confs
 OVERLAY_SIZE_TOLERANCE = 69
-DEFAULT_API_NAME = '"VOSK"'
-DEFAULT_API_MODEL = '"en-128"'
+DEFAULT_API_NAME = "VOSK"
+DEFAULT_API_MODEL = "en-128"
 OUTPUT_RESOLUTION_HEIGHT = 0               # http://trac.ffmpeg.org/wiki/Scaling
 OUTPUT_RESOLUTION_WIDTH = 0                # 1920 px | -n | 0
 
@@ -165,3 +167,5 @@ FFMPEG_OUTPUT_SPECS=  [
 # program variables
 TMP_AUDIO_FILE_NAME = "tmp_audio.wav"
 DEFAULT_TMP_FILE_PATH = "./utils/settings/tmp/"
+MIN_MEDIA_VOLUME = 0
+MIN_MEDIA_INSERT_DURATION = 0

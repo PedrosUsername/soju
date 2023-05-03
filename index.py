@@ -1,6 +1,5 @@
 import discord
 import tempfile
-import json
 import os
 
 import random
@@ -329,11 +328,11 @@ async def is_video_edit_call(message= None, sojufile= None) :
         or not message.attachments
     ) :
         return False
-
+    
     boomers = bu.get_boomers_from_dict(sojufile)
     b_gen = bu.get_boomer_generator_from_dict(sojufile)
 
-    if len(boomers) > 0 and b_gen is None :
+    if boomers is not None and b_gen is None :
         return True
     else :
         return False
@@ -403,13 +402,10 @@ async def on_message(message) :
                         feedback_msg = "🗿 Soju tried to build a soju.file for you, 📂 but no valid references were found for that 🗿🗿"
                         
                 except FileNotFoundError:
-                    feedback_msg = f"FileNotFound exception 🔥\nApparently the file you referenced has no audio 🔊 streams 🧐\nbut it could be something else 👍👌"
+                    feedback_msg = f"FileNotFound exception 💀: Soju had a problem with one of the files provided 👌👍"
             
-                except discord.HTTPException:
-                    feedback_msg = "HTTPException: Even tho discord's standard limit for file size is 25MB, the API still limits soju to 8MB only"
-
                 except Exception as err:
-                    feedback_msg = f"Error 💀\n> {err}"
+                    feedback_msg = f"Error 💀: {err}"
 
             await message.channel.send(feedback_msg, reference= message)
 
@@ -432,22 +428,22 @@ async def on_message(message) :
                         feedback_msg = "🗿🗿 Soju tried to make a goofy edition, but couldn't with 📂 files you provided 🗿"
 
                 except FileNotFoundError :
-                    feedback_msg = f"FileNotFound exception 💀\nApparently the file you referenced has no audio 🔊 streams 🧐\nbut it could be something else 👌👍"
+                    feedback_msg = f"FileNotFound exception 💀\Soju had a problem with one of the files provided 👌👍"
         
                 except KeyError as err :
                     if "video" in str(err) :
-                        feedback_msg = f"💀 We got a KeyError exception 🔥\nWe may have a problem with the video stream of the file you referenced 🧐\nbut it could be something else 👌👍"
+                        feedback_msg = f"💀 KeyError exception 🔥\nWe may have a problem with the video stream of one of the files you referenced👌👍"
                     else :
-                        feedback_msg = "💀 We got a KeyError exception 🔥\nSoju could not process the file you referenced..."
+                        feedback_msg = "💀 KeyError exception 🔥\Soju had a problem with one of the files provided..."
 
                 except ValueError as err :
-                    feedback_msg = f"We got a ValueException 💀💀\nThe json file provided might have invalid json\nbut it could be something else 👍👌"
+                    feedback_msg = f"ValueErrorException 💀💀\nThe json file provided might have invalid json\nbut it could be something else 👍👌"
                 
-                except discord.HTTPException:
-                    feedback_msg = "HTTPException: Sorry, even tho discord's standard limit for file size is 25MB, the API still limits soju to 8MB only\nSoju can't send files bigger than 8mb. Try referencing 30 second videos at best."
+                except discord.HTTPException as err:
+                    feedback_msg = f"discord.HTTPException: {err}"
 
                 except Exception as err:
-                    feedback_msg = f"Error 💀\nI have no idea what happened lol 😂😂\n> {err}"
+                    feedback_msg = f"Error 💀: {err}"
 
             await message.channel.send(feedback_msg, reference= message)
 

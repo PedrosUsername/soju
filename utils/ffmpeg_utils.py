@@ -12,7 +12,28 @@ AUDIO_FOLDER = variables.DEFAULT_AUDIO_FOLDER
 VIDEO_FOLDER = variables.DEFAULT_VIDEO_FOLDER
 FFMPEG_FPS = int(variables.FFMPEG_FPS)
 FFMPEG_AR = int(variables.FFMPEG_SAMPLE_RATE)
-OVERLAY_SIZE_TOLERANCE = variables.OVERLAY_SIZE_TOLERANCE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -64,42 +85,6 @@ def get_only_audio(videofilepath= None, outputfilepath= "./"):
 
 
 
-def classifyImageFiles(image_files):
-    image_files_compose = []
-    image_files_concat = []
-
-    for b in image_files:
-        if (
-            b.get("image").get("conf")
-            and b.get("image").get("conf").get("mergestrategy") == "COMPOSE"
-        ):
-            image_files_compose = image_files_compose + [b]
-        elif(
-            b.get("image").get("conf")
-            and b.get("image").get("conf").get("mergestrategy") == "CONCAT"
-        ):
-            image_files_concat = image_files_concat + [b]
-
-    return (image_files_compose, image_files_concat)
-
-
-def classifyVideoFiles(video_files):
-    video_files_compose = []
-    video_files_concat = []
-
-    for b in video_files:
-        if (
-            b.get("video").get("conf")
-            and b.get("video").get("conf").get("mergestrategy") == "COMPOSE"
-        ):
-            video_files_compose = video_files_compose + [b]
-        elif(
-            b.get("video").get("conf")
-            and b.get("video").get("conf").get("mergestrategy") == "CONCAT"
-        ):
-            video_files_concat = video_files_concat + [b]
-
-    return (video_files_compose, video_files_concat)
 
 
 
@@ -141,13 +126,11 @@ def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
     image_files = [ b for b in boomers if b.get("image") and b.get("image").get("file") ]
     audio_files = [ b for b in boomers if b.get("audio") and b.get("audio").get("file") ]
 
-    video_files_compose, video_files_concat = classifyVideoFiles(video_files)
-    image_files_compose, image_files_concat = classifyImageFiles(image_files)
+    video_files_compose, video_files_concat = bu.classifyBoomersByVideoMergeStrategy(video_files)
+    image_files_compose, image_files_concat = bu.classifyBoomersByImageMergeStrategy(image_files)
 
-    video_files_concat.sort(key= bu.getBoomerBoominTime, reverse= True)
-    image_files_concat.sort(key= bu.getBoomerBoominTime, reverse= True)
-
-
+    video_files_concat.sort(key= bu.getBoomerBoominTimeForFFMPEG, reverse= True)
+    image_files_concat.sort(key= bu.getBoomerBoominTimeForFFMPEG, reverse= True)
 
     media_inputs = buildMediaInputs(
         video_files_compose= video_files_compose,
@@ -354,11 +337,11 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
 
     head = boomers[:1]
     for boomer in head:
-        img_width = bu.getBoomerImageWidth(boomer, main_clip_width)
-        img_height = bu.getBoomerImageHeight(boomer, main_clip_height)
+        img_width = bu.getBoomerImageWidthForFFMPEG(boomer, main_clip_width)
+        img_height = bu.getBoomerImageHeightForFFMPEG(boomer, main_clip_height)
 
-        boomin_time_start = bu.getBoomerBoominTime(boomer)
-        boomin_time_end = boomin_time_start + bu.getBoomerImageDuration(boomer)
+        boomin_time_start = bu.getBoomerBoominTimeForFFMPEG(boomer)
+        boomin_time_end = boomin_time_start + bu.getBoomerImageDurationForFFMPEG(boomer)
         filter_params = filter_params + """
 [{1}] scale= w= {4}:h= {5} [img];
 {0}[img] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, {2}, {3})', setpts=PTS-STARTPTS, setsar=1
@@ -373,10 +356,10 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
 
     tail = boomers[1:]
     for idx, boomer in enumerate(tail, first_file_idx + 1):
-        img_width = bu.getBoomerImageWidth(boomer, main_clip_width)
-        img_height = bu.getBoomerImageHeight(boomer, main_clip_height)        
-        boomin_time_start = bu.getBoomerBoominTime(boomer)
-        boomin_time_end = boomin_time_start + bu.getBoomerImageDuration(boomer)
+        img_width = bu.getBoomerImageWidthForFFMPEG(boomer, main_clip_width)
+        img_height = bu.getBoomerImageHeightForFFMPEG(boomer, main_clip_height)        
+        boomin_time_start = bu.getBoomerBoominTimeForFFMPEG(boomer)
+        boomin_time_end = boomin_time_start + bu.getBoomerImageDurationForFFMPEG(boomer)
         filter_params = filter_params + """{0};
 [{1}] scale= w= {4}:h= {5} [img];
 {0}[img] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, {2}, {3})', setpts=PTS-STARTPTS, setsar=1
@@ -406,9 +389,9 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
 
     head = boomers[:1]
     for boomer in head:
-        boomin_time_start = bu.getBoomerBoominTime(boomer)
-        duration = bu.getBoomerAudioDuration(boomer)
-        volume = bu.getBoomerAudioVolume(boomer)
+        boomin_time_start = bu.getBoomerBoominTimeForFFMPEG(boomer)
+        duration = bu.getBoomerAudioDurationForFFMPEG(boomer)
+        volume = bu.getBoomerAudioVolumeForFFMPEG(boomer)
 
         filter_params = filter_params + """
 {0} asplit=2
@@ -437,9 +420,9 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
 
     tail = boomers[1:]
     for idx, boomer in enumerate(tail, first_file_idx + 1):
-        boomin_time_start = bu.getBoomerBoominTime(boomer)
-        duration = bu.getBoomerAudioDuration(boomer)
-        volume = bu.getBoomerAudioVolume(boomer)
+        boomin_time_start = bu.getBoomerBoominTimeForFFMPEG(boomer)
+        duration = bu.getBoomerAudioDurationForFFMPEG(boomer)
+        volume = bu.getBoomerAudioVolumeForFFMPEG(boomer)
 
         filter_params = filter_params + """{0};
 {0} asplit=2
@@ -477,12 +460,12 @@ def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_
 
     head = boomers[:1]
     for boomer in head:
-        vid_width = bu.getBoomerVideoWidth(boomer, main_clip_width)
-        vid_height = bu.getBoomerVideoHeight(boomer, main_clip_height)
+        vid_width = bu.getBoomerVideoWidthForFFMPEG(boomer, main_clip_width)
+        vid_height = bu.getBoomerVideoHeightForFFMPEG(boomer, main_clip_height)
 
-        boomin_time_start = bu.getBoomerBoominTime(boomer)
-        duration = bu.getBoomerVideoDuration(boomer)
-        volume = bu.getBoomerVideoVolume(boomer)
+        boomin_time_start = bu.getBoomerBoominTimeForFFMPEG(boomer)
+        duration = bu.getBoomerVideoDurationForFFMPEG(boomer)
+        volume = bu.getBoomerVideoVolumeForFFMPEG(boomer)
         filter_params = filter_params + """        
 
 {0} split=2 
@@ -528,12 +511,12 @@ def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_
 
     tail = boomers[1:]
     for idx, boomer in enumerate(tail, first_file_idx + 1):
-        vid_width = bu.getBoomerVideoWidth(boomer, main_clip_width)
-        vid_height = bu.getBoomerVideoHeight(boomer, main_clip_height)     
+        vid_width = bu.getBoomerVideoWidthForFFMPEG(boomer, main_clip_width)
+        vid_height = bu.getBoomerVideoHeightForFFMPEG(boomer, main_clip_height)     
 
-        boomin_time_start = bu.getBoomerBoominTime(boomer)
-        duration = bu.getBoomerVideoDuration(boomer)
-        volume = bu.getBoomerVideoVolume(boomer)        
+        boomin_time_start = bu.getBoomerBoominTimeForFFMPEG(boomer)
+        duration = bu.getBoomerVideoDurationForFFMPEG(boomer)
+        volume = bu.getBoomerVideoVolumeForFFMPEG(boomer)        
         filter_params = filter_params + """{0}{6};
 
 {0} split=2 
@@ -593,9 +576,9 @@ def buildVideoConcatFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v=
 
     head = boomers[:1]
     for boomer in head:
-        boomin_time_start = bu.getBoomerBoominTime(boomer)
-        duration = bu.getBoomerVideoDuration(boomer)
-        volume = bu.getBoomerVideoVolume(boomer)
+        boomin_time_start = bu.getBoomerBoominTimeForFFMPEG(boomer)
+        duration = bu.getBoomerVideoDurationForFFMPEG(boomer)
+        volume = bu.getBoomerVideoVolumeForFFMPEG(boomer)
 
         filter_params = filter_params + f"""
 {inp_v} split=2 
@@ -630,9 +613,9 @@ def buildVideoConcatFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v=
 
     for idx, boomer in enumerate(tail, first_file_idx + 1):
 
-        boomin_time_start = bu.getBoomerBoominTime(boomer)
-        duration = bu.getBoomerVideoDuration(boomer)
-        volume = bu.getBoomerVideoVolume(boomer)
+        boomin_time_start = bu.getBoomerBoominTimeForFFMPEG(boomer)
+        duration = bu.getBoomerVideoDurationForFFMPEG(boomer)
+        volume = bu.getBoomerVideoVolumeForFFMPEG(boomer)
 
         filter_params = filter_params + f"""{out_v}{out_a};
 
@@ -680,8 +663,8 @@ def buildImageConcatFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v=
 
     head = boomers[:1]
     for boomer in head:
-        boomin_time_start = bu.getBoomerBoominTime(boomer)
-        duration = bu.getBoomerImageDuration(boomer)
+        boomin_time_start = bu.getBoomerBoominTimeForFFMPEG(boomer)
+        duration = bu.getBoomerImageDurationForFFMPEG(boomer)
 
         filter_params = filter_params + f"""
 {inp_v} split=2 
@@ -716,8 +699,8 @@ anullsrc=r=44100:cl=mono, atrim= end= {duration}
 
     for idx, boomer in enumerate(tail, first_file_idx + 1):
 
-        boomin_time_start = bu.getBoomerBoominTime(boomer)
-        duration = bu.getBoomerImageDuration(boomer)
+        boomin_time_start = bu.getBoomerBoominTimeForFFMPEG(boomer)
+        duration = bu.getBoomerImageDurationForFFMPEG(boomer)
 
         filter_params = filter_params + f"""{out_v}{out_a};
 

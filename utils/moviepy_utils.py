@@ -6,7 +6,7 @@ import tempfile
 from moviepy.editor import *
 
 from .settings import variables
-from . import ImageMergeStrategy, ffmpeg_utils, vosk_utils, boomer_utils as bu
+from . import ffmpeg_utils, vosk_utils, boomer_utils as bu
 
 
 
@@ -138,9 +138,12 @@ def makeItGoofy(videofilepath="", jsonfilepath= None):
 
 def makeItGoofyForDiscord(moviepycopy="moviepy_friendly_copy.mp4", main_input_url="", sojufile= None, tmp_dir= "./") :
 
-    og_clip = getClipWithMoviePy(moviepycopy)
-    boomers = bu.get_boomers(sojufile)
+    boomers = bu.get_boomers_from_dict(sojufile)
 
+    if len(boomers) < 1 :
+        raise Exception("boomers list is empty")
+
+    og_clip = getClipWithMoviePy(moviepycopy)
     boomers_top, boomers_mid, boomers_bot = bu.filterBoomers(og_clip.duration, boomers)
     outputfilename = generate_output_file_name(main_input_url, tmp_dir)
 
@@ -208,16 +211,17 @@ def buildSojuFile(videofilepath= None, jsonfilepath= None, outputfile= None):
 
 def buildSojuFileForDiscord(videofilepath= None, sojufile= None, random_media= ([], [], []), tmp_dir= "./") :
     if(videofilepath is not None):
-        b_gen = bu.get_boomer_generator_from_dict(sojufile) if sojufile else None
-        new_gen = bu.get_boomer_generator_as_str(b_gen)
+        tmp_audio_path = tmp_dir + variables.TMP_AUDIO_FILE_NAME
+        ffmpeg_utils.get_only_audio(videofilepath, tmp_audio_path)
 
-        ffmpeg_utils.get_only_audio(videofilepath, tmp_dir + variables.TMP_AUDIO_FILE_NAME)
+        if AudioFileClip(tmp_audio_path).duration > 59.90 :
+            raise Exception("media duration exceeds the current limit")
 
-        moviePyAudio = AudioFileClip(tmp_dir + variables.TMP_AUDIO_FILE_NAME)
-        if (moviePyAudio.duration > 59.90) :
-            raise Exception("media duration exceeds the duration limit")
 
-        list_of_words = vosk_utils.voskDescribe(tmp_dir + variables.TMP_AUDIO_FILE_NAME, b_gen)
+        list_of_words = vosk_utils.voskDescribe(
+            audio_file_path= tmp_audio_path,
+            generator= bu.get_boomer_generator_from_dict(sojufile)
+        )
 
         filename = generate_soju_file_name(videofilepath, tmp_dir)
 
@@ -226,8 +230,10 @@ def buildSojuFileForDiscord(videofilepath= None, sojufile= None, random_media= (
 f"""
 {{
  	"soju": {{
+     
+        "boomers": [
 
-		"generator": {new_gen},
+        ],
 
 		"generated": [
 """
@@ -239,12 +245,9 @@ f"""
 
             f.writelines(
 """
-                ],
+        ]
 
-                "boomers": [
-
-                ]
-        }
+    }
 }            
 """         )
 
