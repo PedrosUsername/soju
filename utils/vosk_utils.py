@@ -69,7 +69,7 @@ def getValidAudioFiles():
         return [variables.DEFAULT_AUDIO_FILE]        
     else:
         return [file for file in audio_files if audio_file_is_a_good_choice(file)]    
-    
+
 
 def getValidVideoFiles():
     video_files = os.listdir(variables.DEFAULT_VIDEO_FOLDER)
@@ -97,7 +97,7 @@ def getValidVideoFiles():
 
 
 
-def voskDescribe(audio_file_path= "", generator= None):
+def describe(audio_file_path= "", generator= None):
     default_boomer_structure = bu.get_boomer_generator_as_dict(generator).get("defaults")    
 
     valid_image_files = getValidImageFiles()

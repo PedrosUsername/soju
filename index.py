@@ -5,7 +5,7 @@ import os
 import random
 import itertools
 
-from utils import moviepy_utils, ffmpeg_utils, boomer_utils as bu
+from utils import moviepy_utils, ffmpeg_utils, vosk_utils, boomer_utils as bu
 
 
 
@@ -19,8 +19,8 @@ TOKEN = os.getenv("DISCORD_SOJUBOT_TOKEN")
 
 
 HISTORY_LIMIT = 200
-
-
+TMP_AUDIO_FILE_NAME = "tmp_audio.wav"
+SOJUCALL = "!soju"
 
 
 
@@ -52,7 +52,7 @@ def is_img(input= None) :
 
     if (
         attr_type != None
-        and "image" in attr_type
+        and ("image" in attr_type or "gifv" in attr_type)
     ) :
         return True
     else:
@@ -86,7 +86,7 @@ def is_vid(input= None) :
 
     if (
         attr_type != None
-        and ("video" in attr_type or "gifv" in attr_type)
+        and "video" in attr_type
     ) :
         return True
     else:
@@ -137,12 +137,14 @@ def get_media_input_urls(inputs= []):
 
 
 
-async def get_main_input_from_message(message= None, allow_audio= False):
+async def get_main_clip_url_from_referenced_message(message= None, allow_audio= False):
     if not message:
         return None
-     
-    embeds_list = [m for m in list(message.embeds)]
-    attachs_list = [m for m in list(message.attachments)]
+    
+    referenced_message = await message.channel.fetch_message(message.reference.message_id)
+
+    embeds_list = [m for m in list(referenced_message.embeds)]
+    attachs_list = [m for m in list(referenced_message.attachments)]
 
     img, aud, vid = get_media_input_urls(embeds_list + attachs_list)
 
@@ -221,10 +223,7 @@ async def make_it_goofy(message= None, tmp_dir= "./", sojufile= None) :
         and message.reference
         and message.reference.message_id != None
     ) :
-        referenced_message = await message.channel.fetch_message(message.reference.message_id)
-
-        main_input_url = await get_main_input_from_message(referenced_message, allow_audio= True)
-
+        main_input_url = await get_main_clip_url_from_referenced_message(message, allow_audio= True)
         ffmpeg_copy_output = tmp_dir + "moviepy_friendly_copy.mp4"
 
         if (main_input_url != None and sojufile != None) :
@@ -256,54 +255,51 @@ async def make_it_goofy(message= None, tmp_dir= "./", sojufile= None) :
 
 
 
-async def build_soju_file(message= None, tmp_dir= "./", sojufile= None) :
-    feedback_msg = None
-    outfilename = None
 
-    if (
-        message
-        and message.reference
-        and message.reference.message_id != None
-    ):
-        main_msg = await message.channel.fetch_message(message.reference.message_id)
-        ffmpeg_main_input = await get_main_input_from_message(main_msg, allow_audio= True)
+def build_sojufile_for_discord(outputname= "sojufile.soju.json", boomers= []) :
 
-        if (ffmpeg_main_input != None) :
+        with open(outputname, 'w') as f :
+            f.writelines(
+f"""
+{{
+\t"soju": {{
+     
+\t\t"boomers": [
 
-            img, aud, vid = await get_random_media_inputs(message, ffmpeg_main_input) 
+\t\t],
 
-            outfilename = moviepy_utils.buildSojuFileForDiscord(
-                videofilepath= ffmpeg_main_input,
-                sojufile= sojufile,
-                random_media= (img, aud, vid),
-                tmp_dir= tmp_dir
+\t\t"generated": [
+"""
             )
+            
+            for i, word in enumerate(boomers):
+                comma = ',' if i < (len(boomers) - 1) else ''
+                f.writelines('\t\t\t{0}{1}\n'.format(word.to_string(), comma))
 
+            f.writelines(
+"""
+\t\t]
 
-            feedback_msg = "done 👍"
-        else :
-            feedback_msg = "sorry, not enough valid input files"
-    else :
-        feedback_msg = "run time error 💀"
+\t}
+}            
+"""         )
 
-
-    return { "feedback": feedback_msg, "file": outfilename }
-
-
-
-
-
-
-
-
+        
+        return outputname
 
 
 
 
-async def is_describe_audio_call(message, sojufile= None) :
+
+
+
+
+
+def is_describe_audio_call(message= None, sojufile= None) :
     if (
-        not message
-        or not message.reference
+        message is None
+        or message.reference is None
+        or message.reference.message_id is None
     ) :
         return False
     
@@ -319,21 +315,24 @@ async def is_describe_audio_call(message, sojufile= None) :
 
 
 
-
-
-async def is_video_edit_call(message= None, sojufile= None) :
+def is_video_edit_call(message= None, sojufile= None) :
     if (
-        not message
-        or not message.reference
-        or not message.attachments
+        message is None
+        or message.reference is None
+        or message.reference.message_id is None
+        or message.attachments is None
     ) :
         return False
     
     boomers = bu.get_boomers_from_dict(sojufile)
     b_gen = bu.get_boomer_generator_from_dict(sojufile)
 
-    if boomers is not None and b_gen is None :
+    if (
+        boomers is not None
+        and b_gen is None
+    ) :
         return True
+    
     else :
         return False
 
@@ -341,11 +340,11 @@ async def is_video_edit_call(message= None, sojufile= None) :
 
 def is_credits_call(message) :
     if (
-        not message
+        message is None
     ) :
         return False
     
-    issojucall = message.content.startswith('!soju')
+    issojucall = message.content.startswith(SOJUCALL)
 
     if issojucall :
         return True
@@ -385,67 +384,110 @@ async def on_message(message) :
     
     elif message.channel.guild != None :
 
-        sojufile = bu.get_sojufile_confs_from_url(await get_soju_file(message))
+        sojufile = bu.get_sojufile_from_url_as_dict(await get_soju_file(message))
 
-        if await is_describe_audio_call(message, sojufile) :
+
+
+
+        if is_describe_audio_call(message, sojufile) :
             await message.channel.send("wait a second...", reference= message)
+            feedback_msg = "have fun!"
+            brand_new_file = None
 
             with tempfile.TemporaryDirectory(dir="./") as tmp_dir :
                 ephemeral = tmp_dir + "/"
+                main_clip_url = await get_main_clip_url_from_referenced_message(message, allow_audio= True)                    
+
                 try :
-                    dict_ = await build_soju_file(message, ephemeral, sojufile)
+                    main_clip_name = moviepy_utils.get_base_file_name_from(main_clip_url)
+                    
+                    if main_clip_url is None :
+                        raise Exception("clip not found")
 
-                    if dict_["file"] :
-                        await message.author.send(file= discord.File(dict_["file"]))
-                        feedback_msg = dict_["feedback"]                    
-                    else :
-                        feedback_msg = "🗿 Soju tried to build a soju.file for you, 📂 but no valid references were found for that 🗿🗿"
-                        
-                except FileNotFoundError:
-                    feedback_msg = f"FileNotFound exception 💀: Soju had a problem with one of the files provided 👌👍"
-            
-                except Exception as err:
-                    feedback_msg = f"Error 💀: {err}"
+                    full_main_clip_file_path = ephemeral + main_clip_name + ".mp4"
+                    full_aux_audio_file_path = ephemeral + main_clip_name + ".wav"
+                    full_new_soju_file_path = ephemeral + main_clip_name + ".soju.json"                    
+                    
+                    ffmpeg_utils.download_clip_and_audio(
+                        from_= main_clip_url,
+                        to_v= full_main_clip_file_path,
+                        to_a= full_aux_audio_file_path
+                    )
 
-            await message.channel.send(feedback_msg, reference= message)
+                    moviepy_utils.init_og_clip_params(full_main_clip_file_path)
+
+                    boomers = vosk_utils.describe(
+                        audio_file_path= full_aux_audio_file_path,
+                        generator= bu.get_boomer_generator_from_dict(sojufile)
+                    )
+
+                    build_sojufile_for_discord(full_new_soju_file_path, boomers)
+                    brand_new_file = discord.File(full_new_soju_file_path)
+                except Exception as err :
+                    feedback_msg = f"💀 Audio Description Error:\n\n👉 File: {main_clip_name}\n\n🤖 {err}"
+
+                await message.author.send(feedback_msg, file= brand_new_file)
 
 
 
 
 
-        elif await is_video_edit_call(message, sojufile) :
+
+
+        elif is_video_edit_call(message, sojufile) :
             await message.channel.send("wait a second...", reference= message)
+            feedback_msg = "have fun!"
+            brand_new_video = None
 
             with tempfile.TemporaryDirectory(dir="./") as tmp_dir :
                 ephemeral = tmp_dir + "/"
+                main_clip_url = await get_main_clip_url_from_referenced_message(message, allow_audio= True)
+
                 try :
-                    dict_ = await make_it_goofy(message, ephemeral, sojufile)
+                    boomers = bu.get_boomers_from_dict(sojufile)
+                    main_clip_name = moviepy_utils.get_base_file_name_from(main_clip_url)
 
-                    if dict_["file"] :
-                            await message.author.send(file= discord.File(dict_["file"]))
-                            feedback_msg = dict_["feedback"]
-                    else :
-                        feedback_msg = "🗿🗿 Soju tried to make a goofy edition, but couldn't with 📂 files you provided 🗿"
+                    if len(boomers) < 1 :
+                        raise Exception("boomers list is empty")
 
-                except FileNotFoundError :
-                    feedback_msg = f"FileNotFound exception 💀\Soju had a problem with one of the files provided 👌👍"
-        
-                except KeyError as err :
-                    if "video" in str(err) :
-                        feedback_msg = f"💀 KeyError exception 🔥\nWe may have a problem with the video stream of one of the files you referenced👌👍"
-                    else :
-                        feedback_msg = "💀 KeyError exception 🔥\Soju had a problem with one of the files provided..."
+                    if main_clip_url is None :
+                        raise Exception("clip not found")
+                    
 
-                except ValueError as err :
-                    feedback_msg = f"ValueErrorException 💀💀\nThe json file provided might have invalid json\nbut it could be something else 👍👌"
-                
-                except discord.HTTPException as err:
-                    feedback_msg = f"discord.HTTPException: {err}"
+                    full_main_clip_file_path = ephemeral + main_clip_name + ".mp4"
+                    full_main_clip_file_path_copy = ephemeral + main_clip_name + "_copy.mp4"
 
-                except Exception as err:
-                    feedback_msg = f"Error 💀: {err}"
+                    ffmpeg_utils.copy(
+                        from_= main_clip_url,
+                        to_= full_main_clip_file_path_copy
+                    )
 
-            await message.channel.send(feedback_msg, reference= message)
+                    moviepy_utils.init_og_clip_params(full_main_clip_file_path_copy)
+
+                    boomers_top, boomers_mid, boomers_bot = bu.filterBoomers(
+                        og_clip_duration= moviepy_utils.get_og_clip_params().get("duration"),
+                        boomers= boomers
+                    )
+
+                    params= ffmpeg_utils.buildCall(
+                        full_main_clip_file_path,
+                        boomers_mid
+                    )
+
+                    for p in params :
+                        print(p, end= "\n\n")
+
+                    ffmpeg_utils.executeFfmpegCall(
+                        params= params
+                    )
+                    brand_new_video = discord.File(full_main_clip_file_path)
+                except Exception as err :
+                    feedback_msg = f"💀 Video Edition Error:\n\n👉 File: {main_clip_name}\n\n🤖 {err}"
+
+                await message.author.send(feedback_msg, file= brand_new_video)
+
+
+
 
 
         elif is_credits_call(message) :

@@ -3,7 +3,7 @@ import requests
 import random
 
 from .settings import variables
-from .enum import MergeStrategy
+from .enum.Enum import MergeStrategy, Trigger
 from . import Boomer as bmr
 
 
@@ -67,7 +67,7 @@ def filterBoomers(og_clip_duration= 0, boomers= []):
     out_of_bounds_boomers_top = []
 
     for boomer in boomers:
-        boomin_time = getBoomerBoominTime(boomer)
+        boomin_time = getBoomerBoominTimeForFFMPEG(boomer)
         if boomin_time > 0 and boomin_time < og_clip_duration:
             regular_boomers = regular_boomers + [boomer]
         elif boomin_time <= 0:
@@ -152,7 +152,7 @@ def get_boomer_generator_from_file(jsonfilepath) :
 
 def get_boomers_from_url(jsonfilepath):
     
-    data = get_sojufile_confs_from_url(jsonfilepath)
+    data = get_sojufile_from_url_as_dict(jsonfilepath)
     return data.get("boomers") if data is not None else None
 
 
@@ -164,7 +164,7 @@ def get_boomers_from_url(jsonfilepath):
 
 def get_boomer_generator_from_url(jsonfilepath):
     
-    data = get_sojufile_confs_from_url(jsonfilepath)
+    data = get_sojufile_from_url_as_dict(jsonfilepath)
     return data.get("generator") if data is not None else None
 
 
@@ -173,7 +173,7 @@ def get_boomer_generator_from_url(jsonfilepath):
 
 
 
-def get_sojufile_confs_from_url(jsonfilepath):
+def get_sojufile_from_url_as_dict(jsonfilepath):
     if not str(jsonfilepath).endswith(".json") :
         return None
     
@@ -203,7 +203,13 @@ def get_sojufile_confs_from_url(jsonfilepath):
 
 
 
+def getBoomerImageFileForFFMPEG(boomer= None) :
+    file = getBoomerImageFile(boomer)
 
+    if file is None :
+        return 
+    else :
+        return file
 
 def getBoomerImagePosXForFFMPEG(boomer= None) :
     x = getBoomerImagePosX(boomer)
@@ -223,6 +229,28 @@ def getBoomerImagePosYForFFMPEG(boomer= None) :
    
     else :
         return y    
+    
+
+
+def getBoomerVideoPosXForFFMPEG(boomer= None) :
+    x = getBoomerVideoPosX(boomer)
+
+    if x is None :
+        return 0
+    
+    else :
+        return x
+    
+
+def getBoomerVideoPosYForFFMPEG(boomer= None) :
+    y = getBoomerVideoPosY(boomer)
+
+    if y is None :
+        return 0
+   
+    else :
+        return y    
+
 
 
 
@@ -249,7 +277,7 @@ def getBoomerVideoMergeStrategyForFFMPEG(boomer= None) :
 
 
 
-def getBoomerImageWidthForFFMPEG(boomer, main_clip_width) :
+def getBoomerImageWidthForFFMPEG(boomer, main_clip_width= 0) :
     w = getBoomerImageWidth(boomer)
 
     if w is None:
@@ -263,7 +291,7 @@ def getBoomerImageWidthForFFMPEG(boomer, main_clip_width) :
     
 
 
-def getBoomerVideoWidthForFFMPEG(boomer, main_clip_width) :
+def getBoomerVideoWidthForFFMPEG(boomer, main_clip_width= 0) :
     w = getBoomerVideoWidth(boomer)
 
     if w is None:
@@ -490,6 +518,14 @@ def getBoomTrigger(boomer= None):
 
 
 
+
+def getBoomTriggerForFFMPEG(boomer= None) :
+    trigg = getBoomTrigger(boomer)
+
+    if trigg is None :
+        return Trigger.get("START")
+    else :
+        return trigg
 
 
 def getBoomerBoominTime(boomer= None):
@@ -927,31 +963,31 @@ def get_boomer_generator_as_str(generator= None) :
         dapin = getDefaultApiName(default)
         dapim = getDefaultApiModel(default)
 
-        dbt = getBoomTrigger(default)
+        dbt = getBoomTriggerForFFMPEG(default)
 
         dimgf = getBoomerImageFile(default)
-        dimgms = getBoomerImageMergeStrategy(default)
-        dimgdur = getBoomerImageDuration(default)
-        dimgh = getBoomerImageHeight(default)
-        dimgw = getBoomerImageWidth(default)
-        dimgx = getBoomerImagePosX(default)
-        dimgy = getBoomerImagePosY(default)
+        dimgms = getBoomerImageMergeStrategyForFFMPEG(default)
+        dimgdur = getBoomerImageDurationForFFMPEG(default)
+        dimgh = getBoomerImageHeightForFFMPEG(default)
+        dimgw = getBoomerImageWidthForFFMPEG(default)
+        dimgx = getBoomerImagePosXForFFMPEG(default)
+        dimgy = getBoomerImagePosYForFFMPEG(default)
         dimgd = getBoomerImageTriggerDelay(default)
 
         dvidf = getBoomerVideoFile(default)
-        dvidms = getBoomerVideoMergeStrategy(default)
-        dviddur = getBoomerVideoDuration(default)
-        dvidh = getBoomerVideoHeight(default)
-        dvidw = getBoomerVideoWidth(default)
-        dvidx = getBoomerVideoPosX(default)
-        dvidy = getBoomerVideoPosY(default)
+        dvidms = getBoomerVideoMergeStrategyForFFMPEG(default)
+        dviddur = getBoomerVideoDurationForFFMPEG(default)
+        dvidh = getBoomerVideoHeightForFFMPEG(default)
+        dvidw = getBoomerVideoWidthForFFMPEG(default)
+        dvidx = getBoomerVideoPosXForFFMPEG(default)
+        dvidy = getBoomerVideoPosYForFFMPEG(default)
         dvidd = getBoomerVideoTriggerDelay(default)
-        dvidvol = getBoomerVideoVolume(default)
+        dvidvol = getBoomerVideoVolumeForFFMPEG(default)
 
         daudf = getBoomerAudioFile(default)
-        dauddur = getBoomerAudioDuration(default)
+        dauddur = getBoomerAudioDurationForFFMPEG(default)
         daudd = getBoomerAudioTriggerDelay(default)
-        daudvol = getBoomerAudioVolume(default)
+        daudvol = getBoomerAudioVolumeForFFMPEG(default)
 
     else :
         dresotol = variables.OVERLAY_SIZE_TOLERANCE
@@ -1019,6 +1055,11 @@ def get_boomer_generator_as_str(generator= None) :
                     "general": {{
                         "resotolerance": {dresotol},
                         
+                        "defaultimageset": "default",
+                        "defaultvideoset": "default",
+                        "defaultaudioset": "default",
+                        "defaultsetshare": 0.5,
+
                         "api": {{
                             "name": {dapin},
                             "model": {dapim}

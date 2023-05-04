@@ -17,7 +17,7 @@ MAX_MEDIA_VOLUME = 1
 
 DEFAULT_IMAGE_MERGE_STRATEGY = "COMPOSE"          # COMPOSE | CONCAT
 
-DEFAULT_IMAGE_FOLDER = ""
+DEFAULT_IMAGE_FOLDER = "./assets/image/default/"
 ALLOW_IMAGE_REPETITION = True
 IGNORE_IMAGE_FILE_LIST = []
 
@@ -44,7 +44,7 @@ DEFAULT_IMAGE_POSITION_Y = "CENTER"                       # https://zulko.github
 
 # ########################################## soju.json AUDIO CONF.
 
-DEFAULT_AUDIO_FOLDER = "./assets/audio/cringe/"
+DEFAULT_AUDIO_FOLDER = "./assets/audio/default/"
 ALLOW_AUDIO_REPETITION = False
 IGNORE_AUDIO_FILE_LIST = []
 
@@ -77,7 +77,7 @@ DEFAULT_NULL_AUDIO_FILE = "./assets/audio/null.mp3"
 
 DEFAULT_VIDEO_MERGE_STRATEGY = "COMPOSE"          # COMPOSE | CONCAT
 
-DEFAULT_VIDEO_FOLDER = "./assets/video/clips/"
+DEFAULT_VIDEO_FOLDER = "./assets/video/default/"
 ALLOW_VIDEO_REPETITION = True
 IGNORE_VIDEO_FILE_LIST = []
 

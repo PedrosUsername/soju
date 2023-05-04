@@ -1,17 +1,17 @@
 import subprocess
 
 from .settings import variables
-from . import boomer_utils as bu
+from . import moviepy_utils as mu, boomer_utils as bu
 
 
 
 FFMPEG_PATH = variables.FFMPEG_PATH
 FFMPEG_OUTPUT_SPECS = variables.FFMPEG_OUTPUT_SPECS
+FFMPEG_FPS = int(variables.FFMPEG_FPS)
+FFMPEG_AR = int(variables.FFMPEG_SAMPLE_RATE)
 IMAGE_FOLDER = variables.DEFAULT_IMAGE_FOLDER
 AUDIO_FOLDER = variables.DEFAULT_AUDIO_FOLDER
 VIDEO_FOLDER = variables.DEFAULT_VIDEO_FOLDER
-FFMPEG_FPS = int(variables.FFMPEG_FPS)
-FFMPEG_AR = int(variables.FFMPEG_SAMPLE_RATE)
 
 
 
@@ -116,9 +116,10 @@ def cleanFilterParams(params= "", filth= ""):
     return params[:(len(filth) * -1)]
 
 
-def buildCall(main_clip_params, outputfilepath= "output.mp4", boomers= None):
+def buildCall(outputfilepath= "output.mp4", boomers= None):
     ffmpeg = FFMPEG_PATH
     output_specs = FFMPEG_OUTPUT_SPECS
+    main_clip_params = mu.get_og_clip_params()
 
     main_clip_file = main_clip_params.get("file")
 
@@ -307,19 +308,24 @@ def buildMediaInputs(
     media_inputs = []
     
     for file in video_files_compose:
-        media_inputs = media_inputs + ["-i"] + [VIDEO_FOLDER + file["video"]["file"]]
+        file_name = VIDEO_FOLDER + file["video"]["file"] if not file["video"]["file"].startswith("http") else file["video"]["file"]
+        media_inputs = media_inputs + ["-i"] + [file_name]
 
     for file in image_files_compose:
-        media_inputs = media_inputs + ["-i"] + [IMAGE_FOLDER + file["image"]["file"]]
+        file_name = IMAGE_FOLDER + file["image"]["file"] if not file["image"]["file"].startswith("http") else file["image"]["file"]        
+        media_inputs = media_inputs + ["-i"] + [file_name]
 
     for file in audio_files:
-        media_inputs = media_inputs + ["-i"] + [AUDIO_FOLDER + file["audio"]["file"]]
+        file_name = AUDIO_FOLDER + file["audio"]["file"] if not file["audio"]["file"].startswith("http") else file["audio"]["file"]        
+        media_inputs = media_inputs + ["-i"] + [file_name]
 
     for file in video_files_concat:
-        media_inputs = media_inputs + ["-i"] + [VIDEO_FOLDER + file["video"]["file"]]
+        file_name = VIDEO_FOLDER + file["video"]["file"] if not file["video"]["file"].startswith("http") else file["video"]["file"]        
+        media_inputs = media_inputs + ["-i"] + [file_name]
 
     for file in image_files_concat:
-        media_inputs = media_inputs + ["-i"] + [IMAGE_FOLDER + file["image"]["file"]]        
+        file_name = IMAGE_FOLDER + file["image"]["file"] if not file["image"]["file"].startswith("http") else file["image"]["file"]        
+        media_inputs = media_inputs + ["-i"] + [file_name]        
 
 
     return media_inputs
@@ -751,6 +757,27 @@ def copy(from_= "", to_= ""):
         "copy",
         to_
     ])
+
+
+
+def download_clip_and_audio(from_= "./", to_v= "./", to_a= "./"):
+    
+    subprocess.run([
+        variables.FFMPEG_PATH,
+        "-y",
+        "-i",
+        from_,
+        "-map",
+        "0",
+        '-c',
+        "copy",
+        to_v,
+        "-map",
+        "0:a",
+        "-ac",
+        "1",
+        to_a
+    ])    
 
 
 
