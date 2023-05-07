@@ -1412,6 +1412,7 @@ def buildBoomer(obj, image_files= [], audio_files= [], video_files= [], default=
                 "posx": getBoomerVideoPosX(default),
                 "posy": getBoomerVideoPosY(default),
                 "triggerdelay": getBoomerVideoTriggerDelay(default),
+                "volume": getBoomerVideoVolume(default)
             }
         }
     else :
