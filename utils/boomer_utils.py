@@ -3,17 +3,58 @@ import requests
 import random
 
 from .settings import variables
-from .enum.Enum import MergeStrategy, Trigger
-from . import Boomer as bmr
+from .enum.Enum import MergeStrategy, Trigger, Position
+from . import Boomer as bmr, moviepy_utils as mp
 
 
 
-OVERLAY_SIZE_TOLERANCE = variables.OVERLAY_SIZE_TOLERANCE
+
+
+
+DEFAULT_VIDEO_FILE = variables.DEFAULT_VIDEO_FILE
+DEFAULT_AUDIO_FILE = variables.DEFAULT_AUDIO_FILE
+DEFAULT_IMAGE_FILE = variables.DEFAULT_IMAGE_FILE
+DEFAULT_DELAY = variables.DEFAULT_IMAGE_TRIGGER_DELAY
+DEFAULT_POSITION = Position.get("CENTER")
+DEFAULT_VIDEO_WIDTH = variables.DEFAULT_VIDEO_RESOLUTION_WIDTH
+DEFAULT_IMAGE_WIDTH = variables.DEFAULT_IMAGE_RESOLUTION_WIDTH
+DEFAULT_IMAGE_MERGESTRATEGY = MergeStrategy.get("COMPOSE")
+DEFAULT_VIDEO_MERGESTRATEGY = MergeStrategy.get("CONCAT")
+DEFAULT_BOOM_TRIGGER = Trigger.get("START")
+DEFAULT_API_NAME = variables.DEFAULT_API_NAME
+DEFAULT_API_MODEL = variables.DEFAULT_API_MODEL
 OVERLAY_SIZE_TOLERANCE = variables.OVERLAY_SIZE_TOLERANCE
 MAX_MEDIA_INSERT_DURATION = variables.MAX_MEDIA_INSERT_DURATION
 MIN_MEDIA_INSERT_DURATION = variables.MIN_MEDIA_INSERT_DURATION
 MAX_MEDIA_VOLUME = variables.MAX_MEDIA_VOLUME
 MIN_MEDIA_VOLUME = variables.MIN_MEDIA_VOLUME
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -203,29 +244,108 @@ def get_sojufile_from_url_as_dict(jsonfilepath):
 
 
 
-def getBoomerImageFileForFFMPEG(boomer= None) :
+
+
+
+
+
+
+
+
+
+
+
+def getBoomerAudioTriggerDelayForFFMPEG(boomer= None) :
+    td = getBoomerAudioTriggerDelay(boomer)
+
+    if not isinstance(td, int) and not isinstance(td, float) :
+        return DEFAULT_DELAY
+    
+    else :
+        return td
+
+
+
+
+def getBoomerVideoTriggerDelayForFFMPEG(boomer= None) :
+    td = getBoomerVideoTriggerDelay(boomer)
+
+    if not isinstance(td, int) and not isinstance(td, float) :
+        return DEFAULT_DELAY
+    
+    else :
+        return td
+
+
+
+
+
+
+def getBoomerImageTriggerDelayForFFMPEG(boomer= None) :
+    td = getBoomerImageTriggerDelay(boomer)
+
+    if not isinstance(td, int) and not isinstance(td, float) :
+        return DEFAULT_DELAY
+    
+    else :
+        return td
+
+
+
+
+def getBoomerImageFileForFFMPEG(boomer= None, files= []) :
     file = getBoomerImageFile(boomer)
 
-    if file is None :
-        return 
+    if not isinstance(file, str) :
+        return random.choice(files) if len(files) > 0 else DEFAULT_IMAGE_FILE
+    
     else :
         return file
+
+
+
+def getBoomerAudioFileForFFMPEG(boomer= None, files= []) :
+    file = getBoomerAudioFile(boomer)
+
+    if not isinstance(file, str) :
+        return random.choice(files) if len(files) > 0 else DEFAULT_AUDIO_FILE
+    
+    else :
+        return file
+
+
+
+def getBoomerVideoFileForFFMPEG(boomer= None, files= []) :
+    file = getBoomerVideoFile(boomer)
+
+    if not isinstance(file, str) :
+        return random.choice(files) if len(files) > 0 else DEFAULT_VIDEO_FILE
+    
+    else :
+        return file
+
+
+
+
+
 
 def getBoomerImagePosXForFFMPEG(boomer= None) :
     x = getBoomerImagePosX(boomer)
 
-    if x is None :
-        return 0
+    if not isinstance(x, str) :
+        return DEFAULT_POSITION
     
     else :
         return x
     
 
+
+
 def getBoomerImagePosYForFFMPEG(boomer= None) :
     y = getBoomerImagePosY(boomer)
 
-    if y is None :
-        return 0
+    if not isinstance(y, str) :
+        return DEFAULT_POSITION
    
     else :
         return y    
@@ -235,8 +355,8 @@ def getBoomerImagePosYForFFMPEG(boomer= None) :
 def getBoomerVideoPosXForFFMPEG(boomer= None) :
     x = getBoomerVideoPosX(boomer)
 
-    if x is None :
-        return 0
+    if not isinstance(x, str) :
+        return DEFAULT_POSITION
     
     else :
         return x
@@ -245,8 +365,8 @@ def getBoomerVideoPosXForFFMPEG(boomer= None) :
 def getBoomerVideoPosYForFFMPEG(boomer= None) :
     y = getBoomerVideoPosY(boomer)
 
-    if y is None :
-        return 0
+    if not isinstance(y, str) :
+        return DEFAULT_POSITION
    
     else :
         return y    
@@ -258,8 +378,8 @@ def getBoomerVideoPosYForFFMPEG(boomer= None) :
 def getBoomerImageMergeStrategyForFFMPEG(boomer= None) :
     ms = getBoomerImageMergeStrategy(boomer)
 
-    if ms is None :
-        return MergeStrategy.get("COMPOSE")
+    if not isinstance(ms, str) :
+        return DEFAULT_IMAGE_MERGESTRATEGY
    
     else :
         return ms
@@ -269,8 +389,8 @@ def getBoomerImageMergeStrategyForFFMPEG(boomer= None) :
 def getBoomerVideoMergeStrategyForFFMPEG(boomer= None) :
     ms = getBoomerVideoMergeStrategy(boomer)
 
-    if ms is None :
-        return MergeStrategy.get("COMPOSE")
+    if not isinstance(ms, str) :
+        return DEFAULT_VIDEO_MERGESTRATEGY
    
     else :
         return ms    
@@ -280,8 +400,8 @@ def getBoomerVideoMergeStrategyForFFMPEG(boomer= None) :
 def getBoomerImageWidthForFFMPEG(boomer, main_clip_width= 0) :
     w = getBoomerImageWidth(boomer)
 
-    if w is None:
-        return -1
+    if not isinstance(w, int):
+        return DEFAULT_IMAGE_WIDTH
     
     elif (main_clip_width + OVERLAY_SIZE_TOLERANCE) < w :
         return main_clip_width + OVERLAY_SIZE_TOLERANCE
@@ -294,9 +414,9 @@ def getBoomerImageWidthForFFMPEG(boomer, main_clip_width= 0) :
 def getBoomerVideoWidthForFFMPEG(boomer, main_clip_width= 0) :
     w = getBoomerVideoWidth(boomer)
 
-    if w is None:
+    if not isinstance(w, int):
 
-        return -1
+        return DEFAULT_VIDEO_WIDTH
     elif (main_clip_width + OVERLAY_SIZE_TOLERANCE) < w :
         
         return main_clip_width + OVERLAY_SIZE_TOLERANCE
@@ -311,12 +431,12 @@ def getBoomerVideoWidthForFFMPEG(boomer, main_clip_width= 0) :
 def getBoomerImageHeightForFFMPEG(boomer= None, main_clip_height= 0):
     h = getBoomerImageHeight(boomer)
 
-    if h is None:
-
-        return main_clip_height + OVERLAY_SIZE_TOLERANCE
+    if not isinstance(h, int):
+        return main_clip_height
+    
     elif (main_clip_height + OVERLAY_SIZE_TOLERANCE) < h:
-
         return main_clip_height + OVERLAY_SIZE_TOLERANCE
+    
     else:    
         return abs(h)    
     
@@ -326,9 +446,9 @@ def getBoomerImageHeightForFFMPEG(boomer= None, main_clip_height= 0):
 def getBoomerVideoHeightForFFMPEG(boomer= None, main_clip_height= 0):
     h = getBoomerVideoHeight(boomer)
 
-    if h is None:
+    if not isinstance(h, int):
 
-        return main_clip_height + OVERLAY_SIZE_TOLERANCE
+        return main_clip_height
     elif (main_clip_height + OVERLAY_SIZE_TOLERANCE) < h:
 
         return main_clip_height + OVERLAY_SIZE_TOLERANCE
@@ -340,7 +460,7 @@ def getBoomerVideoHeightForFFMPEG(boomer= None, main_clip_height= 0):
 def getBoomerImageDurationForFFMPEG(boomer= None) :
     dur = getBoomerImageDuration(boomer)
 
-    if dur is None :
+    if not isinstance(dur, int) and not isinstance(dur, float) :
         return 0
     else :
         if dur > MAX_MEDIA_INSERT_DURATION :
@@ -350,14 +470,14 @@ def getBoomerImageDurationForFFMPEG(boomer= None) :
             return MIN_MEDIA_INSERT_DURATION
         
         else :
-            return dur
+            return abs(dur)
 
 
 
 def getBoomerAudioDurationForFFMPEG(boomer= None) :
     dur = getBoomerAudioDuration(boomer)
 
-    if dur is None :
+    if not isinstance(dur, int) and not isinstance(dur, float) :
         return 0
     else :
         if dur > MAX_MEDIA_INSERT_DURATION :
@@ -367,14 +487,14 @@ def getBoomerAudioDurationForFFMPEG(boomer= None) :
             return MIN_MEDIA_INSERT_DURATION
         
         else :
-            return dur
+            return abs(dur)
 
 
 
 def getBoomerVideoDurationForFFMPEG(boomer= None) :
     dur = getBoomerVideoDuration(boomer)
 
-    if dur is None :
+    if not isinstance(dur, int) and not isinstance(dur, float) :
         return 0
     
     else :
@@ -385,14 +505,14 @@ def getBoomerVideoDurationForFFMPEG(boomer= None) :
             return MIN_MEDIA_INSERT_DURATION
         
         else :
-            return dur        
+            return abs(dur)        
 
 
 
 def getBoomerBoominTimeForFFMPEG(boomer= None) :
     time = getBoomerBoominTime(boomer)
 
-    if time is None :
+    if not isinstance(time, int) and not isinstance(time, float) :
         return 0
     else :
         return time
@@ -402,7 +522,7 @@ def getBoomerBoominTimeForFFMPEG(boomer= None) :
 def getBoomerVideoVolumeForFFMPEG(boomer= None) :
     vol = getBoomerVideoVolume(boomer)
 
-    if vol is None :
+    if not isinstance(vol, int) and not isinstance(vol, float) :
         return 0.1
     else :
         if vol > MAX_MEDIA_VOLUME :
@@ -412,14 +532,15 @@ def getBoomerVideoVolumeForFFMPEG(boomer= None) :
             return MIN_MEDIA_VOLUME
         
         else :
-            return vol
+            return abs(vol)
         
 
 def getBoomerAudioVolumeForFFMPEG(boomer= None) :
     vol = getBoomerAudioVolume(boomer)
 
-    if vol is None :
+    if not isinstance(vol, int) and not isinstance(vol, float) :
         return 1
+    
     else :
         if vol > MAX_MEDIA_VOLUME :
             return MAX_MEDIA_VOLUME
@@ -428,7 +549,7 @@ def getBoomerAudioVolumeForFFMPEG(boomer= None) :
             return MIN_MEDIA_VOLUME
         
         else :
-            return vol
+            return abs(vol)
 
 
 
@@ -447,6 +568,7 @@ def getBoomerImageWidth(boomer= None):
         or not boomer.get("image").get("conf")
     ):
         return None
+    
     else:    
         return boomer.get("image").get("conf").get("width")
     
@@ -464,6 +586,7 @@ def getBoomerImageHeight(boomer= None):
         or not boomer.get("image").get("conf")
     ):
         return None
+    
     else:    
         return boomer.get("image").get("conf").get("height")    
     
@@ -481,6 +604,7 @@ def getBoomerVideoWidth(boomer= None):
         or not boomer.get("video").get("conf")
     ):
         return None
+    
     else:    
         return boomer.get("video").get("conf").get("width")
     
@@ -496,6 +620,7 @@ def getBoomerVideoHeight(boomer= None):
         or not boomer.get("video").get("conf")
     ):
         return None
+    
     else:    
         return boomer.get("video").get("conf").get("height")    
 
@@ -511,6 +636,7 @@ def getBoomTrigger(boomer= None):
         or not boomer.get("word")
     ):
         return None
+    
     else:
         return boomer.get("word").get("trigger")
 
@@ -522,8 +648,9 @@ def getBoomTrigger(boomer= None):
 def getBoomTriggerForFFMPEG(boomer= None) :
     trigg = getBoomTrigger(boomer)
 
-    if trigg is None :
-        return Trigger.get("START")
+    if not isinstance(trigg, str) :
+        return DEFAULT_BOOM_TRIGGER
+    
     else :
         return trigg
 
@@ -538,6 +665,7 @@ def getBoomerBoominTime(boomer= None):
         or not boomer.get("word").get(trigg)
     ):
         return None
+    
     else:
         return float(boomer.get("word").get(trigg))
 
@@ -556,6 +684,7 @@ def getBoomerImageDuration(boomer= None):
         or not boomer.get("image").get("conf")
     ):
         return None
+    
     else:
         return boomer.get("image").get("conf").get("duration")
 
@@ -573,6 +702,7 @@ def getBoomerAudioDuration(boomer= None):
         or not boomer.get("audio").get("conf")
     ):
         return None
+    
     else:
         return boomer.get("audio").get("conf").get("duration")
     
@@ -589,6 +719,7 @@ def getBoomerVideoDuration(boomer= None):
         or not boomer.get("video").get("conf")
     ):
         return None
+    
     else:
         return boomer.get("video").get("conf").get("duration")
 
@@ -645,6 +776,7 @@ def getBoomerImageFile(boomer= None) :
         or not boomer.get("image") 
     ):
         return None
+    
     else:
         return boomer.get("image").get("file")
 
@@ -659,6 +791,7 @@ def getBoomerAudioFile(boomer= None) :
         or not boomer.get("audio") 
     ):
         return None
+    
     else:
         return boomer.get("audio").get("file")
 
@@ -677,6 +810,7 @@ def getBoomerVideoFile(boomer= None) :
         or not boomer.get("video") 
     ):
         return None
+    
     else:
         return boomer.get("video").get("file")
 
@@ -694,6 +828,7 @@ def getBoomerImageMergeStrategy(boomer= None) :
         or not boomer.get("image").get("conf")
     ):
         return None
+    
     else:
         return boomer.get("image").get("conf").get("mergestrategy")
 
@@ -711,6 +846,7 @@ def getBoomerVideoMergeStrategy(boomer= None) :
         or not boomer.get("video").get("conf")
     ):
         return None
+    
     else:
         return boomer.get("video").get("conf").get("mergestrategy")
 
@@ -731,6 +867,7 @@ def getBoomerImagePosX(boomer= None) :
         or not boomer.get("image").get("conf")
     ):
         return None
+    
     else:
         return boomer.get("image").get("conf").get("posx")
 
@@ -743,6 +880,7 @@ def getBoomerImagePosY(boomer= None) :
         or not boomer.get("image").get("conf")
     ):
         return None
+    
     else:
         return boomer.get("image").get("conf").get("posy")
 
@@ -756,6 +894,7 @@ def getBoomerVideoPosX(boomer= None) :
         or not boomer.get("video").get("conf")
     ):
         return None
+    
     else:
         return boomer.get("video").get("conf").get("posx")
 
@@ -768,6 +907,7 @@ def getBoomerVideoPosY(boomer= None) :
         or not boomer.get("video").get("conf")
     ):
         return None
+    
     else:
         return boomer.get("video").get("conf").get("posy")
 
@@ -782,6 +922,7 @@ def getBoomerImageTriggerDelay(boomer= None) :
         or not boomer.get("image").get("conf")
     ):
         return None
+    
     else:
         return boomer.get("image").get("conf").get("triggerdelay")
 
@@ -795,6 +936,7 @@ def getBoomerVideoTriggerDelay(boomer= None) :
         or not boomer.get("video").get("conf")
     ):
         return None
+    
     else:
         return boomer.get("video").get("conf").get("triggerdelay")
 
@@ -812,6 +954,7 @@ def getBoomerAudioTriggerDelay(boomer= None) :
         or not boomer.get("audio").get("conf")
     ):
         return None
+    
     else:
         return boomer.get("audio").get("conf").get("triggerdelay")
 
@@ -831,8 +974,24 @@ def getDefaultResoTol(default= None) :
         or not default.get("general")
     ):
         return None
+    
     else:
         return default.get("general").get("resotolerance")
+    
+
+
+
+
+
+
+def getDefaultResoTolForFFMPEG(boomer= None) :
+    rt = getDefaultResoTol(boomer)
+
+    if not isinstance(rt, int) and not isinstance(rt, float) :
+        return OVERLAY_SIZE_TOLERANCE
+   
+    else :
+        return rt
     
 
 
@@ -852,8 +1011,29 @@ def getDefaultApiName(default= None) :
         or not default.get("general").get("api")
     ):
         return None
+    
     else:
         return default.get("general").get("api").get("name")
+    
+
+
+
+
+
+
+
+
+
+def getDefaultApiNameForFFMPEG(boomer= None ) :
+    name = getDefaultApiName(boomer)
+
+    if not isinstance(name, str) :
+        return DEFAULT_API_NAME
+    
+    else :
+        return name
+
+
 
 
 
@@ -872,7 +1052,8 @@ def getDefaultApiModel(default= None) :
         or not default.get("general")
         or not default.get("general").get("api")
     ):
-        return None
+        return DEFAULT_API_MODEL
+    
     else:
         return default.get("general").get("api").get("model")    
 
@@ -884,6 +1065,14 @@ def getDefaultApiModel(default= None) :
 
 
 
+def getDefaultApiModelForFFMPEG(boomer= None) :
+    model = getDefaultApiModel(boomer)
+
+    if not isinstance(model, str) :
+        return DEFAULT_API_MODEL
+    
+    else :
+        return model
 
 
 
@@ -931,27 +1120,24 @@ def getDefaultApiModel(default= None) :
 
 
 
-def as_json_string(value) :
+
+
+
+
+
+
+def as_json_string(value= "") :
     try :
         return '"' + str(value) + '"'
-    except ValueError :
-        return "null"
-
-def as_json_integer(value) :
-    try :
-        return int(value)
-    except ValueError :
-        return 0
-
-def as_json_float(value) :
-    try :
-        return float(value)
-    except ValueError :
-        return 0
-
-
+    except :
+        return '"null"'
 
 def get_boomer_generator_as_str(generator= None) :
+    og_clip = mp.get_og_clip_params()
+
+    addimg = False
+    addvid = False
+    addaud = False
 
     if (
         generator is not None
@@ -959,37 +1145,46 @@ def get_boomer_generator_as_str(generator= None) :
     ) :
         default = generator.get("defaults")
 
-        dresotol = getDefaultResoTol(default)
-        dapin = getDefaultApiName(default)
-        dapim = getDefaultApiModel(default)
+        if default.get("image") :
+            addimg = True
+        if default.get("video") :
+            addvid = True
+        if default.get("audio") :
+            addaud = True                        
+
+        dresotol = getDefaultResoTolForFFMPEG(default)
+        dapin = getDefaultApiNameForFFMPEG(default)
+        dapim = getDefaultApiModelForFFMPEG(default)
 
         dbt = getBoomTriggerForFFMPEG(default)
 
         dimgf = getBoomerImageFile(default)
         dimgms = getBoomerImageMergeStrategyForFFMPEG(default)
         dimgdur = getBoomerImageDurationForFFMPEG(default)
-        dimgh = getBoomerImageHeightForFFMPEG(default)
-        dimgw = getBoomerImageWidthForFFMPEG(default)
+        dimgh = getBoomerImageHeightForFFMPEG(default, og_clip.get("height"))
+        dimgw = getBoomerImageWidthForFFMPEG(default, og_clip.get("width"))
         dimgx = getBoomerImagePosXForFFMPEG(default)
         dimgy = getBoomerImagePosYForFFMPEG(default)
-        dimgd = getBoomerImageTriggerDelay(default)
+        dimgd = getBoomerImageTriggerDelayForFFMPEG(default)
 
         dvidf = getBoomerVideoFile(default)
         dvidms = getBoomerVideoMergeStrategyForFFMPEG(default)
         dviddur = getBoomerVideoDurationForFFMPEG(default)
-        dvidh = getBoomerVideoHeightForFFMPEG(default)
-        dvidw = getBoomerVideoWidthForFFMPEG(default)
+        dvidh = getBoomerVideoHeightForFFMPEG(default, og_clip.get("height"))
+        dvidw = getBoomerVideoWidthForFFMPEG(default, og_clip.get("width"))
         dvidx = getBoomerVideoPosXForFFMPEG(default)
         dvidy = getBoomerVideoPosYForFFMPEG(default)
-        dvidd = getBoomerVideoTriggerDelay(default)
+        dvidd = getBoomerVideoTriggerDelayForFFMPEG(default)
         dvidvol = getBoomerVideoVolumeForFFMPEG(default)
 
         daudf = getBoomerAudioFile(default)
         dauddur = getBoomerAudioDurationForFFMPEG(default)
-        daudd = getBoomerAudioTriggerDelay(default)
+        daudd = getBoomerAudioTriggerDelayForFFMPEG(default)
         daudvol = getBoomerAudioVolumeForFFMPEG(default)
 
     else :
+        addvid = True
+
         dresotol = variables.OVERLAY_SIZE_TOLERANCE
         dapin = variables.DEFAULT_API_NAME
         dapim = variables.DEFAULT_API_MODEL
@@ -1021,7 +1216,7 @@ def get_boomer_generator_as_str(generator= None) :
         daudvol = variables.DEFAULT_AUDIO_VOLUME        
 
 
-    dresotol = "null" if dresotol is None else as_json_integer(dresotol)
+    dresotol = "null" if dresotol is None else as_json_string(dresotol)
     dapin = "null" if dapin is None else as_json_string(dapin)
     dapim = "null" if dapim is None else as_json_string(dapim)
 
@@ -1029,35 +1224,94 @@ def get_boomer_generator_as_str(generator= None) :
 
     dimgf = "null" if dimgf is None else as_json_string(dimgf)
     dimgms = "null" if dimgms is None else as_json_string(dimgms)
-    dimgdur = "null" if dimgdur is None else as_json_float(dimgdur)               
-    dimgh = "null" if dimgh is None else as_json_integer(dimgh)                     
-    dimgw = "null" if dimgw is None else as_json_integer(dimgw)                     
+    dimgdur = "null" if dimgdur is None else dimgdur               
+    dimgh = "null" if dimgh is None else dimgh                     
+    dimgw = "null" if dimgw is None else dimgw                     
     dimgx = "null" if dimgx is None else as_json_string(dimgx)
     dimgy = "null" if dimgy is None else as_json_string(dimgy)
-    dimgd = "null" if dimgd is None else as_json_float(dimgd)
+    dimgd = "null" if dimgd is None else dimgd
 
     dvidf = "null" if dvidf is None else as_json_string(dvidf)
     dvidms = "null" if dvidms is None else as_json_string(dvidms)
-    dviddur = "null" if dviddur is None else as_json_float(dviddur)               
-    dvidh = "null" if dvidh is None else as_json_integer(dvidh)                     
-    dvidw = "null" if dvidw is None else as_json_integer(dvidw)                     
+    dviddur = "null" if dviddur is None else dviddur               
+    dvidh = "null" if dvidh is None else dvidh                     
+    dvidw = "null" if dvidw is None else dvidw                     
     dvidx = "null" if dvidx is None else as_json_string(dvidx)
     dvidy = "null" if dvidy is None else as_json_string(dvidy)
-    dvidd = "null" if dvidd is None else as_json_float(dvidd)
-    dvidvol = "null" if dvidvol is None else as_json_float(dvidvol)               
+    dvidd = "null" if dvidd is None else dvidd
+    dvidvol = "null" if dvidvol is None else dvidvol               
 
     daudf = "null" if daudf is None else as_json_string(daudf)
-    dauddur = "null" if dauddur is None else as_json_float(dauddur)               
-    daudd = "null" if daudd is None else as_json_float(daudd)
-    daudvol = "null" if daudvol is None else as_json_float(daudvol)
+    dauddur = "null" if dauddur is None else dauddur               
+    daudd = "null" if daudd is None else daudd
+    daudvol = "null" if daudvol is None else daudvol
     
+    if addimg :
+        imagedefaults = ( 
+f"""
+                        "image": {{
+                            "file": {dimgf},
+                            "conf": {{
+                                "mergestrategy": {dimgms},
+                                "duration": {dimgdur},
+                                "height": {dimgh},
+                                "width": {dimgw},               
+                                "posx": {dimgx},
+                                "posy": {dimgy},
+                                "triggerdelay": {dimgd}
+                            }}
+
+                        }}""")
+    else :
+        imagedefaults = ""
+
+    if addvid :
+        videodefaults = ( 
+f"""
+                        "video": {{
+                            "file": {dvidf},
+                            "conf": {{
+                                "mergestrategy": {dvidms},
+                                "duration": {dviddur},
+                                "height": {dvidh},
+                                "width": {dvidw},               
+                                "posx": {dvidx},
+                                "posy": {dvidy},
+                                "triggerdelay": {dvidd},
+                                "volume": {dvidvol}
+                            }}
+                        }}""")
+    else :
+        videodefaults = ""
+
+    if addaud :
+        audiodefaults = ( 
+f"""
+                        "audio": {{
+                            "file": {daudf},
+                            "conf": {{
+                                "duration": {dauddur},
+                                "triggerdelay": {daudd},
+                                "volume": {daudvol}
+                            }}
+                        }}
+""")
+    else :
+        audiodefaults = ""
+
+
+    imgvidseparator = ",\n" if addimg and (addvid or addaud) else ""
+    vidaudseparator = ",\n" if addvid and addaud else ""
+
+
+
     return f""" {{
                     "general": {{
                         "resotolerance": {dresotol},
                         
-                        "defaultimageset": "default",
-                        "defaultvideoset": "default",
-                        "defaultaudioset": "default",
+                        "imagedir": "default",
+                        "audiodir": "default",
+                        "videodir": "default",
                         "defaultsetshare": 0.5,
 
                         "api": {{
@@ -1071,42 +1325,12 @@ def get_boomer_generator_as_str(generator= None) :
                             "trigger": {dbt}
                         }},
 
-                        "image": {{
-                            "file": {dimgf},
-                            "conf": {{
-                                "mergestrategy": {dimgms},
-                                "duration": {dimgdur},
-                                "height": {dimgh},
-                                "width": {dimgw},               
-                                "posx": {dimgx},
-                                "posy": {dimgy},
-                                "triggerdelay": {dimgd}
-                            }}
+                        {imagedefaults + imgvidseparator}
 
-                        }},
+                        {videodefaults + vidaudseparator}
 
-                        "video": {{
-                            "file": {dvidf},
-                            "conf": {{
-                                "mergestrategy": {dvidms},
-                                "duration": {dviddur},
-                                "height": {dvidh},
-                                "width": {dvidw},               
-                                "posx": {dvidx},
-                                "posy": {dvidy},
-                                "triggerdelay": {dvidd},
-                                "volume": {dvidvol}
-                            }}
-                        }},
+                        {audiodefaults}
 
-                        "audio": {{
-                            "file": {daudf},
-                            "conf": {{
-                                "duration": {dauddur},
-                                "triggerdelay": {daudd},
-                                "volume": {daudvol}
-                            }}
-                        }}
                     }}
                 }}"""
 
@@ -1149,40 +1373,50 @@ def buildBoomer(obj, image_files= [], audio_files= [], video_files= [], default=
         "trigger": getBoomTrigger(default)
     }
 
-    obj["image"] = {
-        "file": getBoomerImageFile(default),
-        "conf": {
-            "mergestrategy": getBoomerImageMergeStrategy(default),
-            "duration": getBoomerImageDuration(default),
-            "height": getBoomerImageHeight(default),
-            "width": getBoomerImageWidth(default),
-            "posx": getBoomerImagePosX(default),
-            "posy": getBoomerImagePosY(default),
-            "triggerdelay": getBoomerImageTriggerDelay(default),
+    if default.get("image") is not None :
+        obj["image"] = {
+            "file": getBoomerImageFile(default),
+            "conf": {
+                "mergestrategy": getBoomerImageMergeStrategy(default),
+                "duration": getBoomerImageDuration(default),
+                "height": getBoomerImageHeight(default),
+                "width": getBoomerImageWidth(default),
+                "posx": getBoomerImagePosX(default),
+                "posy": getBoomerImagePosY(default),
+                "triggerdelay": getBoomerImageTriggerDelay(default),
+            }
         }
-    }    
+    else :
+        obj["image"] = None
 
-    obj["audio"] = {
-        "file": getBoomerAudioFile(default),
-        "conf": {
-            "duration": getBoomerAudioDuration(default),
-            "triggerdelay": getBoomerAudioTriggerDelay(default),
-            "volume": getBoomerAudioVolume(default)
+    if default.get("audio") is not None :
+        obj["audio"] = {
+            "file": getBoomerAudioFile(default),
+            "conf": {
+                "duration": getBoomerAudioDuration(default),
+                "triggerdelay": getBoomerAudioTriggerDelay(default),
+                "volume": getBoomerAudioVolume(default)
+            }
         }
-    }
+    else :
+        obj["audio"] = None
 
-    obj["video"] = {
-        "file": getBoomerVideoFile(default),
-        "conf": {
-            "mergestrategy": getBoomerVideoMergeStrategy(default),
-            "duration": getBoomerVideoDuration(default),
-            "height": getBoomerVideoHeight(default),
-            "width": getBoomerVideoWidth(default),
-            "posx": getBoomerVideoPosX(default),
-            "posy": getBoomerVideoPosY(default),
-            "triggerdelay": getBoomerVideoTriggerDelay(default),
+    if default.get("video") is not None :
+        obj["video"] = {
+            "file": getBoomerVideoFile(default),
+            "conf": {
+                "mergestrategy": getBoomerVideoMergeStrategy(default),
+                "duration": getBoomerVideoDuration(default),
+                "height": getBoomerVideoHeight(default),
+                "width": getBoomerVideoWidth(default),
+                "posx": getBoomerVideoPosX(default),
+                "posy": getBoomerVideoPosY(default),
+                "triggerdelay": getBoomerVideoTriggerDelay(default),
+            }
         }
-    }
+    else :
+        obj["video"] = None
+
 
     return bmr.Boomer(obj)
 

@@ -1,6 +1,6 @@
 # start   -> boom will be inserted at ["boomers"]["word"]["start"] seconds
 # end     -> boom will be inserted at ["boomers"]["word"]["end"] seconds
-DEFAULT_BOOM_TRIGGER = "start"
+DEFAULT_BOOM_TRIGGER = "START"
 MAX_MEDIA_INSERT_DURATION = 8
 MAX_MEDIA_VOLUME = 1
 
@@ -75,7 +75,7 @@ DEFAULT_NULL_AUDIO_FILE = "./assets/audio/null.mp3"
 
 # ########################################## soju.json VIDEO CONF.
 
-DEFAULT_VIDEO_MERGE_STRATEGY = "COMPOSE"          # COMPOSE | CONCAT
+DEFAULT_VIDEO_MERGE_STRATEGY = "CONCAT"          # COMPOSE | CONCAT
 
 DEFAULT_VIDEO_FOLDER = "./assets/video/default/"
 ALLOW_VIDEO_REPETITION = True
@@ -85,7 +85,7 @@ DEFAULT_VIDEO_FILE = None
 
 DEFAULT_VIDEO_DURATION = 0.3
 DEFAULT_VIDEO_TRIGGER_DELAY = 0
-DEFAULT_VIDEO_VOLUME = 0
+DEFAULT_VIDEO_VOLUME = 1
 
 DEFAULT_VIDEO_RESOLUTION_HEIGHT = 1080               # 1080 px | 0 | -n
 DEFAULT_VIDEO_RESOLUTION_WIDTH = None                # http://trac.ffmpeg.org/wiki/Scaling

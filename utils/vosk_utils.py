@@ -139,13 +139,13 @@ def describe(audio_file_path= "", generator= None):
                 default_boomer_structure
             )
 
-            if variables.ALLOW_IMAGE_REPETITION is False and new_word.image["file"] in valid_image_files:
+            if variables.ALLOW_IMAGE_REPETITION is False and new_word.image is not None and new_word.image["file"] in valid_image_files:
                 valid_image_files.remove(new_word.image["file"])
 
-            if variables.ALLOW_AUDIO_REPETITION is False and new_word.audio["file"] in valid_audio_files:
+            if variables.ALLOW_AUDIO_REPETITION is False and new_word.audio is not None and new_word.audio["file"] in valid_audio_files:
                 valid_audio_files.remove(new_word.audio["file"])
 
-            if variables.ALLOW_VIDEO_REPETITION is False and new_word.video["file"] in valid_video_files:
+            if variables.ALLOW_VIDEO_REPETITION is False and new_word.video is not None and new_word.video["file"] in valid_video_files:
                 valid_video_files.remove(new_word.video["file"])
 
             word_list.append(new_word)  # and add it to list
