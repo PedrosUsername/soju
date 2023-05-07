@@ -11,6 +11,8 @@ from . import Boomer as bmr, moviepy_utils as mp
 
 
 
+MAX_MEDIA_DELAY = variables.MAX_MEDIA_DELAY
+MIN_MEDIA_DELAY = variables.MIN_MEDIA_DELAY
 DEFAULT_VIDEO_FILE = variables.DEFAULT_VIDEO_FILE
 DEFAULT_AUDIO_FILE = variables.DEFAULT_AUDIO_FILE
 DEFAULT_IMAGE_FILE = variables.DEFAULT_IMAGE_FILE
@@ -262,7 +264,14 @@ def getBoomerAudioTriggerDelayForFFMPEG(boomer= None) :
         return DEFAULT_DELAY
     
     else :
-        return td
+        if td > MAX_MEDIA_DELAY :
+            return MAX_MEDIA_DELAY
+        
+        elif td < MIN_MEDIA_DELAY :
+            return MIN_MEDIA_DELAY
+        
+        else :
+            return abs(td)
 
 
 
@@ -274,7 +283,14 @@ def getBoomerVideoTriggerDelayForFFMPEG(boomer= None) :
         return DEFAULT_DELAY
     
     else :
-        return td
+        if td > MAX_MEDIA_DELAY :
+            return MAX_MEDIA_DELAY
+        
+        elif td < MIN_MEDIA_DELAY :
+            return MIN_MEDIA_DELAY
+        
+        else :
+            return abs(td)
 
 
 
@@ -288,7 +304,14 @@ def getBoomerImageTriggerDelayForFFMPEG(boomer= None) :
         return DEFAULT_DELAY
     
     else :
-        return td
+        if td > MAX_MEDIA_DELAY :
+            return MAX_MEDIA_DELAY
+        
+        elif td < MIN_MEDIA_DELAY :
+            return MIN_MEDIA_DELAY
+        
+        else :
+            return abs(td)
 
 
 
@@ -332,7 +355,7 @@ def getBoomerVideoFileForFFMPEG(boomer= None, files= []) :
 def getBoomerImagePosXForFFMPEG(boomer= None) :
     x = getBoomerImagePosX(boomer)
 
-    if not isinstance(x, str) :
+    if not isinstance(x, str) or x not in list(Position.keys()):
         return DEFAULT_POSITION
     
     else :
@@ -344,7 +367,7 @@ def getBoomerImagePosXForFFMPEG(boomer= None) :
 def getBoomerImagePosYForFFMPEG(boomer= None) :
     y = getBoomerImagePosY(boomer)
 
-    if not isinstance(y, str) :
+    if not isinstance(y, str) or y not in list(Position.keys()) :
         return DEFAULT_POSITION
    
     else :
@@ -355,7 +378,7 @@ def getBoomerImagePosYForFFMPEG(boomer= None) :
 def getBoomerVideoPosXForFFMPEG(boomer= None) :
     x = getBoomerVideoPosX(boomer)
 
-    if not isinstance(x, str) :
+    if not isinstance(x, str) or x not in list(Position.keys()) :
         return DEFAULT_POSITION
     
     else :
@@ -365,7 +388,7 @@ def getBoomerVideoPosXForFFMPEG(boomer= None) :
 def getBoomerVideoPosYForFFMPEG(boomer= None) :
     y = getBoomerVideoPosY(boomer)
 
-    if not isinstance(y, str) :
+    if not isinstance(y, str) or y not in list(Position.keys()) :
         return DEFAULT_POSITION
    
     else :
@@ -378,7 +401,7 @@ def getBoomerVideoPosYForFFMPEG(boomer= None) :
 def getBoomerImageMergeStrategyForFFMPEG(boomer= None) :
     ms = getBoomerImageMergeStrategy(boomer)
 
-    if not isinstance(ms, str) :
+    if not isinstance(ms, str) or ms not in list(MergeStrategy.keys()) :
         return DEFAULT_IMAGE_MERGESTRATEGY
    
     else :
@@ -389,7 +412,7 @@ def getBoomerImageMergeStrategyForFFMPEG(boomer= None) :
 def getBoomerVideoMergeStrategyForFFMPEG(boomer= None) :
     ms = getBoomerVideoMergeStrategy(boomer)
 
-    if not isinstance(ms, str) :
+    if not isinstance(ms, str) or ms not in list(MergeStrategy.keys()) :
         return DEFAULT_VIDEO_MERGESTRATEGY
    
     else :

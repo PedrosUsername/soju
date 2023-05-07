@@ -1,9 +1,6 @@
 # start   -> boom will be inserted at ["boomers"]["word"]["start"] seconds
 # end     -> boom will be inserted at ["boomers"]["word"]["end"] seconds
 DEFAULT_BOOM_TRIGGER = "START"
-MAX_MEDIA_INSERT_DURATION = 8
-MAX_MEDIA_VOLUME = 1
-
 
 
 
@@ -169,3 +166,7 @@ TMP_AUDIO_FILE_NAME = "tmp_audio.wav"
 DEFAULT_TMP_FILE_PATH = "./utils/settings/tmp/"
 MIN_MEDIA_VOLUME = 0
 MIN_MEDIA_INSERT_DURATION = 0
+MAX_MEDIA_INSERT_DURATION = 8
+MAX_MEDIA_DELAY = 8
+MIN_MEDIA_DELAY = 0
+MAX_MEDIA_VOLUME = 1
