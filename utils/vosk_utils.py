@@ -6,20 +6,24 @@ import os
 from vosk import Model, KaldiRecognizer
 
 from . import boomer_utils as bu
+from .enum.Enum import ImageFilesDir, VideoFilesDir, AudioFilesDir
 from .settings import variables
 
 
 
 
 
-def image_file_is_a_good_choice(image_file= ""):
-    return os.path.isfile('{0}{1}'.format(variables.DEFAULT_IMAGE_FOLDER, image_file)) and image_file not in variables.IGNORE_IMAGE_FILE_LIST
+def image_file_is_a_good_choice(path= "", image_file= ""):
+    return os.path.isfile('{0}{1}'.format(path, image_file)) and image_file not in variables.IGNORE_IMAGE_FILE_LIST
 
-def audio_file_is_a_good_choice(audio_file= ""):
-    return os.path.isfile('{0}{1}'.format(variables.DEFAULT_AUDIO_FOLDER, audio_file)) and audio_file not in variables.IGNORE_AUDIO_FILE_LIST
+def audio_file_is_a_good_choice(path= "", audio_file= ""):
+    print('aaaaaaaaaaaaa: {0}'.format(audio_file))    
+    return os.path.isfile('{0}{1}'.format(path, audio_file)) and audio_file not in variables.IGNORE_AUDIO_FILE_LIST
 
-def video_file_is_a_good_choice(video_file= ""):
-    return os.path.isfile('{0}{1}'.format(variables.DEFAULT_VIDEO_FOLDER, video_file)) and video_file not in variables.IGNORE_VIDEO_FILE_LIST
+def video_file_is_a_good_choice(path= "", video_file= ""):
+    print('aaaaaaaaaaaaa: {0}'.format(video_file))
+
+    return os.path.isfile('{0}{1}'.format(path, video_file)) and video_file not in variables.IGNORE_VIDEO_FILE_LIST
 
 def getFile(files= []):
     if len(files) > 0:
@@ -53,31 +57,31 @@ def getFile(files= []):
 
 
 
-def getValidImageFiles():
-    image_files = os.listdir(variables.DEFAULT_IMAGE_FOLDER)
+def getValidImageFiles(path= None):
+    image_files = os.listdir(path)
 
     if variables.DEFAULT_IMAGE_FILE != None:
         return [variables.DEFAULT_IMAGE_FILE]
     else:
-        return [file for file in image_files if image_file_is_a_good_choice(file)]
+        return [file for file in image_files if image_file_is_a_good_choice(path, file)]
 
 
-def getValidAudioFiles():
-    audio_files = os.listdir(variables.DEFAULT_AUDIO_FOLDER)
+def getValidAudioFiles(path= None):
+    audio_files = os.listdir(path)
 
     if variables.DEFAULT_AUDIO_FILE != None:
         return [variables.DEFAULT_AUDIO_FILE]        
     else:
-        return [file for file in audio_files if audio_file_is_a_good_choice(file)]    
+        return [file for file in audio_files if audio_file_is_a_good_choice(path, file)]    
 
 
-def getValidVideoFiles():
-    video_files = os.listdir(variables.DEFAULT_VIDEO_FOLDER)
+def getValidVideoFiles(path= None):
+    video_files = os.listdir(path)
 
     if variables.DEFAULT_VIDEO_FILE != None:
         return [variables.DEFAULT_VIDEO_FILE]
     else:
-        return [file for file in video_files if video_file_is_a_good_choice(file)]
+        return [file for file in video_files if video_file_is_a_good_choice(path, file)]
 
 
 
@@ -98,11 +102,26 @@ def getValidVideoFiles():
 
 
 def describe(audio_file_path= "", generator= None):
-    default_boomer_structure = bu.get_boomer_generator_as_dict(generator).get("defaults")    
+    generator = bu.get_boomer_generator_as_dict(generator)
+    default_boomer_structure = generator.get("defaults")
+    default_general_confs = generator.get("general")
 
-    valid_image_files = getValidImageFiles()
-    valid_audio_files = getValidAudioFiles()
-    valid_video_files = getValidVideoFiles()
+    if default_boomer_structure.get("image") is not None and default_boomer_structure.get("image").get("file") is not None :
+        valid_image_files = []
+    else :
+        valid_image_files = getValidImageFiles(ImageFilesDir.get(default_general_confs.get("imagedir")))
+
+    if default_boomer_structure.get("audio") is not None and default_boomer_structure.get("audio").get("file") is not None :
+        valid_audio_files = []
+    else :
+        valid_audio_files = getValidAudioFiles(AudioFilesDir.get(default_general_confs.get("audiodir")))
+
+    if default_boomer_structure.get("video") is not None and default_boomer_structure.get("video").get("file") is not None :
+        valid_video_files = []
+    else :
+        valid_video_files = getValidVideoFiles(VideoFilesDir.get(default_general_confs.get("videodir")))
+
+
 
     model = Model(variables.PATH_MODEL)
     wf = wave.open(audio_file_path, "rb")

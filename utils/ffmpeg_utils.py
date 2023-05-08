@@ -356,8 +356,8 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
             first_file_idx,
             boomin_time_start,
             boomin_time_end,
-            img_width,
-            img_height
+            img_width if img_width else -1,
+            img_height if img_height else -1
         )
 
     tail = boomers[1:]
@@ -374,8 +374,8 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
             idx,
             boomin_time_start,
             boomin_time_end,
-            img_width,
-            img_height
+            img_width if img_width else -1,
+            img_height if img_height else -1
         )
 
     return filter_params
@@ -510,8 +510,8 @@ def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_
             first_file_idx,
             boomin_time_start,
             duration,
-            vid_width,
-            vid_height,
+            vid_width if vid_width else -1,
+            vid_height if vid_height else -1,
             volume
         )
 
@@ -561,8 +561,8 @@ def buildVideoOverlayFilterParams(boomers= [], inp= "[0]", out_v= "[outv]", out_
             idx,
             boomin_time_start,
             duration,
-            vid_width,
-            vid_height,
+            vid_width if vid_width else -1,
+            vid_height if vid_height else -1,
             out_a,
             volume
         )

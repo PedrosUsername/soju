@@ -3,14 +3,16 @@ import requests
 import random
 
 from .settings import variables
-from .enum.Enum import MergeStrategy, Trigger, Position
+from .enum.Enum import MergeStrategy, Trigger, Position, ImageFilesDir, VideoFilesDir, AudioFilesDir
 from . import Boomer as bmr, moviepy_utils as mp
 
 
 
 
-
-
+DEFAULT_IMAGE_DIR = "DEFAULT"
+DEFAULT_AUDIO_DIR = "DEFAULT"
+DEFAULT_VIDEO_DIR = "DEFAULT"
+MIN_RESOLUTION_SIZE = variables.MIN_RESOLUTION_SIZE
 MAX_MEDIA_DELAY = variables.MAX_MEDIA_DELAY
 MIN_MEDIA_DELAY = variables.MIN_MEDIA_DELAY
 DEFAULT_VIDEO_FILE = variables.DEFAULT_VIDEO_FILE
@@ -423,12 +425,12 @@ def getBoomerVideoMergeStrategyForFFMPEG(boomer= None) :
 def getBoomerImageWidthForFFMPEG(boomer, main_clip_width= 0) :
     w = getBoomerImageWidth(boomer)
 
-    if not isinstance(w, int):
+    if not isinstance(w, int) or w < MIN_RESOLUTION_SIZE:
         return DEFAULT_IMAGE_WIDTH
     
     elif (main_clip_width + OVERLAY_SIZE_TOLERANCE) < w :
         return main_clip_width + OVERLAY_SIZE_TOLERANCE
-    
+       
     else:    
         return abs(w)
     
@@ -437,12 +439,12 @@ def getBoomerImageWidthForFFMPEG(boomer, main_clip_width= 0) :
 def getBoomerVideoWidthForFFMPEG(boomer, main_clip_width= 0) :
     w = getBoomerVideoWidth(boomer)
 
-    if not isinstance(w, int):
-
+    if not isinstance(w, int) or w < MIN_RESOLUTION_SIZE:
         return DEFAULT_VIDEO_WIDTH
+    
     elif (main_clip_width + OVERLAY_SIZE_TOLERANCE) < w :
-        
         return main_clip_width + OVERLAY_SIZE_TOLERANCE
+
     else:    
         return abs(w)    
 
@@ -454,7 +456,7 @@ def getBoomerVideoWidthForFFMPEG(boomer, main_clip_width= 0) :
 def getBoomerImageHeightForFFMPEG(boomer= None, main_clip_height= 0):
     h = getBoomerImageHeight(boomer)
 
-    if not isinstance(h, int):
+    if not isinstance(h, int) or h < MIN_RESOLUTION_SIZE:
         return main_clip_height
     
     elif (main_clip_height + OVERLAY_SIZE_TOLERANCE) < h:
@@ -469,12 +471,12 @@ def getBoomerImageHeightForFFMPEG(boomer= None, main_clip_height= 0):
 def getBoomerVideoHeightForFFMPEG(boomer= None, main_clip_height= 0):
     h = getBoomerVideoHeight(boomer)
 
-    if not isinstance(h, int):
-
+    if not isinstance(h, int) or h < MIN_RESOLUTION_SIZE:
         return main_clip_height
+    
     elif (main_clip_height + OVERLAY_SIZE_TOLERANCE) < h:
-
         return main_clip_height + OVERLAY_SIZE_TOLERANCE
+    
     else:    
         return abs(h)    
 
@@ -991,15 +993,14 @@ def getBoomerAudioTriggerDelay(boomer= None) :
 
 
 
-def getDefaultResoTol(default= None) :
+def getDefaultResoTol(general= None) :
     if (
-        not default
-        or not default.get("general")
+        not general
     ):
         return None
     
     else:
-        return default.get("general").get("resotolerance")
+        return general.get("resotolerance")
     
 
 
@@ -1017,26 +1018,81 @@ def getDefaultResoTolForFFMPEG(boomer= None) :
         return rt
     
 
-
-
-
-
-
-
-
-
-
-
-def getDefaultApiName(default= None) :
+def getDefaultImageDir(general= None) :
     if (
-        not default
-        or not default.get("general")
-        or not default.get("general").get("api")
+        not general
     ):
         return None
     
     else:
-        return default.get("general").get("api").get("name")
+        return general.get("imagedir")
+
+
+def getDefaultAudioDir(general= None) :
+    if (
+        not general
+    ):
+        return None
+    
+    else:
+        return general.get("audiodir")
+
+
+def getDefaultVideoDir(general= None) :
+    if (
+        not general
+    ):
+        return None
+    
+    else:
+        return general.get("videodir")        
+    
+
+
+
+
+def getDefaultImageDirForFFMPEG(general= None) :
+    dir = getDefaultImageDir(general)
+
+    if not isinstance(dir, str) or dir not in list(ImageFilesDir.keys()) :
+        return DEFAULT_IMAGE_DIR
+   
+    else :
+        return dir
+
+
+
+def getDefaultAudioDirForFFMPEG(general= None) :
+    dir = getDefaultAudioDir(general)
+
+    if not isinstance(dir, str) or dir not in list(AudioFilesDir.keys()) :
+        return DEFAULT_AUDIO_DIR
+   
+    else :
+        return dir
+
+
+def getDefaultVideoDirForFFMPEG(general= None) :
+    dir = getDefaultVideoDir(general)
+
+    if not isinstance(dir, str) or dir not in list(VideoFilesDir.keys()) :
+        return DEFAULT_VIDEO_DIR
+   
+    else :
+        return dir
+
+
+
+
+
+def getDefaultApiName(general= None) :
+    if (
+        not general
+    ):
+        return None
+    
+    else:
+        return general.get("api").get("name")
     
 
 
@@ -1047,8 +1103,8 @@ def getDefaultApiName(default= None) :
 
 
 
-def getDefaultApiNameForFFMPEG(boomer= None ) :
-    name = getDefaultApiName(boomer)
+def getDefaultApiNameForFFMPEG(general= None ) :
+    name = getDefaultApiName(general)
 
     if not isinstance(name, str) :
         return DEFAULT_API_NAME
@@ -1069,16 +1125,14 @@ def getDefaultApiNameForFFMPEG(boomer= None ) :
 
 
 
-def getDefaultApiModel(default= None) :
+def getDefaultApiModel(general= None) :
     if (
-        not default
-        or not default.get("general")
-        or not default.get("general").get("api")
+        not general
     ):
         return DEFAULT_API_MODEL
     
     else:
-        return default.get("general").get("api").get("model")    
+        return general.get("api").get("model")    
 
 
 
@@ -1088,8 +1142,8 @@ def getDefaultApiModel(default= None) :
 
 
 
-def getDefaultApiModelForFFMPEG(boomer= None) :
-    model = getDefaultApiModel(boomer)
+def getDefaultApiModelForFFMPEG(general= None) :
+    model = getDefaultApiModel(general)
 
     if not isinstance(model, str) :
         return DEFAULT_API_MODEL
@@ -1166,6 +1220,7 @@ def get_boomer_generator_as_str(generator= None) :
         generator is not None
         and generator.get("defaults") is not None
     ) :
+        general = generator.get("general")
         default = generator.get("defaults")
 
         if default.get("image") :
@@ -1175,9 +1230,13 @@ def get_boomer_generator_as_str(generator= None) :
         if default.get("audio") :
             addaud = True                        
 
-        dresotol = getDefaultResoTolForFFMPEG(default)
-        dapin = getDefaultApiNameForFFMPEG(default)
-        dapim = getDefaultApiModelForFFMPEG(default)
+        dresotol = getDefaultResoTolForFFMPEG(general)
+        imgdir = getDefaultImageDirForFFMPEG(general)
+        auddir = getDefaultAudioDirForFFMPEG(general)
+        viddir = getDefaultVideoDirForFFMPEG(general)
+
+        dapin = getDefaultApiNameForFFMPEG(general)
+        dapim = getDefaultApiModelForFFMPEG(general)
 
         dbt = getBoomTriggerForFFMPEG(default)
 
@@ -1207,6 +1266,10 @@ def get_boomer_generator_as_str(generator= None) :
 
     else :
         addvid = True
+
+        imgdir = DEFAULT_IMAGE_DIR        
+        auddir = DEFAULT_AUDIO_DIR
+        viddir = DEFAULT_VIDEO_DIR
 
         dresotol = variables.OVERLAY_SIZE_TOLERANCE
         dapin = variables.DEFAULT_API_NAME
@@ -1240,6 +1303,11 @@ def get_boomer_generator_as_str(generator= None) :
 
 
     dresotol = "null" if dresotol is None else as_json_string(dresotol)
+
+    imgdir = "null" if imgdir is None else as_json_string(imgdir)
+    auddir = "null" if auddir is None else as_json_string(auddir)
+    viddir = "null" if viddir is None else as_json_string(viddir)
+
     dapin = "null" if dapin is None else as_json_string(dapin)
     dapim = "null" if dapim is None else as_json_string(dapim)
 
@@ -1332,11 +1400,10 @@ f"""
                     "general": {{
                         "resotolerance": {dresotol},
                         
-                        "imagedir": "default",
-                        "audiodir": "default",
-                        "videodir": "default",
-                        "defaultsetshare": 0.5,
-
+                        "imagedir": {imgdir},
+                        "audiodir": {auddir},
+                        "videodir": {viddir},
+                        
                         "api": {{
                             "name": {dapin},
                             "model": {dapim}
@@ -1398,7 +1465,7 @@ def buildBoomer(obj, image_files= [], audio_files= [], video_files= [], default=
 
     if default.get("image") is not None :
         obj["image"] = {
-            "file": getBoomerImageFile(default),
+            "file": getBoomerImageFileForFFMPEG(default, image_files),
             "conf": {
                 "mergestrategy": getBoomerImageMergeStrategy(default),
                 "duration": getBoomerImageDuration(default),
@@ -1414,7 +1481,7 @@ def buildBoomer(obj, image_files= [], audio_files= [], video_files= [], default=
 
     if default.get("audio") is not None :
         obj["audio"] = {
-            "file": getBoomerAudioFile(default),
+            "file": getBoomerAudioFileForFFMPEG(default, audio_files),
             "conf": {
                 "duration": getBoomerAudioDuration(default),
                 "triggerdelay": getBoomerAudioTriggerDelay(default),
@@ -1426,7 +1493,7 @@ def buildBoomer(obj, image_files= [], audio_files= [], video_files= [], default=
 
     if default.get("video") is not None :
         obj["video"] = {
-            "file": getBoomerVideoFile(default),
+            "file": getBoomerVideoFileForFFMPEG(default, video_files),
             "conf": {
                 "mergestrategy": getBoomerVideoMergeStrategy(default),
                 "duration": getBoomerVideoDuration(default),

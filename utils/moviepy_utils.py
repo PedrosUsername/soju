@@ -26,7 +26,7 @@ def init_og_clip_params(clip_path= None) :
 
     clip = VideoFileClip( clip_path )
 
-    if clip.duration > 60 :
+    if clip.duration > 300 :
         raise Exception("media duration exceeds the current limit")
 
     og_clip_params = {

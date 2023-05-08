@@ -26,3 +26,25 @@ Trigger = {
     "end": "END",
     "END": "END"
 }
+
+
+ImageFilesDir = {
+    "default": "./assets/image/default/",
+    "DEFAULT": "./assets/image/default/",
+    "araara": "./assets/image/mommy/",
+    "ARAARA": "./assets/image/mommy/",
+    "pettan": "./assets/image/mommy/",
+    "PETTAN": "./assets/image/mommy/",
+}
+
+
+AudioFilesDir = {
+    "default": "./assets/audio/default/",
+    "DEFAULT": "./assets/audio/default/",
+}
+
+
+VideoFilesDir = {
+    "default": "./assets/video/default/",
+    "DEFAULT": "./assets/video/default/",
+}
