@@ -2,6 +2,7 @@ import subprocess
 
 from .settings import variables
 from . import moviepy_utils as mu, boomer_utils as bu
+from .enum.Enum import ImageFilesDir, VideoFilesDir, AudioFilesDir
 
 
 
@@ -9,9 +10,6 @@ FFMPEG_PATH = variables.FFMPEG_PATH
 FFMPEG_OUTPUT_SPECS = variables.FFMPEG_OUTPUT_SPECS
 FFMPEG_FPS = int(variables.FFMPEG_FPS)
 FFMPEG_AR = int(variables.FFMPEG_SAMPLE_RATE)
-IMAGE_FOLDER = variables.DEFAULT_IMAGE_FOLDER
-AUDIO_FOLDER = variables.DEFAULT_AUDIO_FOLDER
-VIDEO_FOLDER = variables.DEFAULT_VIDEO_FOLDER
 
 
 
@@ -308,23 +306,23 @@ def buildMediaInputs(
     media_inputs = []
     
     for file in video_files_compose:
-        file_name = VIDEO_FOLDER + file["video"]["file"] if not file["video"]["file"].startswith("http") else file["video"]["file"]
+        file_name = VideoFilesDir.get(bu.getBoomerDefaultVideoDirForFFMPEG(file)) + file["video"]["file"] if not file["video"]["file"].startswith("https://") else file["video"]["file"]
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for file in image_files_compose:
-        file_name = IMAGE_FOLDER + file["image"]["file"] if not file["image"]["file"].startswith("http") else file["image"]["file"]        
+        file_name = ImageFilesDir.get(bu.getBoomerDefaultImageDirForFFMPEG(file)) + file["image"]["file"] if not file["image"]["file"].startswith("https://") else file["image"]["file"]        
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for file in audio_files:
-        file_name = AUDIO_FOLDER + file["audio"]["file"] if not file["audio"]["file"].startswith("http") else file["audio"]["file"]        
+        file_name = AudioFilesDir.get(bu.getBoomerDefaultAudioDirForFFMPEG(file)) + file["audio"]["file"] if not file["audio"]["file"].startswith("https://") else file["audio"]["file"]        
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for file in video_files_concat:
-        file_name = VIDEO_FOLDER + file["video"]["file"] if not file["video"]["file"].startswith("http") else file["video"]["file"]        
+        file_name = VideoFilesDir.get(bu.getBoomerDefaultVideoDirForFFMPEG(file)) + file["video"]["file"] if not file["video"]["file"].startswith("https://") else file["video"]["file"]        
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for file in image_files_concat:
-        file_name = IMAGE_FOLDER + file["image"]["file"] if not file["image"]["file"].startswith("http") else file["image"]["file"]        
+        file_name = ImageFilesDir.get(bu.getBoomerDefaultImageDirForFFMPEG(file)) + file["image"]["file"] if not file["image"]["file"].startswith("https://") else file["image"]["file"]        
         media_inputs = media_inputs + ["-i"] + [file_name]        
 
 

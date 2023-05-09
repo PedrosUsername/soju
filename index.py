@@ -396,33 +396,33 @@ async def on_message(message) :
                 ephemeral = tmp_dir + "/"
                 main_clip_url = await get_main_clip_url_from_referenced_message(message, allow_audio= True)                    
 
-                #try :
-                main_clip_name = moviepy_utils.get_base_file_name_from(main_clip_url)
-                
-                if main_clip_url is None :
-                    raise Exception("clip not found")
+                try :
+                    main_clip_name = moviepy_utils.get_base_file_name_from(main_clip_url)
+                    
+                    if main_clip_url is None :
+                        raise Exception("clip not found")
 
-                full_main_clip_file_path = ephemeral + main_clip_name + ".mp4"
-                full_aux_audio_file_path = ephemeral + main_clip_name + ".wav"
-                full_new_soju_file_path = ephemeral + main_clip_name + ".soju.json"                    
-                
-                ffmpeg_utils.download_clip_and_audio(
-                    from_= main_clip_url,
-                    to_v= full_main_clip_file_path,
-                    to_a= full_aux_audio_file_path
-                )
+                    full_main_clip_file_path = ephemeral + main_clip_name + ".mp4"
+                    full_aux_audio_file_path = ephemeral + main_clip_name + ".wav"
+                    full_new_soju_file_path = ephemeral + main_clip_name + ".soju.json"                    
+                    
+                    ffmpeg_utils.download_clip_and_audio(
+                        from_= main_clip_url,
+                        to_v= full_main_clip_file_path,
+                        to_a= full_aux_audio_file_path
+                    )
 
-                moviepy_utils.init_og_clip_params(full_main_clip_file_path)
+                    moviepy_utils.init_og_clip_params(full_main_clip_file_path)
 
-                boomers = vosk_utils.describe(
-                    audio_file_path= full_aux_audio_file_path,
-                    generator= bu.get_boomer_generator_from_dict(sojufile)
-                )
+                    boomers = vosk_utils.describe(
+                        audio_file_path= full_aux_audio_file_path,
+                        generator= bu.get_boomer_generator_from_dict(sojufile)
+                    )
 
-                build_sojufile_for_discord(full_new_soju_file_path, boomers)
-                brand_new_file = discord.File(full_new_soju_file_path)
-                #except Exception as err :
-                #    feedback_msg = f"💀 Audio Description Error:\n\n👉 File: {main_clip_name}\n\n🤖 {err}"
+                    build_sojufile_for_discord(full_new_soju_file_path, boomers)
+                    brand_new_file = discord.File(full_new_soju_file_path)
+                except Exception as err :
+                    feedback_msg = f"💀 Audio Description Error"
 
                 await message.author.send(feedback_msg, file= brand_new_file)
 
@@ -480,7 +480,7 @@ async def on_message(message) :
                     )
                     brand_new_video = discord.File(full_main_clip_file_path)
                 except Exception as err :
-                    feedback_msg = f"💀 Video Edition Error:\n\n👉 File: {main_clip_name}\n\n🤖 {err}"
+                    feedback_msg = f"💀 Video Edition Error:\n\n👉 {err}"
 
                 await message.author.send(feedback_msg, file= brand_new_video)
 

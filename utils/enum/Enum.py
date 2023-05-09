@@ -21,10 +21,10 @@ Position = {
 
 
 Trigger = {
-    "start": "START",
-    "START": "START",
-    "end": "END",
-    "END": "END"
+    "start": "start",
+    "START": "start",
+    "end": "end",
+    "END": "end"
 }
 
 
@@ -33,8 +33,8 @@ ImageFilesDir = {
     "DEFAULT": "./assets/image/default/",
     "araara": "./assets/image/mommy/",
     "ARAARA": "./assets/image/mommy/",
-    "pettan": "./assets/image/mommy/",
-    "PETTAN": "./assets/image/mommy/",
+    "pettan": "./assets/image/pettan/",
+    "PETTAN": "./assets/image/pettan/",
 }
 
 

@@ -17,12 +17,9 @@ def image_file_is_a_good_choice(path= "", image_file= ""):
     return os.path.isfile('{0}{1}'.format(path, image_file)) and image_file not in variables.IGNORE_IMAGE_FILE_LIST
 
 def audio_file_is_a_good_choice(path= "", audio_file= ""):
-    print('aaaaaaaaaaaaa: {0}'.format(audio_file))    
     return os.path.isfile('{0}{1}'.format(path, audio_file)) and audio_file not in variables.IGNORE_AUDIO_FILE_LIST
 
 def video_file_is_a_good_choice(path= "", video_file= ""):
-    print('aaaaaaaaaaaaa: {0}'.format(video_file))
-
     return os.path.isfile('{0}{1}'.format(path, video_file)) and video_file not in variables.IGNORE_VIDEO_FILE_LIST
 
 def getFile(files= []):
@@ -104,22 +101,21 @@ def getValidVideoFiles(path= None):
 def describe(audio_file_path= "", generator= None):
     generator = bu.get_boomer_generator_as_dict(generator)
     default_boomer_structure = generator.get("defaults")
-    default_general_confs = generator.get("general")
 
     if default_boomer_structure.get("image") is not None and default_boomer_structure.get("image").get("file") is not None :
         valid_image_files = []
     else :
-        valid_image_files = getValidImageFiles(ImageFilesDir.get(default_general_confs.get("imagedir")))
+        valid_image_files = getValidImageFiles(ImageFilesDir.get( bu.getBoomerDefaultImageDirForFFMPEG(default_boomer_structure) ))
 
     if default_boomer_structure.get("audio") is not None and default_boomer_structure.get("audio").get("file") is not None :
         valid_audio_files = []
     else :
-        valid_audio_files = getValidAudioFiles(AudioFilesDir.get(default_general_confs.get("audiodir")))
+        valid_audio_files = getValidAudioFiles(AudioFilesDir.get( bu.getBoomerDefaultAudioDirForFFMPEG(default_boomer_structure) ))
 
     if default_boomer_structure.get("video") is not None and default_boomer_structure.get("video").get("file") is not None :
         valid_video_files = []
     else :
-        valid_video_files = getValidVideoFiles(VideoFilesDir.get(default_general_confs.get("videodir")))
+        valid_video_files = getValidVideoFiles(VideoFilesDir.get( bu.getBoomerDefaultVideoDirForFFMPEG(default_boomer_structure) ))
 
 
 
