@@ -42,7 +42,7 @@ DEFAULT_IMAGE_POSITION_Y = "CENTER"                       # https://zulko.github
 # ########################################## soju.json AUDIO CONF.
 
 DEFAULT_AUDIO_FOLDER = "./assets/audio/default/"
-ALLOW_AUDIO_REPETITION = False
+ALLOW_AUDIO_REPETITION = True
 IGNORE_AUDIO_FILE_LIST = []
 
 DEFAULT_AUDIO_FILE = None

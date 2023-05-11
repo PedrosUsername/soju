@@ -363,7 +363,7 @@ def getBoomerImagePosXForFFMPEG(boomer= None) :
         return DEFAULT_POSITION
     
     else :
-        return x
+        return Position.get(x)
     
 
 
@@ -375,7 +375,7 @@ def getBoomerImagePosYForFFMPEG(boomer= None) :
         return DEFAULT_POSITION
    
     else :
-        return y    
+        return Position.get(y)     
     
 
 
@@ -386,7 +386,7 @@ def getBoomerVideoPosXForFFMPEG(boomer= None) :
         return DEFAULT_POSITION
     
     else :
-        return x
+        return Position.get(x)
     
 
 def getBoomerVideoPosYForFFMPEG(boomer= None) :
@@ -396,7 +396,7 @@ def getBoomerVideoPosYForFFMPEG(boomer= None) :
         return DEFAULT_POSITION
    
     else :
-        return y    
+        return Position.get(y)    
 
 
 
@@ -409,7 +409,7 @@ def getBoomerImageMergeStrategyForFFMPEG(boomer= None) :
         return DEFAULT_IMAGE_MERGESTRATEGY
    
     else :
-        return ms
+        return MergeStrategy.get(ms)
     
 
 
@@ -420,7 +420,7 @@ def getBoomerVideoMergeStrategyForFFMPEG(boomer= None) :
         return DEFAULT_VIDEO_MERGESTRATEGY
    
     else :
-        return ms    
+        return MergeStrategy.get(ms)    
 
 
 

@@ -15,6 +15,8 @@ Position = {
     "BOTTOM": "BOTTOM",
     "MID": "CENTER",
     "mid": "CENTER",
+    "bot": "BOTTOM",
+    "BOT": "BOTTOM",
     "random": "RANDOM",
     "RANDOM": "RANDOM"
 }
@@ -31,8 +33,8 @@ Trigger = {
 ImageFilesDir = {
     "default": "./assets/image/default/",
     "DEFAULT": "./assets/image/default/",
-    "araara": "./assets/image/mommy/",
-    "ARAARA": "./assets/image/mommy/",
+    "mommy": "./assets/image/mommy/",
+    "MOMMY": "./assets/image/mommy/",
     "pettan": "./assets/image/pettan/",
     "PETTAN": "./assets/image/pettan/",
 }
