@@ -621,6 +621,41 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
         vid_width = bu.getBoomerVideoWidthForFFMPEG(boomer, main_clip_width)
         vid_height = bu.getBoomerVideoHeightForFFMPEG(boomer, main_clip_height)
 
+        positionx = bu.getBoomerVideoPosXForFFMPEG(boomer)
+        positiony = bu.getBoomerVideoPosYForFFMPEG(boomer)        
+
+        if positionx == Position.get("TOP") :
+            posx = "x=main_w-overlay_w-12"
+        elif positionx == Position.get("CENTER") :
+            posx = "x=main_w/2-overlay_w/2"
+        elif positionx == Position.get("BOTTOM") :
+            posx = "x=12"
+        elif positionx == Position.get("RANDOM") :
+            if main_clip_width and vid_width :
+                randomx = random.choice(range(int(float(0.8 * main_clip_width - vid_width))))
+            elif main_clip_width and vid_height :
+                randomx = random.choice(range(int(float(0.8 * main_clip_width - vid_height))))
+            else :
+                randomx = 12
+            for _ in range(8) :
+                print(f"randomx: {randomx}, main_w: {main_clip_width}, img_w: {vid_width}", end="\n")
+            posx = "x={}".format(randomx)            
+
+        if positiony == Position.get("TOP") :
+            posy = "y=12"
+        elif positiony == Position.get("CENTER") :
+            posy = "y=main_h/2-overlay_h/2"
+        elif positiony == Position.get("BOTTOM") :
+            posy = "y=main_h-overlay_h-12"
+        elif positiony == Position.get("RANDOM") :
+            if main_clip_height and vid_height :
+                randomy = random.choice(range(main_clip_height - vid_height))
+            else :
+                randomy = 12
+            for _ in range(8) :
+                print(f"randomy: {randomy}, main_h: {main_clip_height}, img_h: {vid_height}", end="\n")
+            posy = "y={}".format(randomy)            
+
         boomin_time_start = bu.getBoomerBoominTimeForFFMPEG(boomer)
         duration = bu.getBoomerVideoDurationForFFMPEG(boomer)
         volume = bu.getBoomerVideoVolumeForFFMPEG(boomer)
@@ -638,7 +673,7 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
 [{first_file_idx}] trim= end= {duration}, scale= w= {vid_width if vid_width else -1}:h= {vid_height if vid_height else -1}, setpts=PTS-STARTPTS
 [b_video];
 
-[uppv] [b_video] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, 0, {duration})'
+[uppv] [b_video] overlay= {posx}:{posy}:enable='between(t, 0, {duration})'
 [uppv_mix];
 
 {inp_a} asplit=2 
@@ -664,6 +699,42 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
         vid_width = bu.getBoomerVideoWidthForFFMPEG(boomer, main_clip_width)
         vid_height = bu.getBoomerVideoHeightForFFMPEG(boomer, main_clip_height)     
 
+        positionx = bu.getBoomerVideoPosXForFFMPEG(boomer)
+        positiony = bu.getBoomerVideoPosYForFFMPEG(boomer)        
+
+        if positionx == Position.get("TOP") :
+            posx = "x=main_w-overlay_w-12"
+        elif positionx == Position.get("CENTER") :
+            posx = "x=main_w/2-overlay_w/2"
+        elif positionx == Position.get("BOTTOM") :
+            posx = "x=12"
+        elif positionx == Position.get("RANDOM") :
+            if main_clip_width and vid_width :
+                randomx = random.choice(range(int(float(0.8 * main_clip_width - vid_width))))
+            elif main_clip_width and vid_height :
+                randomx = random.choice(range(int(float(0.8 * main_clip_width - vid_height))))
+            else :
+                randomx = 12
+            for _ in range(8) :
+                print(f"randomx: {randomx}, main_w: {main_clip_width}, img_w: {vid_width}", end="\n")
+            posx = "x={}".format(randomx)            
+
+        if positiony == Position.get("TOP") :
+            posy = "y=12"
+        elif positiony == Position.get("CENTER") :
+            posy = "y=main_h/2-overlay_h/2"
+        elif positiony == Position.get("BOTTOM") :
+            posy = "y=main_h-overlay_h-12"
+        elif positiony == Position.get("RANDOM") :
+            if main_clip_height and vid_height :
+                randomy = random.choice(range(main_clip_height - vid_height))
+            else :
+                randomy = 12
+            for _ in range(8) :
+                print(f"randomy: {randomy}, main_h: {main_clip_height}, img_h: {vid_height}", end="\n")
+            posy = "y={}".format(randomy)            
+
+
         boomin_time_start = bu.getBoomerBoominTimeForFFMPEG(boomer)
         duration = bu.getBoomerVideoDurationForFFMPEG(boomer)
         volume = bu.getBoomerVideoVolumeForFFMPEG(boomer)        
@@ -681,7 +752,7 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
 [{idx}] trim= end= {duration}, scale= w= {vid_width if vid_width else -1}:h= {vid_height if vid_height else -1}, setpts=PTS-STARTPTS
 [b_video];
 
-[uppv] [b_video] overlay= x=main_w/2-overlay_w/2:y=main_h/2-overlay_h/2:enable='between(t, 0, {duration})'
+[uppv] [b_video] overlay= {posx}:{posy}:enable='between(t, 0, {duration})'
 [uppv_mix];
 
 {out_a} asplit=2 
