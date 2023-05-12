@@ -618,6 +618,7 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
 
     head = boomers[:1]
     for boomer in head:
+        
         vid_width = bu.getBoomerVideoWidthForFFMPEG(boomer, main_clip_width)
         vid_height = bu.getBoomerVideoHeightForFFMPEG(boomer, main_clip_height)
 
@@ -659,6 +660,21 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
         boomin_time_start = bu.getBoomerBoominTimeForFFMPEG(boomer)
         duration = bu.getBoomerVideoDurationForFFMPEG(boomer)
         volume = bu.getBoomerVideoVolumeForFFMPEG(boomer)
+        if volume > 0 :
+            audio_merge_params = f"""
+[uppa];
+
+[{first_file_idx}] atrim= end= {duration}, volume= {volume}, asetpts=PTS-STARTPTS
+[b_audio];
+
+[uppa] [b_audio] amix= dropout_transition=0, dynaudnorm
+[uppa_mix];            
+"""
+        else :
+            audio_merge_params = f"""
+[uppa_mix];            
+"""
+
         filter_params = filter_params + f"""        
 
 {inp_v} split=2 
@@ -683,13 +699,7 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
 [bota];
 
 [fin4] atrim= start= {boomin_time_start}, asetpts=PTS-STARTPTS
-[uppa];
-
-[{first_file_idx}] atrim= end= {duration}, volume= {volume}, asetpts=PTS-STARTPTS
-[b_audio];
-
-[uppa] [b_audio] amix= dropout_transition=0, dynaudnorm
-[uppa_mix];
+{audio_merge_params}
  
 [botv] [bota] [uppv_mix] [uppa_mix] concat=n=2:v=1:a=1
 """
@@ -738,6 +748,21 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
         boomin_time_start = bu.getBoomerBoominTimeForFFMPEG(boomer)
         duration = bu.getBoomerVideoDurationForFFMPEG(boomer)
         volume = bu.getBoomerVideoVolumeForFFMPEG(boomer)        
+        if volume > 0 :
+            audio_merge_params = f"""
+[uppa];
+
+[{first_file_idx}] atrim= end= {duration}, volume= {volume}, asetpts=PTS-STARTPTS
+[b_audio];
+
+[uppa] [b_audio] amix= dropout_transition=0, dynaudnorm
+[uppa_mix];            
+"""
+        else :
+            audio_merge_params = f"""
+[uppa_mix];            
+"""
+
         filter_params = filter_params + f"""{out_v}{out_a};
 
 {out_v} split=2 
@@ -762,13 +787,7 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
 [bota];
 
 [fin4] atrim= start= {boomin_time_start}, asetpts=PTS-STARTPTS
-[uppa];
-
-[{idx}] atrim= end= {duration}, volume= {volume}, asetpts=PTS-STARTPTS
-[b_audio];
-
-[uppa] [b_audio] amix= dropout_transition=0, dynaudnorm
-[uppa_mix];
+{audio_merge_params}
  
 [botv] [bota] [uppv_mix] [uppa_mix] concat=n=2:v=1:a=1
 """

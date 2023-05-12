@@ -43,6 +43,10 @@ ImageFilesDir = {
 AudioFilesDir = {
     "default": "./assets/audio/default/",
     "DEFAULT": "./assets/audio/default/",
+    "fart": "./assets/audio/fart/",
+    "FART": "./assets/audio/fart/",
+    "music": "./assets/audio/music/",
+    "MUSIC": "./assets/audio/music/",
 }
 
 
