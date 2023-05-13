@@ -256,36 +256,6 @@ async def make_it_goofy(message= None, tmp_dir= "./", sojufile= None) :
 
 
 
-def build_sojufile_for_discord(outputname= "sojufile.soju.json", boomers= []) :
-
-        with open(outputname, 'w') as f :
-            f.writelines(
-f"""
-{{
-\t"soju": {{
-     
-\t\t"boomers": [
-
-\t\t],
-
-\t\t"generated": [
-"""
-            )
-            
-            for i, word in enumerate(boomers):
-                comma = ',' if i < (len(boomers) - 1) else ''
-                f.writelines('\t\t\t{0}{1}\n'.format(word.to_string(), comma))
-
-            f.writelines(
-"""
-\t\t]
-
-\t}
-}            
-"""         )
-
-        
-        return outputname
 
 
 
@@ -396,33 +366,33 @@ async def on_message(message) :
                 ephemeral = tmp_dir + "/"
                 main_clip_url = await get_main_clip_url_from_referenced_message(message, allow_audio= True)                    
 
-                try :
-                    main_clip_name = moviepy_utils.get_base_file_name_from(main_clip_url)
-                    
-                    if main_clip_url is None :
-                        raise Exception("clip not found")
+                # try :
+                main_clip_name = moviepy_utils.get_base_file_name_from(main_clip_url)
+                
+                if main_clip_url is None :
+                    raise Exception("clip not found")
 
-                    full_main_clip_file_path = ephemeral + main_clip_name + ".mp4"
-                    full_aux_audio_file_path = ephemeral + main_clip_name + ".wav"
-                    full_new_soju_file_path = ephemeral + main_clip_name + ".soju.json"                    
-                    
-                    ffmpeg_utils.download_clip_and_audio(
-                        from_= main_clip_url,
-                        to_v= full_main_clip_file_path,
-                        to_a= full_aux_audio_file_path
-                    )
+                full_main_clip_file_path = ephemeral + main_clip_name + ".mp4"
+                full_aux_audio_file_path = ephemeral + main_clip_name + ".wav"
+                full_new_soju_file_path = ephemeral + main_clip_name + ".soju.json"                    
+                
+                ffmpeg_utils.download_clip_and_audio(
+                    from_= main_clip_url,
+                    to_v= full_main_clip_file_path,
+                    to_a= full_aux_audio_file_path
+                )
 
-                    moviepy_utils.init_og_clip_params(full_main_clip_file_path)
+                moviepy_utils.init_og_clip_params(full_main_clip_file_path)
 
-                    boomers = vosk_utils.describe(
-                        audio_file_path= full_aux_audio_file_path,
-                        generator= bu.get_boomer_generator_from_dict(sojufile)
-                    )
+                boomers = vosk_utils.describe(
+                    audio_file_path= full_aux_audio_file_path,
+                    generator= bu.get_boomer_generator_from_dict(sojufile)
+                )
 
-                    build_sojufile_for_discord(full_new_soju_file_path, boomers)
-                    brand_new_file = discord.File(full_new_soju_file_path)
-                except Exception as err :
-                    feedback_msg = f"💀 Audio Description Error"
+                bu.build_sojufile_for_discord(full_new_soju_file_path, boomers)
+                brand_new_file = discord.File(full_new_soju_file_path)
+                #except Exception as err :
+                #    feedback_msg = f"💀 Audio Description Error"
 
                 await message.author.send(feedback_msg, file= brand_new_file)
 
@@ -441,46 +411,46 @@ async def on_message(message) :
                 ephemeral = tmp_dir + "/"
                 main_clip_url = await get_main_clip_url_from_referenced_message(message, allow_audio= True)
 
-                try :
-                    boomers = bu.get_boomers_from_dict(sojufile)
-                    main_clip_name = moviepy_utils.get_base_file_name_from(main_clip_url)
+                #try :
+                boomers = bu.get_boomers_from_dict(sojufile)
+                main_clip_name = moviepy_utils.get_base_file_name_from(main_clip_url)
 
-                    if len(boomers) < 1 :
-                        raise Exception("boomers list is empty")
+                if len(boomers) < 1 :
+                    raise Exception("boomers list is empty")
 
-                    if main_clip_url is None :
-                        raise Exception("clip not found")
-                    
+                if main_clip_url is None :
+                    raise Exception("clip not found")
+                
 
-                    full_main_clip_file_path = ephemeral + main_clip_name + ".mp4"
-                    full_main_clip_file_path_copy = ephemeral + main_clip_name + "_copy.mp4"
+                full_main_clip_file_path = ephemeral + main_clip_name + ".mp4"
+                full_main_clip_file_path_copy = ephemeral + main_clip_name + "_copy.mp4"
 
-                    ffmpeg_utils.copy(
-                        from_= main_clip_url,
-                        to_= full_main_clip_file_path_copy
-                    )
+                ffmpeg_utils.copy(
+                    from_= main_clip_url,
+                    to_= full_main_clip_file_path_copy
+                )
 
-                    moviepy_utils.init_og_clip_params(full_main_clip_file_path_copy)
+                moviepy_utils.init_og_clip_params(full_main_clip_file_path_copy)
 
-                    boomers_top, boomers_mid, boomers_bot = bu.filterBoomers(
-                        og_clip_duration= moviepy_utils.get_og_clip_params().get("duration"),
-                        boomers= boomers
-                    )
+                boomers_top, boomers_mid, boomers_bot = bu.filterBoomers(
+                    og_clip_duration= moviepy_utils.get_og_clip_params().get("duration"),
+                    boomers= boomers
+                )
 
-                    params= ffmpeg_utils.buildCall(
-                        full_main_clip_file_path,
-                        boomers_mid
-                    )
+                params = ffmpeg_utils.buildCall(
+                    full_main_clip_file_path,
+                    boomers_mid
+                )
 
-                    for p in params :
-                        print(p, end= "\n\n")
+                for p in params :
+                    print(p, end= "\n\n")
 
-                    ffmpeg_utils.executeFfmpegCall(
-                        params= params
-                    )
-                    brand_new_video = discord.File(full_main_clip_file_path)
-                except Exception as err :
-                    feedback_msg = f"💀 Video Edition Error:\n\n👉 {err}"
+                ffmpeg_utils.executeFfmpegCall(
+                    params= params
+                )
+                brand_new_video = discord.File(full_main_clip_file_path)
+                #except Exception as err :
+                #    feedback_msg = f"💀 Video Edition Error:\n\n👉 {err}"
 
                 await message.author.send(feedback_msg, file= brand_new_video)
 

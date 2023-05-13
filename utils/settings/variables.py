@@ -1,6 +1,7 @@
 # start   -> boom will be inserted at ["boomers"]["word"]["start"] seconds
 # end     -> boom will be inserted at ["boomers"]["word"]["end"] seconds
 DEFAULT_BOOM_TRIGGER = "START"
+DEFAULT_BOOMIN_TIME = 0
 
 
 
@@ -20,7 +21,7 @@ IGNORE_IMAGE_FILE_LIST = []
 
 DEFAULT_IMAGE_FILE = None
 
-DEFAULT_IMAGE_DURATION = 0.3
+DEFAULT_IMAGE_DURATION = 0.8
 DEFAULT_IMAGE_TRIGGER_DELAY = 0
 
 DEFAULT_IMAGE_RESOLUTION_HEIGHT = 1080               # 1080 px | 0 | -n
@@ -47,7 +48,7 @@ IGNORE_AUDIO_FILE_LIST = []
 
 DEFAULT_AUDIO_FILE = None
 
-DEFAULT_AUDIO_DURATION = 0.3
+DEFAULT_AUDIO_DURATION = 0.8
 DEFAULT_AUDIO_TRIGGER_DELAY = 0
 DEFAULT_AUDIO_VOLUME = 1
 
@@ -80,7 +81,7 @@ IGNORE_VIDEO_FILE_LIST = []
 
 DEFAULT_VIDEO_FILE = None
 
-DEFAULT_VIDEO_DURATION = 0.3
+DEFAULT_VIDEO_DURATION = 0.8
 DEFAULT_VIDEO_TRIGGER_DELAY = 0
 DEFAULT_VIDEO_VOLUME = 0
 
@@ -106,7 +107,7 @@ DEFAULT_API_MODEL = "en-128"
 OUTPUT_RESOLUTION_HEIGHT = 0               # http://trac.ffmpeg.org/wiki/Scaling
 OUTPUT_RESOLUTION_WIDTH = 0                # 1920 px | -n | 0
 
-PATH_MODEL = "/home/pedro/Videos/sojubot/models/en-model"   
+PATH_MODEL = "/home/pedro/Downloads/sojubot/models/en-model"   
 DEFAULT_OUTPUT_PATH = ""
 PATH_DEFAULT_JSON_FILE = "./assets/json/"
 
@@ -164,6 +165,8 @@ FFMPEG_OUTPUT_SPECS=  [
 # program variables
 TMP_AUDIO_FILE_NAME = "tmp_audio.wav"
 DEFAULT_TMP_FILE_PATH = "./utils/settings/tmp/"
+
+# limiters
 MIN_MEDIA_VOLUME = 0
 MIN_MEDIA_INSERT_DURATION = 0
 MAX_MEDIA_INSERT_DURATION = 8

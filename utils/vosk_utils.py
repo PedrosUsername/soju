@@ -54,7 +54,7 @@ def getFile(files= []):
 
 
 
-def getValidImageFiles(path= None):
+def getValidImageFiles(path= None) :
     image_files = os.listdir(path)
 
     if variables.DEFAULT_IMAGE_FILE != None:
@@ -63,7 +63,7 @@ def getValidImageFiles(path= None):
         return [file for file in image_files if image_file_is_a_good_choice(path, file)]
 
 
-def getValidAudioFiles(path= None):
+def getValidAudioFiles(path= None) :
     audio_files = os.listdir(path)
 
     if variables.DEFAULT_AUDIO_FILE != None:
@@ -72,7 +72,7 @@ def getValidAudioFiles(path= None):
         return [file for file in audio_files if audio_file_is_a_good_choice(path, file)]    
 
 
-def getValidVideoFiles(path= None):
+def getValidVideoFiles(path= None) :
     video_files = os.listdir(path)
 
     if variables.DEFAULT_VIDEO_FILE != None:
@@ -102,22 +102,39 @@ def describe(audio_file_path= "", generator= None):
     generator = bu.get_boomer_generator_as_dict(generator)
     default_boomer_structure = generator.get("defaults")
 
-    if default_boomer_structure.get("image") is not None and default_boomer_structure.get("image").get("file") is not None :
-        valid_image_files = []
-    else :
-        valid_image_files = getValidImageFiles(ImageFilesDir.get( bu.getBoomerDefaultImageDirForFFMPEG(default_boomer_structure) ))
+    valid_image_files_by_dir = {}
+    valid_audio_files_by_dir = {}
+    valid_video_files_by_dir = {}
 
-    if default_boomer_structure.get("audio") is not None and default_boomer_structure.get("audio").get("file") is not None :
-        valid_audio_files = []
-    else :
-        valid_audio_files = getValidAudioFiles(AudioFilesDir.get( bu.getBoomerDefaultAudioDirForFFMPEG(default_boomer_structure) ))
+    if default_boomer_structure.get("image") :
+        for img_param in default_boomer_structure.get("image") :
+            img_param_dir = bu.getBoomerImageParamDirForFFMPEG(img_param)
 
-    if default_boomer_structure.get("video") is not None and default_boomer_structure.get("video").get("file") is not None :
-        valid_video_files = []
-    else :
-        valid_video_files = getValidVideoFiles(VideoFilesDir.get( bu.getBoomerDefaultVideoDirForFFMPEG(default_boomer_structure) ))
+            if img_param_dir not in list(valid_image_files_by_dir.keys()) :
+                valid_image_files = getValidImageFiles(ImageFilesDir.get( img_param_dir ))
+                valid_image_files_by_dir.update({
+                    str(img_param_dir): valid_image_files
+                })
 
+    if default_boomer_structure.get("audio") :
+        for aud_param in default_boomer_structure.get("audio") :
+            aud_param_dir = bu.getBoomerAudioParamDirForFFMPEG(aud_param)
 
+            if aud_param_dir not in list(valid_audio_files_by_dir.keys()) :
+                valid_audio_files = getValidAudioFiles(AudioFilesDir.get( aud_param_dir ))
+                valid_audio_files_by_dir.update({
+                    str(aud_param_dir): valid_audio_files
+                })
+
+    if default_boomer_structure.get("video") :
+        for vid_param in default_boomer_structure.get("video") :
+            vid_param_dir = bu.getBoomerVideoParamDirForFFMPEG(vid_param)
+
+            if vid_param_dir not in list(valid_video_files_by_dir.keys()) :
+                valid_video_files = getValidVideoFiles(VideoFilesDir.get( vid_param_dir ))
+                valid_video_files_by_dir.update({
+                    str(vid_param_dir): valid_video_files
+                })
 
     model = Model(variables.PATH_MODEL)
     wf = wave.open(audio_file_path, "rb")
@@ -148,20 +165,11 @@ def describe(audio_file_path= "", generator= None):
         for obj in sentence['result']:
             new_word = bu.buildBoomer(
                 obj,
-                valid_image_files,
-                valid_audio_files,
-                valid_video_files,
+                valid_image_files_by_dir,
+                valid_audio_files_by_dir,
+                valid_video_files_by_dir,
                 default_boomer_structure
             )
-
-            if variables.ALLOW_IMAGE_REPETITION is False and new_word.image is not None and new_word.image["file"] in valid_image_files:
-                valid_image_files.remove(new_word.image["file"])
-
-            if variables.ALLOW_AUDIO_REPETITION is False and new_word.audio is not None and new_word.audio["file"] in valid_audio_files:
-                valid_audio_files.remove(new_word.audio["file"])
-
-            if variables.ALLOW_VIDEO_REPETITION is False and new_word.video is not None and new_word.video["file"] in valid_video_files:
-                valid_video_files.remove(new_word.video["file"])
 
             word_list.append(new_word)  # and add it to list
 
