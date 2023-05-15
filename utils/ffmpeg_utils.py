@@ -112,11 +112,11 @@ def extend_boomers_by_video_concaters(boomers= []) :
 
     accumulator = 0
     for b in boomers :
+        video_params = b.get("video") if b.get("video") is not None else []
 
         video_duration = 0
-        for param in b :
-            video_mergestrategy = bu.getBoomerVideoParamMergeStrategyForFFMPEG(param)
-            if video_mergestrategy == MergeStrategy.get("CONCAT") : 
+        for param in video_params :
+            if bu.getBoomerVideoParamMergeStrategyForFFMPEG(param) == MergeStrategy.get("CONCAT") : 
                 video_duration = video_duration + bu.getBoomerVideoParamDurationForFFMPEG(param)
 
         btrigger = bu.getBoomTrigger(b)
@@ -128,8 +128,7 @@ def extend_boomers_by_video_concaters(boomers= []) :
         ) :
             b["word"][btrigger] = b["word"][btrigger] + accumulator
 
-        if video_mergestrategy == MergeStrategy.get("CONCAT") :
-            accumulator = accumulator + video_duration
+        accumulator = accumulator + video_duration
 
         new_bmrs = new_bmrs + [b]
 
@@ -145,11 +144,11 @@ def extend_boomers_by_image_concaters(boomers= []) :
 
     accumulator = 0
     for b in boomers :
+        image_params = b.get("image") if b.get("image") is not None else []
 
         image_duration = 0
-        for param in b :
-            image_mergestrategy = bu.getBoomerImageParamMergeStrategyForFFMPEG(param)
-            if image_mergestrategy == MergeStrategy.get("CONCAT") : 
+        for param in image_params :            
+            if bu.getBoomerImageParamMergeStrategyForFFMPEG(param) == MergeStrategy.get("CONCAT") : 
                 image_duration = image_duration + bu.getBoomerImageParamDurationForFFMPEG(param)
 
         btrigger = bu.getBoomTrigger(b)
@@ -161,8 +160,7 @@ def extend_boomers_by_image_concaters(boomers= []) :
         ) :
             b["word"][btrigger] = b["word"][btrigger] + accumulator
 
-        if image_mergestrategy == MergeStrategy.get("CONCAT") :
-            accumulator = (accumulator + image_duration) if image_duration is not None else accumulator
+        accumulator = accumulator + image_duration
 
         new_bmrs = new_bmrs + [b]
 
@@ -335,11 +333,11 @@ def buildCall(outputfilepath= "output.mp4", boomers= None):
     filter_params = cleanFilterParams(filter_params, filth= separator)
 
     media_inputs = buildMediaInputs(
-        video_files_compose= compose_video_params_w_words,
-        image_files_compose= compose_image_params_w_words,
-        audio_files= audio_params_w_words,
-        video_files_concat= concat_video_params_w_words,
-        image_files_concat= concat_image_params_w_words
+        video_params_compose= compose_video_params_w_words,
+        image_params_compose= compose_image_params_w_words,
+        audio_params= audio_params_w_words,
+        video_params_concat= concat_video_params_w_words,
+        image_params_concat= concat_image_params_w_words
     )
 
     ffmpegCall = [

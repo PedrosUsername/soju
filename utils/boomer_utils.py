@@ -96,7 +96,7 @@ def get_fake_boomers_for_video_params_concat(boomers= []) :
         video_params = [param for param in b.get("video")] if b.get("video") else []
 
         for param in video_params :
-            strategy = getBoomerVideoParamMergeStrategyForFFMPEG(video_params)
+            strategy = getBoomerVideoParamMergeStrategyForFFMPEG(param)
 
             if strategy == MergeStrategy.get("CONCAT") :
                 param["word"] = b.get("word")
@@ -115,7 +115,7 @@ def get_fake_boomers_for_video_params_compose(boomers= []) :
         video_params = [param for param in b.get("video")] if b.get("video") else []
 
         for param in video_params :
-            strategy = getBoomerVideoParamMergeStrategyForFFMPEG(video_params)
+            strategy = getBoomerVideoParamMergeStrategyForFFMPEG(param)
 
             if strategy == MergeStrategy.get("COMPOSE") :
                 param["word"] = b.get("word")
@@ -134,9 +134,9 @@ def get_fake_boomers_for_image_params_compose(boomers= []) :
         image_params = [param for param in b.get("image")] if b.get("image") else []
 
         for param in image_params :
-            strategy = getBoomerVideoParamMergeStrategyForFFMPEG(image_params)
+            strategy = getBoomerImageParamMergeStrategyForFFMPEG(param)
 
-            if strategy == MergeStrategy.get("COMPSE") :
+            if strategy == MergeStrategy.get("COMPOSE") :
                 param["word"] = b.get("word")
                 image_files_compose = image_files_compose + [param]
 
@@ -151,7 +151,7 @@ def get_fake_boomers_for_image_params_concat(boomers= []) :
         image_params = [param for param in b.get("image")] if b.get("image") else []
 
         for param in image_params :
-            strategy = getBoomerVideoParamMergeStrategyForFFMPEG(image_params)
+            strategy = getBoomerImageParamMergeStrategyForFFMPEG(param)
 
             if strategy == MergeStrategy.get("CONCAT") :
                 param["word"] = b.get("word")
@@ -1540,7 +1540,7 @@ f"""
 
 def as_json_string(value= "") :
     try :
-        return '"' + str(value) + '"'
+        return '"' + value + '"'
     except :
         return "null"
     
@@ -1574,7 +1574,7 @@ def create_boomer_generator_as_str(generator= None) :
         dapin = as_json_string(getDefaultApiNameForFFMPEG(general))
         dapim = as_json_string(getDefaultApiModelForFFMPEG(general))
 
-        dbt = as_json_string(getBoomTriggerForSojufile(default))
+        dbt = getBoomTriggerForSojufile(default)
 
         if type(default.get("image")) is list :
             addimg = True
@@ -1637,7 +1637,7 @@ def create_boomer_generator_as_str(generator= None) :
         dapin = as_json_string(variables.DEFAULT_API_NAME)
         dapim = as_json_string(variables.DEFAULT_API_MODEL)
 
-        dbt = as_json_string(variables.DEFAULT_BOOM_TRIGGER)
+        dbt = variables.DEFAULT_BOOM_TRIGGER
 
         boomer_image = [
             {
@@ -1704,6 +1704,13 @@ def create_boomer_generator_as_str(generator= None) :
             }
         ]"""
 
+    if dbt :
+        boomtriggerdefault = ( 
+f"""
+                        "trigger": {json.dumps(dbt)}                           
+                        """)
+    else :
+        boomtriggerdefault = ""
     
     if addimg :
         imagedefaults = ( 
@@ -1741,7 +1748,7 @@ f""",
 
                     "defaults": {{
                         "word": {{
-                            "trigger": {dbt}
+                            {boomtriggerdefault}
                         }}
 
                         {imagedefaults}
@@ -1789,8 +1796,11 @@ def buildBoomer(obj, image_file_dirs= {}, audio_file_dirs= {}, video_file_dirs= 
         "content": obj["word"],
         "start": obj["start"],
         "end": obj["end"],
-        "trigger": getBoomTrigger(default)
     }
+
+    bt = getBoomTriggerForSojufile(default)
+    if bt :
+        obj["word"]["trigger"] = bt
 
     if default.get("image") is not None :
         obj["image"] = []
