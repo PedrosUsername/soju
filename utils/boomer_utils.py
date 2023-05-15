@@ -907,7 +907,7 @@ def getBoomerAudioParamVolumeForSojufile(param= None) :
 
 def getBoomerImageParamWidth(param= None):
     if (
-        not param
+        param is None
     ):
         return None
     
@@ -923,7 +923,7 @@ def getBoomerImageParamWidth(param= None):
 
 def getBoomerImageParamHeight(param= None):
     if (
-        not param
+        param is None
     ):
         return None
     
@@ -939,7 +939,7 @@ def getBoomerImageParamHeight(param= None):
 
 def getBoomerVideoParamWidth(param= None):
     if (
-        not param
+        param is None
     ):
         return None
     
@@ -953,7 +953,7 @@ def getBoomerVideoParamWidth(param= None):
 
 def getBoomerVideoParamHeight(param= None):
     if (
-        not param
+        param is None
     ):
         return None
     
@@ -968,8 +968,8 @@ def getBoomerVideoParamHeight(param= None):
 
 def getBoomTrigger(boomer= None):
     if (
-        not boomer
-        or not boomer.get("word")
+        boomer is None
+        or boomer.get("word") is None
     ):
         return None
     
@@ -1004,10 +1004,10 @@ def getBoomerBoominTime(boomer= None):
     trigg = getBoomTriggerForFFMPEG(boomer)
 
     if (
-        not boomer
-        or not trigg
-        or not boomer.get("word")
-        or not boomer.get("word").get(trigg)
+        boomer is None
+        or trigg is None
+        or boomer.get("word") is None
+        or boomer.get("word").get(trigg) is None
     ):
         return None
     
@@ -1024,7 +1024,7 @@ def getBoomerBoominTime(boomer= None):
 
 def getBoomerImageParamDuration(param= None):
     if (
-        not param 
+        param is None 
     ):
         return None
     
@@ -1040,7 +1040,7 @@ def getBoomerImageParamDuration(param= None):
 
 def getBoomerAudioParamDuration(param= None):
     if (
-        not param 
+        param is None 
     ):
         return None
     
@@ -1055,7 +1055,7 @@ def getBoomerAudioParamDuration(param= None):
 
 def getBoomerVideoParamDuration(param= None):
     if (
-        not param 
+        param is None 
     ):
         return None
     
@@ -1107,7 +1107,7 @@ def getBoomerAudioParamVolume(param= None):
 
 def getBoomerImageParamFile(param= None) :
     if (
-        not param
+        param is None
     ):
         return None
     
@@ -1121,7 +1121,7 @@ def getBoomerImageParamFile(param= None) :
 
 def getBoomerAudioParamFile(param= None) :
     if (
-        not param 
+        param is None 
     ):
         return None
     
@@ -1139,7 +1139,7 @@ def getBoomerAudioParamFile(param= None) :
 
 def getBoomerVideoParamFile(param= None) :
     if (
-        not param
+        param is None
     ):
         return None
     
@@ -1155,7 +1155,7 @@ def getBoomerVideoParamFile(param= None) :
 
 def getBoomerImageParamMergeStrategy(param= None) :
     if (
-        not param
+        param is None
     ):
         return None
     
@@ -1171,7 +1171,7 @@ def getBoomerImageParamMergeStrategy(param= None) :
 
 def getBoomerVideoParamMergeStrategy(param= None) :
     if (
-        not param
+        param is None
     ):
         return None
     
@@ -1190,7 +1190,7 @@ def getBoomerVideoParamMergeStrategy(param= None) :
 
 def getBoomerImageParamPosX(param= None) :
     if (
-        not param
+        param is None
     ):
         return None
     
@@ -1201,7 +1201,7 @@ def getBoomerImageParamPosX(param= None) :
 
 def getBoomerImageParamPosY(param= None) :
     if (
-        not param
+        param is None
     ):
         return None
     
@@ -1213,7 +1213,7 @@ def getBoomerImageParamPosY(param= None) :
 
 def getBoomerVideoParamPosX(param= None) :
     if (
-        not param
+        param is None
     ):
         return None
     
@@ -1224,7 +1224,7 @@ def getBoomerVideoParamPosX(param= None) :
 
 def getBoomerVideoParamPosY(param= None) :
     if (
-        not param
+        param is None
     ):
         return None
     
@@ -1237,7 +1237,7 @@ def getBoomerVideoParamPosY(param= None) :
 
 def getBoomerImageParamTriggerDelay(param= None) :
     if (
-        not param
+        param is None
     ):
         return None
     
@@ -1249,7 +1249,7 @@ def getBoomerImageParamTriggerDelay(param= None) :
 
 def getBoomerVideoParamTriggerDelay(param= None) :
     if (
-        not param
+        param is None
     ):
         return None
     
@@ -1265,7 +1265,7 @@ def getBoomerVideoParamTriggerDelay(param= None) :
 
 def getBoomerAudioParamTriggerDelay(param= None) :
     if (
-        not param
+        param is None
     ):
         return None
     
@@ -1331,7 +1331,7 @@ def getBoomerImageParamDirForSojufile(param= None) :
     dir = getBoomerImageParamDir(param)
 
     if not isinstance(dir, str) or dir not in list(ImageFilesDir.keys()) :
-        return DEFAULT_IMAGE_DIR
+        return None
    
     else :
         return dir
@@ -1808,7 +1808,7 @@ def buildBoomer(obj, image_file_dirs= {}, audio_file_dirs= {}, video_file_dirs= 
             new_b_param = {}
 
             param_dir = getBoomerImageParamDirForSojufile(param)
-            if param_dir :
+            if param_dir is not None :
                 new_b_param["dir"] = param_dir
             else :
                 param_dir = getBoomerImageParamDirForFFMPEG(param)
@@ -1816,31 +1816,31 @@ def buildBoomer(obj, image_file_dirs= {}, audio_file_dirs= {}, video_file_dirs= 
             new_b_param["file"] = getBoomerImageParamFileForFFMPEG(param, image_file_dirs.get(param_dir))
             
             ms = getBoomerImageParamMergeStrategy(param)
-            if ms :
+            if ms is not None :
                 new_b_param["mergestrategy"] = ms
 
             dur = getBoomerImageParamDuration(param)
-            if dur :
+            if dur is not None :
                 new_b_param["duration"] = dur                                
 
             h = getBoomerImageParamHeight(param)
-            if h :
+            if h is not None :
                 new_b_param["height"] = h                                
 
             w = getBoomerImageParamWidth(param)
-            if w :
+            if w is not None :
                 new_b_param["width"] = w                                
 
             x = getBoomerImageParamPosX(param)
-            if x :
+            if x is not None :
                 new_b_param["posx"] = x                                
 
             y = getBoomerImageParamPosY(param)
-            if y :
+            if y is not None :
                 new_b_param["posy"] = y                                
 
             td = getBoomerImageParamTriggerDelay(param)
-            if td :
+            if td is not None :
                 new_b_param["triggerdelay"] = td                                
 
             obj["image"].append(new_b_param)
@@ -1853,7 +1853,7 @@ def buildBoomer(obj, image_file_dirs= {}, audio_file_dirs= {}, video_file_dirs= 
             new_b_param = {}
 
             param_dir = getBoomerAudioParamDirForSojufile(param)
-            if param_dir :
+            if param_dir is not None :
                 new_b_param["dir"] = param_dir
             else :
                 param_dir = getBoomerAudioParamDirForFFMPEG(param)
@@ -1862,15 +1862,15 @@ def buildBoomer(obj, image_file_dirs= {}, audio_file_dirs= {}, video_file_dirs= 
             
 
             dur = getBoomerAudioParamDuration(param)
-            if dur :
+            if dur is not None :
                 new_b_param["duration"] = dur                                
 
             td = getBoomerAudioParamTriggerDelay(param)
-            if td :
+            if td is not None :
                 new_b_param["triggerdelay"] = td                                
 
             vol = getBoomerAudioParamVolume(param)
-            if vol :
+            if vol is not None :
                 new_b_param["volume"] = vol                                
 
             obj["audio"].append(new_b_param)
@@ -1882,7 +1882,7 @@ def buildBoomer(obj, image_file_dirs= {}, audio_file_dirs= {}, video_file_dirs= 
             new_b_param = {}
 
             param_dir = getBoomerVideoParamDirForSojufile(param)
-            if param_dir :
+            if param_dir is not None :
                 new_b_param["dir"] = param_dir
             else :
                 param_dir = getBoomerVideoParamDirForFFMPEG(param)
@@ -1890,35 +1890,35 @@ def buildBoomer(obj, image_file_dirs= {}, audio_file_dirs= {}, video_file_dirs= 
             new_b_param["file"] = getBoomerVideoParamFileForFFMPEG(param, video_file_dirs.get(param_dir)) 
             
             ms = getBoomerVideoParamMergeStrategy(param)
-            if ms :
+            if ms is not None :
                 new_b_param["mergestrategy"] = ms
 
             dur = getBoomerVideoParamDuration(param)
-            if dur :
+            if dur is not None :
                 new_b_param["duration"] = dur                                
 
             h = getBoomerVideoParamHeight(param)
-            if h :
+            if h is not None :
                 new_b_param["height"] = h                                
 
             w = getBoomerVideoParamWidth(param)
-            if w :
+            if w is not None :
                 new_b_param["width"] = w                                
 
             x = getBoomerVideoParamPosX(param)
-            if x :
+            if x is not None :
                 new_b_param["posx"] = x                                
 
             y = getBoomerVideoParamPosY(param)
-            if y :
+            if y is not None :
                 new_b_param["posy"] = y                                
 
             td = getBoomerVideoParamTriggerDelay(param)
-            if td :
+            if td is not None :
                 new_b_param["triggerdelay"] = td                                
 
             vol = getBoomerVideoParamVolume(param)
-            if vol :
+            if vol is not None :
                 new_b_param["volume"] = vol                                
 
             obj["video"].append(new_b_param)

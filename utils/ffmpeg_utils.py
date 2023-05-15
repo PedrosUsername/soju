@@ -458,6 +458,7 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
         if not boomin_time_start :
             continue
 
+        boomin_time_start = boomin_time_start + bu.getBoomerImageParamTriggerDelayForFFMPEG(boomer)
         boomin_time_end = boomin_time_start + bu.getBoomerImageParamDurationForFFMPEG(boomer)
         filter_params = filter_params + """
 [{1}] scale= w= {4}:h= {5} [img];
@@ -516,6 +517,7 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
         if not boomin_time_start :
             continue
         
+        boomin_time_start = boomin_time_start + bu.getBoomerImageParamTriggerDelayForFFMPEG(boomer)        
         boomin_time_end = boomin_time_start + bu.getBoomerImageParamDurationForFFMPEG(boomer)
         filter_params = filter_params + """{0};
 [{1}] scale= w= {4}:h= {5} [img];
@@ -552,6 +554,7 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
         if not boomin_time_start :
             continue
 
+        boomin_time_start = boomin_time_start + bu.getBoomerAudioParamTriggerDelayForFFMPEG(boomer)
         duration = bu.getBoomerAudioParamDurationForFFMPEG(boomer)
         volume = bu.getBoomerAudioParamVolumeForFFMPEG(boomer)
 
@@ -586,6 +589,7 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
         if not boomin_time_start :
             continue
 
+        boomin_time_start = boomin_time_start + bu.getBoomerAudioParamTriggerDelayForFFMPEG(boomer)
         duration = bu.getBoomerAudioParamDurationForFFMPEG(boomer)
         volume = bu.getBoomerAudioParamVolumeForFFMPEG(boomer)
 
@@ -668,6 +672,7 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
         if not boomin_time_start :
             continue
 
+        boomin_time_start = boomin_time_start + bu.getBoomerVideoParamTriggerDelayForFFMPEG(boomer)
         duration = bu.getBoomerVideoParamDurationForFFMPEG(boomer)
         volume = bu.getBoomerVideoParamVolumeForFFMPEG(boomer)
         if volume > 0 :
@@ -759,6 +764,7 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
         if not boomin_time_start :
             continue
 
+        boomin_time_start = boomin_time_start + bu.getBoomerVideoParamTriggerDelayForFFMPEG(boomer)
         duration = bu.getBoomerVideoParamDurationForFFMPEG(boomer)
         volume = bu.getBoomerVideoParamVolumeForFFMPEG(boomer)        
         if volume > 0 :
@@ -824,6 +830,7 @@ def buildVideoConcatFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v=
         if not boomin_time_start :
             continue
 
+        boomin_time_start = boomin_time_start + bu.getBoomerVideoParamTriggerDelayForFFMPEG(boomer)
         duration = bu.getBoomerVideoParamDurationForFFMPEG(boomer)
         volume = bu.getBoomerVideoParamVolumeForFFMPEG(boomer)
 
@@ -863,7 +870,8 @@ def buildVideoConcatFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v=
         boomin_time_start = bu.getBoomerBoominTime(boomer)
         if not boomin_time_start :
             continue
-
+ 
+        boomin_time_start = boomin_time_start + bu.getBoomerVideoParamTriggerDelayForFFMPEG(boomer)
         duration = bu.getBoomerVideoParamDurationForFFMPEG(boomer)
         volume = bu.getBoomerVideoParamVolumeForFFMPEG(boomer)
 
@@ -917,6 +925,7 @@ def buildImageConcatFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v=
         if not boomin_time_start :
             continue
 
+        boomin_time_start = boomin_time_start + bu.getBoomerImageParamTriggerDelayForFFMPEG(boomer)
         duration = bu.getBoomerImageParamDurationForFFMPEG(boomer)
 
         filter_params = filter_params + f"""
@@ -956,6 +965,7 @@ anullsrc=r=44100:cl=mono, atrim= end= {duration}
         if not boomin_time_start :
             continue
 
+        boomin_time_start = boomin_time_start + bu.getBoomerImageParamTriggerDelayForFFMPEG(boomer)
         duration = bu.getBoomerImageParamDurationForFFMPEG(boomer)
 
         filter_params = filter_params + f"""{out_v}{out_a};
