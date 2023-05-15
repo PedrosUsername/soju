@@ -765,7 +765,7 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
             audio_merge_params = f"""
 [uppa];
 
-[{first_file_idx}] atrim= end= {duration}, volume= {volume}, asetpts=PTS-STARTPTS
+[{idx}] atrim= end= {duration}, volume= {volume}, asetpts=PTS-STARTPTS
 [b_audio];
 
 [uppa] [b_audio] amix= dropout_transition=0, dynaudnorm
