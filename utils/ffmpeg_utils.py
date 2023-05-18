@@ -179,14 +179,14 @@ def cleanFilterParams(params= "", filth= ""):
     return params[:(len(filth) * -1)]
 
 
-def buildCall(outputfilepath= "output.mp4", boomers= None):
+def buildCall(outputfilepath= "output.mp4", boomers_bot= None, boomers_mid= None, boomers_top= None):
     ffmpeg = FFMPEG_PATH
     output_specs = FFMPEG_OUTPUT_SPECS
     main_clip_params = mu.get_og_clip_params()
 
     main_clip_file = main_clip_params.get("file")
 
-    extended_bmrs = extend_boomers_by_video_concaters(boomers)
+    extended_bmrs = extend_boomers_by_video_concaters(boomers_mid)
     concat_video_params_w_words = bu.get_fake_boomers_for_video_params_concat(extended_bmrs)
 
     v_mapping = ["-map", "0:v"]
@@ -228,7 +228,7 @@ def buildCall(outputfilepath= "output.mp4", boomers= None):
         main_label_a = fout_label_a
 
 
-    extended_bmrs = extend_boomers_by_image_concaters(boomers)
+    extended_bmrs = extend_boomers_by_image_concaters(boomers_mid)
     compose_video_params_w_words = bu.get_fake_boomers_for_video_params_compose(extended_bmrs)
     concat_image_params_w_words = bu.get_fake_boomers_for_image_params_concat(extended_bmrs)
     compose_image_params_w_words = bu.get_fake_boomers_for_image_params_compose(extended_bmrs)
@@ -1027,8 +1027,6 @@ def download_clip_and_audio(from_= "./", to_v= "./", to_a= "./"):
         "-y",
         "-i",
         from_,
-        "-map",
-        "0",
         '-c',
         "copy",
         to_v,
@@ -1036,9 +1034,8 @@ def download_clip_and_audio(from_= "./", to_v= "./", to_a= "./"):
         "0:a",
         "-ac",
         "1",
-        to_a
-    ])    
-
+        to_a        
+    ])        
 
 
     

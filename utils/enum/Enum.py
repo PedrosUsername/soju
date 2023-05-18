@@ -47,6 +47,8 @@ AudioFilesDir = {
     "FART": "./assets/audio/fart/",
     "music": "./assets/audio/music/",
     "MUSIC": "./assets/audio/music/",
+    "laughtrack": "./assets/audio/laughtrack/",
+    "LAUGHTRACK": "./assets/audio/laughtrack/"
 }
 
 

@@ -98,9 +98,10 @@ def getValidVideoFiles(path= None) :
 
 
 
-def describe(audio_file_path= "", generator= None):
-    generator = bu.get_boomer_generator_as_dict(generator)
-    default_boomer_structure = generator.get("defaults")
+def describe(audio_file_path= "", generator= None) :
+    generator = bu.prepare_boomer_generator(generator)
+    default_boomer_structure = generator.get("defaults") if generator.get("defaults") else {}
+    print(json.dumps(default_boomer_structure, indent= 4))
 
     valid_image_files_by_dir = {}
     valid_audio_files_by_dir = {}

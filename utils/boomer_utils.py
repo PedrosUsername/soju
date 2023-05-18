@@ -13,9 +13,9 @@ DEFAULT_BOOMIN_TIME = variables.DEFAULT_BOOMIN_TIME
 DEFAULT_VIDEO_DURATION = variables.DEFAULT_VIDEO_DURATION
 DEFAULT_AUDIO_DURATION = variables.DEFAULT_AUDIO_DURATION
 DEFAULT_IMAGE_DURATION = variables.DEFAULT_IMAGE_DURATION
-DEFAULT_IMAGE_DIR = "DEFAULT"
-DEFAULT_AUDIO_DIR = "DEFAULT"
-DEFAULT_VIDEO_DIR = "DEFAULT"
+DEFAULT_IMAGE_DIR = variables.DEFAULT_IMAGE_DIR
+DEFAULT_AUDIO_DIR = variables.DEFAULT_AUDIO_DIR
+DEFAULT_VIDEO_DIR = variables.DEFAULT_VIDEO_DIR
 MIN_RESOLUTION_SIZE = variables.MIN_RESOLUTION_SIZE
 MAX_MEDIA_DELAY = variables.MAX_MEDIA_DELAY
 MIN_MEDIA_DELAY = variables.MIN_MEDIA_DELAY
@@ -38,9 +38,6 @@ MAX_MEDIA_VOLUME = variables.MAX_MEDIA_VOLUME
 MIN_MEDIA_VOLUME = variables.MIN_MEDIA_VOLUME
 DEFAULT_VIDEO_VOL = variables.DEFAULT_VIDEO_VOLUME
 DEFAULT_AUDIO_VOL = variables.DEFAULT_AUDIO_VOLUME
-
-
-
 
 
 
@@ -313,17 +310,19 @@ def get_boomer_generator_from_url(jsonfilepath):
 
 
 def get_sojufile_from_url_as_dict(jsonfilepath):
-    if not str(jsonfilepath).endswith(".json") :
-        return None
-    
+    try :
+        response = requests.get(jsonfilepath)
+        data = "{}"
 
-    response = requests.get(jsonfilepath)
-    data = "{}"
-
-    if (response.status_code):
-        data = response.text
+        if (response.status_code):
+            data = response.text
     
-    return json.loads(data).get("soju")
+        content = json.loads(data).get("soju")
+        return content
+    
+    except :
+        return {}
+    
 
 
 
@@ -984,7 +983,7 @@ def getBoomTrigger(boomer= None):
 def getBoomTriggerForFFMPEG(boomer= None) :
     trigg = getBoomTrigger(boomer)
 
-    if not isinstance(trigg, str) or trigg not in list(Trigger.keys()) :
+    if trigg not in list(Trigger.keys()) :
         return DEFAULT_BOOM_TRIGGER
     
     else :
@@ -993,7 +992,7 @@ def getBoomTriggerForFFMPEG(boomer= None) :
 def getBoomTriggerForSojufile(boomer= None) :
     trigg = getBoomTrigger(boomer)
 
-    if not isinstance(trigg, str) or trigg not in list(Trigger.keys()) :
+    if trigg not in list(Trigger.keys()) :
         return None
     
     else :
@@ -1380,71 +1379,32 @@ def getBoomerVideoParamDirForSojufile(param= None) :
 
 
 
-def getDefaultApiName(general= None) :
+def getGeneralsApiName(api= None) :
     if (
-        not general
+        api is None
     ):
         return None
     
     else:
-        return general.get("api").get("name")
+        return api.get("name")
     
 
 
-
-
-
-
-
-
-
-def getDefaultApiNameForFFMPEG(general= None ) :
-    name = getDefaultApiName(general)
-
-    if not isinstance(name, str) :
-        return DEFAULT_API_NAME
-    
-    else :
-        return name
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def getDefaultApiModel(general= None) :
+def getGeneralsApiModel(api= None) :
     if (
-        not general
+        api is None
     ):
-        return DEFAULT_API_MODEL
+        return None
     
     else:
-        return general.get("api").get("model")    
-
-
-
-
-
-
-
-
-
-def getDefaultApiModelForFFMPEG(general= None) :
-    model = getDefaultApiModel(general)
-
-    if not isinstance(model, str) :
-        return DEFAULT_API_MODEL
+        return api.get("model")    
     
-    else :
-        return model
+
+
+
+
+
+
 
 
 
@@ -1527,15 +1487,108 @@ f"""
 
 
 
+def prepare_boomer_gen_gens_api(api= None) :
+    healthy_api = {}
+
+    if type(api) is dict :
+        healthy_api["name"] = getGeneralsApiName(api)
+        healthy_api["model"] = getGeneralsApiModel(api)
+    
+    else :
+        dgenerator = open("./assets/json/dgenerator.soju.json")
+        healthy_api = json.load(dgenerator)["soju"]["generator"].get("generals").get("api")
+
+    return healthy_api
+        
 
 
 
+def prepare_boomer_gen_generals(generals= None) :
+    healthy_generals = {}
+
+    if type(generals) is dict :
+        healthy_generals["api"] = prepare_boomer_gen_gens_api(generals.get("api"))
+    
+    else :
+        dgenerator = open("./assets/json/dgenerator.soju.json")
+        healthy_generals = json.load(dgenerator)["soju"]["generator"].get("generals")
+
+    return healthy_generals
 
 
 
+def prepare_boomer_gen_defaults(boomer= None) :
+    healthy_defaults = {}
+
+    og_clip = mp.get_og_clip_params()
 
 
+    if type(boomer) is dict :
+        boomer_word = {}
+        if type(boomer.get("word")) is dict :
+                boomer_word["trigger"] = getBoomTriggerForSojufile(boomer)
 
+        boomer_image = []
+        if type(boomer.get("image")) is list :
+            for img_param in boomer.get("image"):
+                new_param = {}
+                
+                new_param["file"] = getBoomerImageParamFile(img_param)
+                new_param["dir"] = getBoomerImageParamDirForSojufile(img_param)
+                new_param["mergestrategy"] = getBoomerImageParamMergeStrategyForSojufile(img_param)
+                new_param["duration"] = getBoomerImageParamDurationForSojufile(img_param)
+                new_param["height"] = getBoomerImageParamHeightForSojufile(img_param, og_clip.get("height"))
+                new_param["width"] = getBoomerImageParamWidthForSojufile(img_param, og_clip.get("width"))
+                new_param["posx"] = getBoomerImageParamPosXForSojufile(img_param)
+                new_param["posy"] = getBoomerImageParamPosYForSojufile(img_param)
+                new_param["triggerdelay"] = getBoomerImageParamTriggerDelayForSojufile(img_param)
+
+                boomer_image = boomer_image + [new_param]
+
+        boomer_video = []
+        if type(boomer.get("video")) is list :
+            for vid_param in boomer.get("video"):
+                new_param = {}
+                
+                new_param["file"] = getBoomerVideoParamFile(vid_param)
+                new_param["dir"] = getBoomerVideoParamDirForSojufile(vid_param)
+                new_param["mergestrategy"] = getBoomerVideoParamMergeStrategyForSojufile(vid_param)
+                new_param["duration"] = getBoomerVideoParamDurationForSojufile(vid_param)
+                new_param["height"] = getBoomerVideoParamHeightForSojufile(vid_param, og_clip.get("height"))
+                new_param["width"] = getBoomerVideoParamWidthForSojufile(vid_param, og_clip.get("width"))
+                new_param["posx"] = getBoomerVideoParamPosXForSojufile(vid_param)
+                new_param["posy"] = getBoomerVideoParamPosYForSojufile(vid_param)
+                new_param["triggerdelay"] = getBoomerVideoParamTriggerDelayForSojufile(vid_param)
+                new_param["volume"] = getBoomerVideoParamVolumeForSojufile(vid_param)
+
+                boomer_video = boomer_video + [new_param]
+
+        boomer_audio = []
+        if type(boomer.get("audio")) is list :
+            for aud_param in boomer.get("audio"):
+                new_param = {}
+
+                new_param["file"] = getBoomerAudioParamFile(aud_param)
+                new_param["dir"] = getBoomerAudioParamDirForSojufile(aud_param)
+                new_param["duration"] = getBoomerAudioParamDurationForSojufile(aud_param)
+                new_param["triggerdelay"] = getBoomerAudioParamTriggerDelayForSojufile(aud_param)
+                new_param["volume"] = getBoomerAudioParamVolumeForSojufile(aud_param)
+
+                boomer_audio = boomer_audio + [new_param]
+
+        if boomer_word :
+            healthy_defaults["word"] = boomer_word
+        if boomer_image :
+            healthy_defaults["image"] = boomer_image
+        if boomer_video :
+            healthy_defaults["video"] = boomer_video
+        if boomer_audio :            
+            healthy_defaults["audio"] = boomer_audio
+    else :
+        dgenerator = open("./assets/json/dgenerator.soju.json")
+        healthy_defaults = json.load(dgenerator)["soju"]["generator"].get("defaults")                  
+
+    return healthy_defaults
 
 
 def as_json_string(value= "") :
@@ -1557,6 +1610,22 @@ def as_json_int(value= "") :
         return None    
 
 
+def prepare_boomer_generator(generator= None) :
+    healthy_generator = {}
+
+    if type(generator) is dict :
+        healthy_generator["generals"] = prepare_boomer_gen_generals(generator.get("generals"))
+        healthy_generator["defaults"] = prepare_boomer_gen_defaults(generator.get("defaults"))
+    else :
+        dgenerator = open("./assets/json/dgenerator.soju.json")
+        healthy_generator = json.load(dgenerator).get("soju").get("generator")
+        
+    print(healthy_generator)
+    return healthy_generator
+
+
+
+
 def create_boomer_generator_as_str(generator= None) :
     og_clip = mp.get_og_clip_params()
 
@@ -1568,11 +1637,11 @@ def create_boomer_generator_as_str(generator= None) :
         generator is not None
         and generator.get("defaults") is not None
     ) :
-        general = generator.get("general")
+        general = generator.get("generals")
         default = generator.get("defaults")
 
-        dapin = as_json_string(getDefaultApiNameForFFMPEG(general))
-        dapim = as_json_string(getDefaultApiModelForFFMPEG(general))
+        # dapin = as_json_string(getDefaultApiNameForFFMPEG(general))
+        # dapim = as_json_string(getDefaultApiModelForFFMPEG(general))
 
         dbt = getBoomTriggerForSojufile(default)
 
@@ -1739,7 +1808,7 @@ f""",
 
 
     return f""" {{
-                    "general": {{                                          
+                    "generals": {{                                          
                         "api": {{
                             "name": {dapin},
                             "model": {dapim}
