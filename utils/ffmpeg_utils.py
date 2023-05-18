@@ -381,24 +381,39 @@ def buildMediaInputs(
     media_inputs = []
 
     for param in video_params_concat:
-        file_name = VideoFilesDir.get(bu.getBoomerVideoParamDirForFFMPEG(param)) + param["file"] if not param["file"].startswith("https://") else param["file"]        
-        media_inputs = media_inputs + ["-i"] + [file_name]
+        if param["file"].startswith("https://") :
+            raise Exception("Soju can't work with http requests here yet")
+        else :
+            file_name = VideoFilesDir.get(bu.getBoomerVideoParamDirForFFMPEG(param)) + param["file"]       
+            media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in image_params_concat:
-        file_name = ImageFilesDir.get(bu.getBoomerImageParamDirForFFMPEG(param)) + param["file"] if not param["file"].startswith("https://") else param["file"]        
-        media_inputs = media_inputs + ["-i"] + [file_name]
+        if param["file"].startswith("https://") :
+            raise Exception("Soju can't work with http requests here yet")
+        else :
+            file_name = ImageFilesDir.get(bu.getBoomerImageParamDirForFFMPEG(param)) + param["file"]        
+            media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in video_params_compose:
-        file_name = VideoFilesDir.get(bu.getBoomerVideoParamDirForFFMPEG(param)) + param["file"] if not param["file"].startswith("https://") else param["file"]
-        media_inputs = media_inputs + ["-i"] + [file_name]
+        if param["file"].startswith("https://") :
+            raise Exception("Soju can't work with http requests here yet")
+        else :
+            file_name = VideoFilesDir.get(bu.getBoomerVideoParamDirForFFMPEG(param)) + param["file"]
+            media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in image_params_compose:
-        file_name = ImageFilesDir.get(bu.getBoomerImageParamDirForFFMPEG(param)) + param["file"] if not param["file"].startswith("https://") else param["file"]        
-        media_inputs = media_inputs + ["-i"] + [file_name]
+        if param["file"].startswith("https://") :
+            raise Exception("Soju can't work with http requests here yet")
+        else :
+            file_name = ImageFilesDir.get(bu.getBoomerImageParamDirForFFMPEG(param)) + param["file"]        
+            media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in audio_params:
-        file_name = AudioFilesDir.get(bu.getBoomerAudioParamDirForFFMPEG(param)) + param["file"] if not param["file"].startswith("https://") else param["file"]        
-        media_inputs = media_inputs + ["-i"] + [file_name]        
+        if param["file"].startswith("https://") :
+            raise Exception("Soju can't work with http requests here yet")
+        else :
+            file_name = AudioFilesDir.get(bu.getBoomerAudioParamDirForFFMPEG(param)) + param["file"]
+            media_inputs = media_inputs + ["-i"] + [file_name]        
 
 
     return media_inputs
