@@ -3,7 +3,7 @@ import random
 import requests
 
 from .settings import variables
-from . import moviepy_utils as mu, file_utils, boomer_utils as bu
+from . import moviepy_utils as mu, file_utils as fu, boomer_utils as bu
 from .enum.Enum import ImageFilesDir, VideoFilesDir, AudioFilesDir, MergeStrategy, Position
 
 
@@ -382,63 +382,23 @@ def buildMediaInputs(
     media_inputs = []
 
     for param in video_params_concat :
-        if param["file"].startswith("https://") or param["file"].startswith("http://"):
-            try :
-                file_name = tmp_dir + file_utils.get_base_file_name_from(param["file"])
-                download_file_from_url(param["file"], file_name)
-            except :
-                raise ConnectionError("soju had a problem handling a http request for the file " + param["file"])
-        else :
-            file_name = VideoFilesDir.get(bu.getBoomerVideoParamDirForFFMPEG(param)) + param["file"]
-
+        file_name = handle_video_input_file(param, tmp_dir)
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in image_params_concat:
-        if param["file"].startswith("https://") or param["file"].startswith("http://"):
-            try :
-                file_name = tmp_dir + file_utils.get_base_file_name_from(param["file"])
-                download_file_from_url(param["file"], file_name)
-            except :
-                raise ConnectionError("soju had a problem handling a http request for the file " + param["file"])
-        else :
-            file_name = ImageFilesDir.get(bu.getBoomerImageParamDirForFFMPEG(param)) + param["file"]        
-        
+        file_name = handle_image_input_file(param, tmp_dir)
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in video_params_compose:
-        if param["file"].startswith("https://") or param["file"].startswith("http://"):
-            try :
-                file_name = tmp_dir + file_utils.get_base_file_name_from(param["file"])
-                download_file_from_url(param["file"], file_name)
-            except :
-                raise ConnectionError("soju had a problem handling a http request for the file " + param["file"])
-        else :
-            file_name = VideoFilesDir.get(bu.getBoomerVideoParamDirForFFMPEG(param)) + param["file"]
-
+        file_name = handle_video_input_file(param, tmp_dir)
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in image_params_compose:
-        if param["file"].startswith("https://") or param["file"].startswith("http://"):
-            try :
-                file_name = tmp_dir + file_utils.get_base_file_name_from(param["file"])
-                download_file_from_url(param["file"], file_name)
-            except :
-                raise ConnectionError("soju had a problem handling a http request for the file " + param["file"])
-        else :
-            file_name = ImageFilesDir.get(bu.getBoomerImageParamDirForFFMPEG(param)) + param["file"]        
-            
+        file_name = handle_image_input_file(param, tmp_dir)
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in audio_params:
-        if param["file"].startswith("https://") or param["file"].startswith("http://"):
-            try :
-                file_name = tmp_dir + file_utils.get_base_file_name_from(param["file"])
-                download_file_from_url(param["file"], file_name)
-            except :
-                raise ConnectionError("soju had a problem handling a http request for the file " + param["file"])
-        else :
-            file_name = AudioFilesDir.get(bu.getBoomerAudioParamDirForFFMPEG(param)) + param["file"]
-        
+        file_name = handle_audio_input_file(param, tmp_dir)
         media_inputs = media_inputs + ["-i"] + [file_name]        
 
 
@@ -1023,6 +983,72 @@ anullsrc=r=44100:cl=mono, atrim= end= {duration}
     return filter_params    
 
 
+
+
+
+
+
+def handle_image_input_file(param, tmp_dir) :
+    dir_ = bu.getBoomerImageParamDirForFFMPEG(param)
+    file_dir = ImageFilesDir.get(dir_)
+
+    if bu.getBoomerImageParamFile(param) is None :
+        file_name = file_dir + random.choice(fu.getValidImageFiles(ImageFilesDir.get( dir_ )))
+
+    elif fu.image_file_is_a_good_choice(file_dir, param["file"]) :
+        file_name = file_dir + param["file"]
+
+    else :
+        try :
+            file_name = tmp_dir + fu.get_base_file_name_from(param["file"])
+            download_file_from_url(param["file"], file_name)
+        except :
+            raise FileNotFoundError("image file " + str(param["file"]) + " not found")
+
+    return file_name
+
+
+
+
+def handle_video_input_file(param, tmp_dir) :
+    dir_ = bu.getBoomerVideoParamDirForFFMPEG(param)
+    file_dir = VideoFilesDir.get(dir_)
+
+    if bu.getBoomerVideoParamFile(param) is None :
+        file_name = file_dir + random.choice(fu.getValidVideoFiles(VideoFilesDir.get( dir_ )))
+
+    elif fu.video_file_is_a_good_choice(file_dir, param["file"]) :
+        file_name = file_dir + param["file"]
+
+    else :
+        try :
+            file_name = tmp_dir + fu.get_base_file_name_from(param["file"])
+            download_file_from_url(param["file"], file_name)
+        except :
+            raise FileNotFoundError("video file " + str(param["file"]) + " not found")
+
+    return file_name
+
+
+
+def handle_audio_input_file(param, tmp_dir) :
+    dir_ = bu.getBoomerAudioParamDirForFFMPEG(param)
+    file_dir = AudioFilesDir.get(dir_)
+
+    if bu.getBoomerAudioParamFile(param) is None :
+        file_name = file_dir + random.choice(fu.getValidAudioFiles(AudioFilesDir.get( dir_ )))
+
+    elif fu.audio_file_is_a_good_choice(file_dir, param["file"]) :
+        file_name = file_dir + param["file"]
+
+    else :
+        try :
+            file_name = tmp_dir + fu.get_base_file_name_from(param["file"])
+            download_file_from_url(param["file"], file_name)
+        except :
+            raise FileNotFoundError("audio file " + str(param["file"]) + " not found")
+
+    return file_name
 
 
 
