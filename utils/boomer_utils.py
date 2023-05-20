@@ -202,13 +202,17 @@ def filterBoomers(og_clip_duration= 0, boomers= []):
     regular_boomers = []
     out_of_bounds_boomers_top = []
 
+    boomers.sort(key= getBoomerBoominTimeForFFMPEG)
+
     for boomer in boomers:
         boomin_time = getBoomerBoominTimeForFFMPEG(boomer)
         if boomin_time > 0 and boomin_time < og_clip_duration:
             regular_boomers = regular_boomers + [boomer]
         elif boomin_time <= 0:
+            boomer["word"] = { "content": "", "start": 0, "end": 0, "trigger": "start"}
             out_of_bounds_boomers_bot = out_of_bounds_boomers_bot + [boomer]
         elif boomin_time >= og_clip_duration:
+            boomer["word"] = { "content": "", "start": og_clip_duration, "end": og_clip_duration, "trigger": "start" }            
             out_of_bounds_boomers_top = out_of_bounds_boomers_top + [boomer]
 
     return (out_of_bounds_boomers_top, regular_boomers, out_of_bounds_boomers_bot)

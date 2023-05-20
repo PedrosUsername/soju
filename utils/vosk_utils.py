@@ -1,11 +1,9 @@
-import random
 import wave
 import json
-import os
 
 from vosk import Model, KaldiRecognizer
 
-from . import boomer_utils as bu
+from . import boomer_utils as bu, file_utils as fu
 from .enum.Enum import ImageFilesDir, VideoFilesDir, AudioFilesDir
 from .settings import variables
 
@@ -13,72 +11,6 @@ from .settings import variables
 
 
 
-def image_file_is_a_good_choice(path= "", image_file= ""):
-    return os.path.isfile('{0}{1}'.format(path, image_file)) and image_file not in variables.IGNORE_IMAGE_FILE_LIST
-
-def audio_file_is_a_good_choice(path= "", audio_file= ""):
-    return os.path.isfile('{0}{1}'.format(path, audio_file)) and audio_file not in variables.IGNORE_AUDIO_FILE_LIST
-
-def video_file_is_a_good_choice(path= "", video_file= ""):
-    return os.path.isfile('{0}{1}'.format(path, video_file)) and video_file not in variables.IGNORE_VIDEO_FILE_LIST
-
-def getFile(files= []):
-    if len(files) > 0:
-        return random.choice(files)
-    
-    else:
-        return None
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def getValidImageFiles(path= None) :
-    image_files = os.listdir(path)
-
-    if variables.DEFAULT_IMAGE_FILE != None:
-        return [variables.DEFAULT_IMAGE_FILE]
-    else:
-        return [file for file in image_files if image_file_is_a_good_choice(path, file)]
-
-
-def getValidAudioFiles(path= None) :
-    audio_files = os.listdir(path)
-
-    if variables.DEFAULT_AUDIO_FILE != None:
-        return [variables.DEFAULT_AUDIO_FILE]        
-    else:
-        return [file for file in audio_files if audio_file_is_a_good_choice(path, file)]    
-
-
-def getValidVideoFiles(path= None) :
-    video_files = os.listdir(path)
-
-    if variables.DEFAULT_VIDEO_FILE != None:
-        return [variables.DEFAULT_VIDEO_FILE]
-    else:
-        return [file for file in video_files if video_file_is_a_good_choice(path, file)]
 
 
 
@@ -112,7 +44,7 @@ def describe(audio_file_path= "", generator= None) :
             img_param_dir = bu.getBoomerImageParamDirForFFMPEG(img_param)
 
             if img_param_dir not in list(valid_image_files_by_dir.keys()) :
-                valid_image_files = getValidImageFiles(ImageFilesDir.get( img_param_dir ))
+                valid_image_files = fu.getValidImageFiles(ImageFilesDir.get( img_param_dir ))
                 valid_image_files_by_dir.update({
                     str(img_param_dir): valid_image_files
                 })
@@ -122,7 +54,7 @@ def describe(audio_file_path= "", generator= None) :
             aud_param_dir = bu.getBoomerAudioParamDirForFFMPEG(aud_param)
 
             if aud_param_dir not in list(valid_audio_files_by_dir.keys()) :
-                valid_audio_files = getValidAudioFiles(AudioFilesDir.get( aud_param_dir ))
+                valid_audio_files = fu.getValidAudioFiles(AudioFilesDir.get( aud_param_dir ))
                 valid_audio_files_by_dir.update({
                     str(aud_param_dir): valid_audio_files
                 })
@@ -132,7 +64,7 @@ def describe(audio_file_path= "", generator= None) :
             vid_param_dir = bu.getBoomerVideoParamDirForFFMPEG(vid_param)
 
             if vid_param_dir not in list(valid_video_files_by_dir.keys()) :
-                valid_video_files = getValidVideoFiles(VideoFilesDir.get( vid_param_dir ))
+                valid_video_files = fu.getValidVideoFiles(VideoFilesDir.get( vid_param_dir ))
                 valid_video_files_by_dir.update({
                     str(vid_param_dir): valid_video_files
                 })

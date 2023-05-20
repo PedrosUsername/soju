@@ -1,8 +1,9 @@
 import subprocess
 import random
+import requests
 
 from .settings import variables
-from . import moviepy_utils as mu, boomer_utils as bu
+from . import moviepy_utils as mu, file_utils, boomer_utils as bu
 from .enum.Enum import ImageFilesDir, VideoFilesDir, AudioFilesDir, MergeStrategy, Position
 
 
@@ -107,7 +108,6 @@ def get_only_audio(videofilepath= None, outputfilepath= "./"):
 
 
 def extend_boomers_by_video_concaters(boomers= []) :
-    boomers.sort(key= bu.getBoomerBoominTimeForFFMPEG)
     new_bmrs = []
 
     accumulator = 0
@@ -139,7 +139,6 @@ def extend_boomers_by_video_concaters(boomers= []) :
 
 
 def extend_boomers_by_image_concaters(boomers= []) :
-    boomers.sort(key= bu.getBoomerBoominTimeForFFMPEG)
     new_bmrs = []
 
     accumulator = 0
@@ -179,7 +178,7 @@ def cleanFilterParams(params= "", filth= ""):
     return params[:(len(filth) * -1)]
 
 
-def buildCall(outputfilepath= "output.mp4", boomers_bot= None, boomers_mid= None, boomers_top= None):
+def buildCall(outputfilepath= "output.mp4", boomers_mid= None, tmp_dir= "./"):
     ffmpeg = FFMPEG_PATH
     output_specs = FFMPEG_OUTPUT_SPECS
     main_clip_params = mu.get_og_clip_params()
@@ -337,7 +336,8 @@ def buildCall(outputfilepath= "output.mp4", boomers_bot= None, boomers_mid= None
         image_params_compose= compose_image_params_w_words,
         audio_params= audio_params_w_words,
         video_params_concat= concat_video_params_w_words,
-        image_params_concat= concat_image_params_w_words
+        image_params_concat= concat_image_params_w_words,
+        tmp_dir= tmp_dir
     )
 
     ffmpegCall = [
@@ -376,44 +376,70 @@ def buildMediaInputs(
         video_params_concat= [],
         image_params_compose= [],
         image_params_concat= [],
-        audio_params= []
+        audio_params= [],
+        tmp_dir= "./"
 ):
     media_inputs = []
 
-    for param in video_params_concat:
-        if param["file"].startswith("https://") :
-            raise Exception("Soju can't work with http requests here yet")
-        else :
-            file_name = VideoFilesDir.get(bu.getBoomerVideoParamDirForFFMPEG(param)) + param["file"]       
-            media_inputs = media_inputs + ["-i"] + [file_name]
-
-    for param in image_params_concat:
-        if param["file"].startswith("https://") :
-            raise Exception("Soju can't work with http requests here yet")
-        else :
-            file_name = ImageFilesDir.get(bu.getBoomerImageParamDirForFFMPEG(param)) + param["file"]        
-            media_inputs = media_inputs + ["-i"] + [file_name]
-
-    for param in video_params_compose:
-        if param["file"].startswith("https://") :
-            raise Exception("Soju can't work with http requests here yet")
+    for param in video_params_concat :
+        if param["file"].startswith("https://") or param["file"].startswith("http://"):
+            try :
+                file_name = tmp_dir + file_utils.get_base_file_name_from(param["file"])
+                download_file_from_url(param["file"], file_name)
+            except :
+                raise ConnectionError("soju had a problem handling a http request for the file " + param["file"])
         else :
             file_name = VideoFilesDir.get(bu.getBoomerVideoParamDirForFFMPEG(param)) + param["file"]
-            media_inputs = media_inputs + ["-i"] + [file_name]
 
-    for param in image_params_compose:
-        if param["file"].startswith("https://") :
-            raise Exception("Soju can't work with http requests here yet")
+        media_inputs = media_inputs + ["-i"] + [file_name]
+
+    for param in image_params_concat:
+        if param["file"].startswith("https://") or param["file"].startswith("http://"):
+            try :
+                file_name = tmp_dir + file_utils.get_base_file_name_from(param["file"])
+                download_file_from_url(param["file"], file_name)
+            except :
+                raise ConnectionError("soju had a problem handling a http request for the file " + param["file"])
         else :
             file_name = ImageFilesDir.get(bu.getBoomerImageParamDirForFFMPEG(param)) + param["file"]        
-            media_inputs = media_inputs + ["-i"] + [file_name]
+        
+        media_inputs = media_inputs + ["-i"] + [file_name]
+
+    for param in video_params_compose:
+        if param["file"].startswith("https://") or param["file"].startswith("http://"):
+            try :
+                file_name = tmp_dir + file_utils.get_base_file_name_from(param["file"])
+                download_file_from_url(param["file"], file_name)
+            except :
+                raise ConnectionError("soju had a problem handling a http request for the file " + param["file"])
+        else :
+            file_name = VideoFilesDir.get(bu.getBoomerVideoParamDirForFFMPEG(param)) + param["file"]
+
+        media_inputs = media_inputs + ["-i"] + [file_name]
+
+    for param in image_params_compose:
+        if param["file"].startswith("https://") or param["file"].startswith("http://"):
+            try :
+                file_name = tmp_dir + file_utils.get_base_file_name_from(param["file"])
+                download_file_from_url(param["file"], file_name)
+            except :
+                raise ConnectionError("soju had a problem handling a http request for the file " + param["file"])
+        else :
+            file_name = ImageFilesDir.get(bu.getBoomerImageParamDirForFFMPEG(param)) + param["file"]        
+            
+        media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in audio_params:
-        if param["file"].startswith("https://") :
-            raise Exception("Soju can't work with http requests here yet")
+        if param["file"].startswith("https://") or param["file"].startswith("http://"):
+            try :
+                file_name = tmp_dir + file_utils.get_base_file_name_from(param["file"])
+                download_file_from_url(param["file"], file_name)
+            except :
+                raise ConnectionError("soju had a problem handling a http request for the file " + param["file"])
         else :
             file_name = AudioFilesDir.get(bu.getBoomerAudioParamDirForFFMPEG(param)) + param["file"]
-            media_inputs = media_inputs + ["-i"] + [file_name]        
+        
+        media_inputs = media_inputs + ["-i"] + [file_name]        
 
 
     return media_inputs
@@ -470,8 +496,6 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
             posy = "y={}".format(randomy)            
 
         boomin_time_start = bu.getBoomerBoominTime(boomer)
-        if not boomin_time_start :
-            continue
 
         boomin_time_start = boomin_time_start + bu.getBoomerImageParamTriggerDelayForFFMPEG(boomer)
         boomin_time_end = boomin_time_start + bu.getBoomerImageParamDurationForFFMPEG(boomer)
@@ -529,8 +553,6 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
 
 
         boomin_time_start = bu.getBoomerBoominTime(boomer)
-        if not boomin_time_start :
-            continue
         
         boomin_time_start = boomin_time_start + bu.getBoomerImageParamTriggerDelayForFFMPEG(boomer)        
         boomin_time_end = boomin_time_start + bu.getBoomerImageParamDurationForFFMPEG(boomer)
@@ -566,8 +588,6 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
     head = boomers[:1]
     for boomer in head:
         boomin_time_start = bu.getBoomerBoominTime(boomer)
-        if not boomin_time_start :
-            continue
 
         boomin_time_start = boomin_time_start + bu.getBoomerAudioParamTriggerDelayForFFMPEG(boomer)
         duration = bu.getBoomerAudioParamDurationForFFMPEG(boomer)
@@ -601,8 +621,6 @@ def buildAudioAmixFilterParams(boomers= [], inp= "[0]", out= "[outa]", first_fil
     tail = boomers[1:]
     for idx, boomer in enumerate(tail, first_file_idx + 1):
         boomin_time_start = bu.getBoomerBoominTime(boomer)
-        if not boomin_time_start :
-            continue
 
         boomin_time_start = boomin_time_start + bu.getBoomerAudioParamTriggerDelayForFFMPEG(boomer)
         duration = bu.getBoomerAudioParamDurationForFFMPEG(boomer)
@@ -684,8 +702,6 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
             posy = "y={}".format(randomy)            
 
         boomin_time_start = bu.getBoomerBoominTime(boomer)
-        if not boomin_time_start :
-            continue
 
         boomin_time_start = boomin_time_start + bu.getBoomerVideoParamTriggerDelayForFFMPEG(boomer)
         duration = bu.getBoomerVideoParamDurationForFFMPEG(boomer)
@@ -776,8 +792,6 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
 
 
         boomin_time_start = bu.getBoomerBoominTime(boomer)
-        if not boomin_time_start :
-            continue
 
         boomin_time_start = boomin_time_start + bu.getBoomerVideoParamTriggerDelayForFFMPEG(boomer)
         duration = bu.getBoomerVideoParamDurationForFFMPEG(boomer)
@@ -842,8 +856,6 @@ def buildVideoConcatFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v=
     head = boomers[:1]
     for boomer in head:
         boomin_time_start = bu.getBoomerBoominTime(boomer)
-        if not boomin_time_start :
-            continue
 
         boomin_time_start = boomin_time_start + bu.getBoomerVideoParamTriggerDelayForFFMPEG(boomer)
         duration = bu.getBoomerVideoParamDurationForFFMPEG(boomer)
@@ -883,8 +895,6 @@ def buildVideoConcatFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v=
     for idx, boomer in enumerate(tail, first_file_idx + 1):
 
         boomin_time_start = bu.getBoomerBoominTime(boomer)
-        if not boomin_time_start :
-            continue
  
         boomin_time_start = boomin_time_start + bu.getBoomerVideoParamTriggerDelayForFFMPEG(boomer)
         duration = bu.getBoomerVideoParamDurationForFFMPEG(boomer)
@@ -937,8 +947,6 @@ def buildImageConcatFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v=
     head = boomers[:1]
     for boomer in head:
         boomin_time_start = bu.getBoomerBoominTime(boomer)
-        if not boomin_time_start :
-            continue
 
         boomin_time_start = boomin_time_start + bu.getBoomerImageParamTriggerDelayForFFMPEG(boomer)
         duration = bu.getBoomerImageParamDurationForFFMPEG(boomer)
@@ -977,8 +985,6 @@ anullsrc=r=44100:cl=mono, atrim= end= {duration}
     for idx, boomer in enumerate(tail, first_file_idx + 1):
 
         boomin_time_start = bu.getBoomerBoominTime(boomer)
-        if not boomin_time_start :
-            continue
 
         boomin_time_start = boomin_time_start + bu.getBoomerImageParamTriggerDelayForFFMPEG(boomer)
         duration = bu.getBoomerImageParamDurationForFFMPEG(boomer)
@@ -1035,24 +1041,16 @@ def copy(from_= "", to_= ""):
 
 
 
-def download_clip_and_audio(from_= "./", to_v= "./", to_a= "./"):
-    
-    subprocess.run([
-        variables.FFMPEG_PATH,
-        "-y",
-        "-i",
-        from_,
-        '-c',
-        "copy",
-        to_v,
-        "-map",
-        "0:a",
-        "-ac",
-        "1",
-        to_a        
-    ])        
-
-
+def download_file_from_url(link, response_path= "./"): 
+       
+    # create response object 
+    r = requests.get(link, stream = True) 
+        
+    # download started 
+    with open(response_path, 'wb') as f: 
+        for chunk in r.iter_content(chunk_size = 1024*1024): 
+            if chunk: 
+                f.write(chunk)
     
 
 # merge video w audio

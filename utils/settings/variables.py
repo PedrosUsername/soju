@@ -105,12 +105,16 @@ DEFAULT_VIDEO_POSITION_Y = "CENTER"                         # https://zulko.gith
 
 # general confs
 OVERLAY_SIZE_TOLERANCE = 69
+MAX_MEDIA_INSERT_DURATION = 8
+MAX_MEDIA_DELAY = 8
+MAX_MEDIA_VOLUME = 1
+
 DEFAULT_API_NAME = "VOSK"
 DEFAULT_API_MODEL = "en-128"
 OUTPUT_RESOLUTION_HEIGHT = 0               # http://trac.ffmpeg.org/wiki/Scaling
 OUTPUT_RESOLUTION_WIDTH = 0                # 1920 px | -n | 0
 
-PATH_MODEL = "/home/pedro/Downloads/sojubot/models/en-model"   
+PATH_MODEL = "/home/pedro/Downloads/sojubot/models/en/lightweight"   
 DEFAULT_OUTPUT_PATH = ""
 PATH_DEFAULT_JSON_FILE = "./assets/json/"
 
@@ -168,12 +172,7 @@ FFMPEG_OUTPUT_SPECS=  [
 # program variables
 TMP_AUDIO_FILE_NAME = "tmp_audio.wav"
 DEFAULT_TMP_FILE_PATH = "./utils/settings/tmp/"
-
-# limiters
 MIN_MEDIA_VOLUME = 0
 MIN_MEDIA_INSERT_DURATION = 0
-MAX_MEDIA_INSERT_DURATION = 8
-MAX_MEDIA_DELAY = 8
 MIN_MEDIA_DELAY = 0
-MAX_MEDIA_VOLUME = 1
 MIN_RESOLUTION_SIZE = 0

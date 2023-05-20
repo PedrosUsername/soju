@@ -1,0 +1,38 @@
+{
+    "soju": {
+        "generator": {
+            "generals": {
+                "api": {
+                    "name": "vosk",
+                    "model": "en-128"
+                }
+            },
+
+            "defaults": {
+                "word": {
+                    "trigger": "end"
+                },
+                
+                "image": [
+                    {
+                        "dir": "default",
+                        "duration": 2.5,
+                        "mergestrategy": "concat"
+                    }
+                ],
+
+                "audio": [
+                    {
+                        "dir": "fart",
+                        "duration": 2.5
+                    },
+                    {
+                        "dir": "laughtrack",
+                        "duration": 2.16,
+                        "triggerdelay": 0.34
+                    }
+                ]
+            }
+        }
+    }
+}
