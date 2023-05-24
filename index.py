@@ -416,7 +416,6 @@ async def on_message(message) :
 
                     if main_clip_url is None :
                         raise Exception("clip not found")
-                    
 
                     full_main_clip_file_path = ephemeral + main_clip_name + ".mp4"
                     full_main_clip_file_path_copy = ephemeral + main_clip_name + "_copy.mp4"
@@ -430,11 +429,9 @@ async def on_message(message) :
                         boomers= boomers
                     )
 
-                    boomers_mid = boomers_bot + boomers_mid + boomers_top
-
                     params = ffmpeg_utils.buildCall(
                         full_main_clip_file_path,
-                        boomers_mid,
+                        boomers_bot + boomers_mid + boomers_top,
                         ephemeral                        
                     )
 
@@ -466,4 +463,4 @@ client.run(TOKEN)
 
 
 # issue 0000 > server straight up freezes with certain http input requests > closed
-# issue 0001 > soju videos encoding aren't suitable for youtube or twitter upload. They need to be "converted to mp4" before.
+# issue 0001 > some of soju videos aren't suitable for youtube or twitter upload. They need to be "converted to mp4" before.
