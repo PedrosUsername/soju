@@ -19,6 +19,7 @@ TOKEN = os.getenv("DISCORD_SOJUBOT_TOKEN")
 
 
 HISTORY_LIMIT = 200
+
 TMP_AUDIO_FILE_NAME = "tmp_audio.wav"
 SOJUCALL = "!soju"
 
@@ -33,6 +34,11 @@ def get_file_type(our_file):
     extension = our_file.split(".")[-1]
     return "." + extension
     
+
+
+
+
+
 
 
 
@@ -212,6 +218,44 @@ async def get_random_media_inputs(message= None, main_input= None):
 
 
 
+async def get_random_media_inputs_from_channel(channel= None, main_input= None):
+    if not channel:
+        return ([], [], [])
+    
+    msgs = [message async for message in channel.history(limit=HISTORY_LIMIT)]
+
+    random.shuffle(msgs)
+
+    embeds_lists = [msg.embeds for msg in msgs]
+    attachs_lists = [msg.attachments for msg in msgs]
+    
+    img = []
+    aud = []
+    vid = []
+
+    embeds = [m for m in list(itertools.chain(*embeds_lists))]
+    aux_img, aux_aud, aux_vid = get_media_input_urls(embeds)
+    img = img + aux_img
+    aud = aud + aux_aud
+    vid = vid + aux_vid
+
+
+    attachs = [m for m in list(itertools.chain(*attachs_lists))]
+    aux_img, aux_aud, aux_vid = get_media_input_urls(attachs)
+    img = img + aux_img
+    aud = aud + aux_aud
+    vid = vid + aux_vid
+ 
+    vid.remove(main_input) if main_input in vid else None
+
+    return img, aud, vid
+
+
+
+
+
+
+
 
 async def make_it_goofy(message= None, tmp_dir= "./", sojufile= None) :
     feedback_msg = None
@@ -375,14 +419,15 @@ async def on_message(message) :
                     full_aux_audio_file_path = ephemeral + main_clip_name + ".wav"
                     full_new_soju_file_path = ephemeral + main_clip_name + ".soju.json"            
 
-                    ffmpeg_utils.download_file_from_url(main_clip_url, full_main_clip_file_path)                        
+                    ffmpeg_utils.download_file_from_url(main_clip_url, full_main_clip_file_path)
                     ffmpeg_utils.get_only_audio(full_main_clip_file_path, full_aux_audio_file_path)
 
                     moviepy_utils.init_og_clip_params(full_main_clip_file_path)
 
-                    boomers = vosk_utils.describe(
+                    boomers = await vosk_utils.describe(
                         audio_file_path= full_aux_audio_file_path,
-                        generator= bu.get_boomer_generator_from_dict(sojufile)
+                        generator= bu.get_boomer_generator_from_dict(sojufile),
+                        client = client
                     )
 
                     bu.build_sojufile_for_discord(full_new_soju_file_path, boomers)
@@ -429,10 +474,11 @@ async def on_message(message) :
                         boomers= boomers
                     )
 
-                    params = ffmpeg_utils.buildCall(
+                    params = await ffmpeg_utils.buildCall(
                         full_main_clip_file_path,
                         boomers_bot + boomers_mid + boomers_top,
-                        ephemeral                        
+                        ephemeral,
+                        client
                     )
 
                     for p in params :

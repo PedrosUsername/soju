@@ -178,7 +178,7 @@ def cleanFilterParams(params= "", filth= ""):
     return params[:(len(filth) * -1)]
 
 
-def buildCall(outputfilepath= "output.mp4", boomers_mid= None, tmp_dir= "./"):
+async def buildCall(outputfilepath= "output.mp4", boomers_mid= None, tmp_dir= "./", client= None) :
     ffmpeg = FFMPEG_PATH
     output_specs = FFMPEG_OUTPUT_SPECS
     main_clip_params = mu.get_og_clip_params()
@@ -331,13 +331,14 @@ def buildCall(outputfilepath= "output.mp4", boomers_mid= None, tmp_dir= "./"):
 
     filter_params = cleanFilterParams(filter_params, filth= separator)
 
-    media_inputs = buildMediaInputs(
+    media_inputs = await buildMediaInputs(
         video_params_compose= compose_video_params_w_words,
         image_params_compose= compose_image_params_w_words,
         audio_params= audio_params_w_words,
         video_params_concat= concat_video_params_w_words,
         image_params_concat= concat_image_params_w_words,
-        tmp_dir= tmp_dir
+        tmp_dir= tmp_dir,
+        client= client
     )
 
     ffmpegCall = [
@@ -371,34 +372,35 @@ def buildCall(outputfilepath= "output.mp4", boomers_mid= None, tmp_dir= "./"):
 
 
 
-def buildMediaInputs(
+async def buildMediaInputs(
         video_params_compose= [],
         video_params_concat= [],
         image_params_compose= [],
         image_params_concat= [],
         audio_params= [],
-        tmp_dir= "./"
+        tmp_dir= "./",
+        client= None
 ):
     media_inputs = []
 
     for param in video_params_concat :
-        file_name = handle_video_input_file(param, tmp_dir)
+        file_name = await handle_video_input_file(param, tmp_dir, client)
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in image_params_concat:
-        file_name = handle_image_input_file(param, tmp_dir)
+        file_name = await handle_image_input_file(param, tmp_dir, client)
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in video_params_compose:
-        file_name = handle_video_input_file(param, tmp_dir)
+        file_name = await handle_video_input_file(param, tmp_dir, client)
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in image_params_compose:
-        file_name = handle_image_input_file(param, tmp_dir)
+        file_name = await handle_image_input_file(param, tmp_dir, client)
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in audio_params:
-        file_name = handle_audio_input_file(param, tmp_dir)
+        file_name = await handle_audio_input_file(param, tmp_dir, client)
         media_inputs = media_inputs + ["-i"] + [file_name]        
 
 
@@ -421,7 +423,7 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
         img_height = bu.getBoomerImageParamHeightForFFMPEG(boomer, main_clip_height)
 
         positionx = bu.getBoomerImageParamPosXForFFMPEG(boomer)
-        positiony = bu.getBoomerImageParamPosYForFFMPEG(boomer)        
+        positiony = bu.getBoomerImageParamPosYForFFMPEG(boomer)
 
         if positionx == Position.get("TOP") :
             posx = "x=main_w-overlay_w-12"
@@ -430,9 +432,9 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
         elif positionx == Position.get("BOTTOM") :
             posx = "x=12"
         elif positionx == Position.get("RANDOM") :
-            if main_clip_width and img_width :
+            if main_clip_width and img_width and (main_clip_width - img_width) > 0 :
                 randomx = random.choice(range(int(float(0.8 * main_clip_width - img_width))))
-            elif main_clip_width and img_height :
+            elif main_clip_width and img_height and (main_clip_width - img_height) > 0 :
                 randomx = random.choice(range(int(float(0.8 * main_clip_width - img_height))))
             else :
                 randomx = 12
@@ -447,7 +449,7 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
         elif positiony == Position.get("BOTTOM") :
             posy = "y=main_h-overlay_h-12"
         elif positiony == Position.get("RANDOM") :
-            if main_clip_height and img_height :
+            if main_clip_height and img_height and (main_clip_height - img_height) > 0 :
                 randomy = random.choice(range(main_clip_height - img_height))
             else :
                 randomy = 12
@@ -488,9 +490,9 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
         elif positionx == Position.get("BOTTOM") :
             posx = "x=12"
         elif positionx == Position.get("RANDOM") :
-            if main_clip_width and img_width :
+            if main_clip_width and img_width and (main_clip_width - img_width) > 0 :
                 randomx = random.choice(range(int(float(0.8 * main_clip_width - img_width))))
-            elif main_clip_width and img_height :
+            elif main_clip_width and img_height and (main_clip_width - img_height) > 0 :
                 randomx = random.choice(range(int(float(0.8 * main_clip_width - img_height))))
             else :
                 randomx = 12
@@ -504,7 +506,7 @@ def buildImageOverlayFilterParams(boomers= [], inp= "[0]", out= "[outv]", first_
         elif positiony == Position.get("BOTTOM") :
             posy = "y=main_h-overlay_h-12"
         elif positiony == Position.get("RANDOM") :
-            if main_clip_height and img_height :
+            if main_clip_height and img_height and (main_clip_height - img_height) > 0 :
                 randomy = random.choice(range(main_clip_height - img_height))
             else :
                 randomy = 12
@@ -636,9 +638,9 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
         elif positionx == Position.get("BOTTOM") :
             posx = "x=12"
         elif positionx == Position.get("RANDOM") :
-            if main_clip_width and vid_width :
+            if main_clip_width and vid_width and (main_clip_width - vid_width) > 0 :
                 randomx = random.choice(range(int(float(0.8 * main_clip_width - vid_width))))
-            elif main_clip_width and vid_height :
+            elif main_clip_width and vid_height and (main_clip_width - vid_height) > 0 :
                 randomx = random.choice(range(int(float(0.8 * main_clip_width - vid_height))))
             else :
                 randomx = 12
@@ -653,7 +655,7 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
         elif positiony == Position.get("BOTTOM") :
             posy = "y=main_h-overlay_h-12"
         elif positiony == Position.get("RANDOM") :
-            if main_clip_height and vid_height :
+            if main_clip_height and vid_height and (main_clip_width - vid_height) > 0 :
                 randomy = random.choice(range(main_clip_height - vid_height))
             else :
                 randomy = 12
@@ -725,9 +727,9 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
         elif positionx == Position.get("BOTTOM") :
             posx = "x=12"
         elif positionx == Position.get("RANDOM") :
-            if main_clip_width and vid_width :
+            if main_clip_width and vid_width and (main_clip_width - vid_width) > 0 :
                 randomx = random.choice(range(int(float(0.8 * main_clip_width - vid_width))))
-            elif main_clip_width and vid_height :
+            elif main_clip_width and vid_height and (main_clip_width - vid_height) > 0 :
                 randomx = random.choice(range(int(float(0.8 * main_clip_width - vid_height))))
             else :
                 randomx = 12
@@ -742,7 +744,7 @@ def buildVideoOverlayFilterParams(boomers= [], inp_v= "[0]", inp_a= "[0]", out_v
         elif positiony == Position.get("BOTTOM") :
             posy = "y=main_h-overlay_h-12"
         elif positiony == Position.get("RANDOM") :
-            if main_clip_height and vid_height :
+            if main_clip_height and vid_height and (main_clip_width - vid_height) > 0 :
                 randomy = random.choice(range(main_clip_height - vid_height))
             else :
                 randomy = 12
@@ -988,12 +990,22 @@ anullsrc=r=44100:cl=mono, atrim= end= {duration}
 
 
 
-def handle_image_input_file(param, tmp_dir) :
+async def handle_image_input_file(param, tmp_dir, client) :
     dir_ = bu.getBoomerImageParamDirForFFMPEG(param)
     file_dir = ImageFilesDir.get(dir_)
 
     if bu.getBoomerImageParamFile(param) is None :
-        file_name = file_dir + random.choice(fu.getValidImageFiles(ImageFilesDir.get( dir_ )))
+        if isinstance(dir_, str) :
+            file_name = file_dir + random.choice(fu.getValidImageFiles(ImageFilesDir.get( dir_ )))
+        elif isinstance(dir_, int) :
+            valid_files, aud, vid = await fu.getValidMediaFilesFromDiscordByChannelId(dir_, client)
+            if not valid_files :
+                raise Exception(f"channel {dir_} not found, or has no media files")
+            url = random.choice(valid_files)
+            file_name = tmp_dir + fu.get_base_file_name_from(url)
+            download_file_from_url(param["file"], file_name)
+        else :
+            file_name = None
 
     elif fu.image_file_is_a_good_choice(file_dir, param["file"]) :
         file_name = file_dir + param["file"]
@@ -1010,13 +1022,23 @@ def handle_image_input_file(param, tmp_dir) :
 
 
 
-def handle_video_input_file(param, tmp_dir) :
+async def handle_video_input_file(param, tmp_dir, client) :
     dir_ = bu.getBoomerVideoParamDirForFFMPEG(param)
     file_dir = VideoFilesDir.get(dir_)
 
     if bu.getBoomerVideoParamFile(param) is None :
-        file_name = file_dir + random.choice(fu.getValidVideoFiles(VideoFilesDir.get( dir_ )))
-
+        if isinstance(dir_, str) :
+            file_name = file_dir + random.choice(fu.getValidVideoFiles(VideoFilesDir.get( dir_ )))
+        elif isinstance(dir_, int) :
+            img, aud, valid_files = await fu.getValidMediaFilesFromDiscordByChannelId(dir_, client)
+            if not valid_files :
+                raise Exception(f"channel {dir_} not found, or has no media files")
+            url = random.choice(valid_files)
+            file_name = tmp_dir + fu.get_base_file_name_from(url)
+            download_file_from_url(param["file"], file_name)
+        else :
+            file_name = None
+        
     elif fu.video_file_is_a_good_choice(file_dir, param["file"]) :
         file_name = file_dir + param["file"]
 
@@ -1031,12 +1053,22 @@ def handle_video_input_file(param, tmp_dir) :
 
 
 
-def handle_audio_input_file(param, tmp_dir) :
+async def handle_audio_input_file(param, tmp_dir, client) :
     dir_ = bu.getBoomerAudioParamDirForFFMPEG(param)
     file_dir = AudioFilesDir.get(dir_)
 
     if bu.getBoomerAudioParamFile(param) is None :
-        file_name = file_dir + random.choice(fu.getValidAudioFiles(AudioFilesDir.get( dir_ )))
+        if isinstance(dir_, str) :
+            file_name = file_dir + random.choice(fu.getValidAudioFiles(AudioFilesDir.get( dir_ )))
+        elif isinstance(dir_, int) :
+            img, valid_files, vid = await fu.getValidMediaFilesFromDiscordByChannelId(dir_, client)
+            if not valid_files :
+                raise Exception(f"channel {dir_} not found, or has no media files")            
+            url = random.choice(valid_files)
+            file_name = tmp_dir + fu.get_base_file_name_from(url)
+            download_file_from_url(param["file"], file_name)
+        else :
+            file_name = None
 
     elif fu.audio_file_is_a_good_choice(file_dir, param["file"]) :
         file_name = file_dir + param["file"]

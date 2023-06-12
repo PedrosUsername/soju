@@ -30,7 +30,7 @@ from .settings import variables
 
 
 
-def describe(audio_file_path= "", generator= None) :
+async def describe(audio_file_path= "", generator= None, client= None) :
     generator = bu.prepare_boomer_generator(generator)
     default_boomer_structure = generator.get("defaults") if generator.get("defaults") else {}
     print(json.dumps(default_boomer_structure, indent= 4))
@@ -44,9 +44,15 @@ def describe(audio_file_path= "", generator= None) :
             img_param_dir = bu.getBoomerImageParamDirForFFMPEG(img_param)
 
             if img_param_dir not in list(valid_image_files_by_dir.keys()) :
-                valid_image_files = fu.getValidImageFiles(ImageFilesDir.get( img_param_dir ))
+                if isinstance(img_param_dir, str) :
+                    valid_image_files = fu.getValidImageFiles(ImageFilesDir.get( img_param_dir ))
+                elif isinstance(img_param_dir, int) :
+                    valid_image_files, aud, vid = await fu.getValidMediaFilesFromDiscordByChannelId(img_param_dir, client)
+                else :
+                    valid_image_files = []
+
                 valid_image_files_by_dir.update({
-                    str(img_param_dir): valid_image_files
+                    img_param_dir: valid_image_files
                 })
 
     if default_boomer_structure.get("audio") :
@@ -54,9 +60,15 @@ def describe(audio_file_path= "", generator= None) :
             aud_param_dir = bu.getBoomerAudioParamDirForFFMPEG(aud_param)
 
             if aud_param_dir not in list(valid_audio_files_by_dir.keys()) :
-                valid_audio_files = fu.getValidAudioFiles(AudioFilesDir.get( aud_param_dir ))
+                if isinstance(aud_param_dir, str) :
+                    valid_audio_files = fu.getValidAudioFiles(AudioFilesDir.get( aud_param_dir ))
+                elif isinstance(aud_param_dir, int) :
+                    img, valid_audio_files, vid = await fu.getValidMediaFilesFromDiscordByChannelId(aud_param_dir, client)
+                else :
+                    valid_audio_files = []
+
                 valid_audio_files_by_dir.update({
-                    str(aud_param_dir): valid_audio_files
+                    aud_param_dir: valid_audio_files
                 })
 
     if default_boomer_structure.get("video") :
@@ -64,9 +76,15 @@ def describe(audio_file_path= "", generator= None) :
             vid_param_dir = bu.getBoomerVideoParamDirForFFMPEG(vid_param)
 
             if vid_param_dir not in list(valid_video_files_by_dir.keys()) :
-                valid_video_files = fu.getValidVideoFiles(VideoFilesDir.get( vid_param_dir ))
+                if isinstance(vid_param_dir, str) :
+                    valid_video_files = fu.getValidVideoFiles(VideoFilesDir.get( vid_param_dir ))
+                elif isinstance(vid_param_dir, int) :
+                    img, aud, valid_video_files = await fu.getValidMediaFilesFromDiscordByChannelId(vid_param_dir, client)
+                else :
+                    valid_video_files = []
+
                 valid_video_files_by_dir.update({
-                    str(vid_param_dir): valid_video_files
+                    vid_param_dir: valid_video_files
                 })
 
     model = Model(variables.PATH_MODEL)

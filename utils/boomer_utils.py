@@ -464,7 +464,7 @@ def getBoomerImageParamFileForFFMPEG(param= None, files= []) :
     file = getBoomerImageParamFile(param)
 
     if not isinstance(file, str) :
-        return random.choice(files) if len(files) > 0 else DEFAULT_IMAGE_FILE
+        return random.choice(files) if files else DEFAULT_IMAGE_FILE
     
     else :
         return file
@@ -475,7 +475,7 @@ def getBoomerAudioParamFileForFFMPEG(param= None, files= []) :
     file = getBoomerAudioParamFile(param)
 
     if not isinstance(file, str) :
-        return random.choice(files) if len(files) > 0 else DEFAULT_AUDIO_FILE
+        return random.choice(files) if files else DEFAULT_AUDIO_FILE
     
     else :
         return file
@@ -486,7 +486,7 @@ def getBoomerVideoParamFileForFFMPEG(param= None, files= []) :
     file = getBoomerVideoParamFile(param)
 
     if not isinstance(file, str) :
-        return random.choice(files) if len(files) > 0 else DEFAULT_VIDEO_FILE
+        return random.choice(files) if files else DEFAULT_VIDEO_FILE
     
     else :
         return file
@@ -1325,7 +1325,10 @@ def getBoomerImageParamDirForFFMPEG(param= None) :
     dir = getBoomerImageParamDir(param)
 
     if not isinstance(dir, str) or dir not in list(ImageFilesDir.keys()) :
-        return DEFAULT_IMAGE_DIR
+        if not isinstance(dir, int) :
+            return DEFAULT_IMAGE_DIR
+        else :
+            return dir
    
     else :
         return dir
@@ -1334,7 +1337,10 @@ def getBoomerImageParamDirForSojufile(param= None) :
     dir = getBoomerImageParamDir(param)
 
     if not isinstance(dir, str) or dir not in list(ImageFilesDir.keys()) :
-        return None
+        if not isinstance(dir, int) :
+            return None
+        else :
+            return dir
    
     else :
         return dir
@@ -1344,7 +1350,10 @@ def getBoomerAudioParamDirForFFMPEG(param= None) :
     dir = getBoomerAudioParamDir(param)
 
     if not isinstance(dir, str) or dir not in list(AudioFilesDir.keys()) :
-        return DEFAULT_AUDIO_DIR
+        if not isinstance(dir, int) :
+            return DEFAULT_AUDIO_DIR
+        else :
+            return dir
    
     else :
         return dir
@@ -1353,7 +1362,10 @@ def getBoomerAudioParamDirForSojufile(param= None) :
     dir = getBoomerAudioParamDir(param)
 
     if not isinstance(dir, str) or dir not in list(AudioFilesDir.keys()) :
-        return None
+        if not isinstance(dir, int) :
+            return None
+        else :
+            return dir
    
     else :
         return dir
@@ -1364,7 +1376,10 @@ def getBoomerVideoParamDirForFFMPEG(param= None) :
     dir = getBoomerVideoParamDir(param)
 
     if not isinstance(dir, str) or dir not in list(VideoFilesDir.keys()) :
-        return DEFAULT_VIDEO_DIR
+        if not isinstance(dir, int) :
+            return DEFAULT_VIDEO_DIR
+        else :
+            return dir
    
     else :
         return dir
@@ -1374,7 +1389,10 @@ def getBoomerVideoParamDirForSojufile(param= None) :
     dir = getBoomerVideoParamDir(param)
 
     if not isinstance(dir, str) or dir not in list(VideoFilesDir.keys()) :
-        return None
+        if not isinstance(dir, int) :
+            return None
+        else :
+            return dir
    
     else :
         return dir
