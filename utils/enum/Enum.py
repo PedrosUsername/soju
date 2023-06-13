@@ -33,12 +33,22 @@ Trigger = {
 ImageFilesDir = {
     "default": "./assets/image/default/",
     "DEFAULT": "./assets/image/default/",
+    "mommy": "./assets/image/mommy/",
+    "MOMMY": "./assets/image/mommy/",
+    "pettan": "./assets/image/pettan/",
+    "PETTAN": "./assets/image/pettan/",        
 }
 
 
 AudioFilesDir = {
     "default": "./assets/audio/default/",
     "DEFAULT": "./assets/audio/default/",
+    "music": "./assets/audio/music/",
+    "MUSIC": "./assets/audio/music/",
+    "fart": "./assets/audio/fart/",
+    "FART": "./assets/audio/fart/",
+    "laughtrack": "./assets/audio/laughtrack/",
+    "LAUGHTRACK": "./assets/audio/laughtrack/",    
 }
 
 

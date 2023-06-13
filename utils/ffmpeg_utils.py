@@ -384,23 +384,23 @@ async def buildMediaInputs(
     media_inputs = []
 
     for param in video_params_concat :
-        file_name = await handle_video_input_file(param, tmp_dir, client)
+        file_name = await handle_video_input_file(param, tmp_dir)
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in image_params_concat:
-        file_name = await handle_image_input_file(param, tmp_dir, client)
+        file_name = await handle_image_input_file(param, tmp_dir)
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in video_params_compose:
-        file_name = await handle_video_input_file(param, tmp_dir, client)
+        file_name = await handle_video_input_file(param, tmp_dir)
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in image_params_compose:
-        file_name = await handle_image_input_file(param, tmp_dir, client)
+        file_name = await handle_image_input_file(param, tmp_dir)
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in audio_params:
-        file_name = await handle_audio_input_file(param, tmp_dir, client)
+        file_name = await handle_audio_input_file(param, tmp_dir)
         media_inputs = media_inputs + ["-i"] + [file_name]        
 
 
