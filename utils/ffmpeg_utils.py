@@ -990,22 +990,13 @@ anullsrc=r=44100:cl=mono, atrim= end= {duration}
 
 
 
-async def handle_image_input_file(param, tmp_dir, client) :
+async def handle_image_input_file(param, tmp_dir) :
     dir_ = bu.getBoomerImageParamDirForFFMPEG(param)
     file_dir = ImageFilesDir.get(dir_)
 
     if bu.getBoomerImageParamFile(param) is None :
         if isinstance(dir_, str) :
             file_name = file_dir + random.choice(fu.getValidImageFiles(ImageFilesDir.get( dir_ )))
-        elif isinstance(dir_, int) :
-            valid_files, aud, vid = await fu.getValidMediaFilesFromDiscordByChannelId(dir_, client)
-            if not valid_files :
-                raise Exception(f"channel {dir_} not found, or has no media files")
-            url = random.choice(valid_files)
-            file_name = tmp_dir + fu.get_base_file_name_from(url)
-            download_file_from_url(param["file"], file_name)
-        else :
-            file_name = None
 
     elif fu.image_file_is_a_good_choice(file_dir, param["file"]) :
         file_name = file_dir + param["file"]
@@ -1022,22 +1013,13 @@ async def handle_image_input_file(param, tmp_dir, client) :
 
 
 
-async def handle_video_input_file(param, tmp_dir, client) :
+async def handle_video_input_file(param, tmp_dir) :
     dir_ = bu.getBoomerVideoParamDirForFFMPEG(param)
     file_dir = VideoFilesDir.get(dir_)
 
     if bu.getBoomerVideoParamFile(param) is None :
         if isinstance(dir_, str) :
             file_name = file_dir + random.choice(fu.getValidVideoFiles(VideoFilesDir.get( dir_ )))
-        elif isinstance(dir_, int) :
-            img, aud, valid_files = await fu.getValidMediaFilesFromDiscordByChannelId(dir_, client)
-            if not valid_files :
-                raise Exception(f"channel {dir_} not found, or has no media files")
-            url = random.choice(valid_files)
-            file_name = tmp_dir + fu.get_base_file_name_from(url)
-            download_file_from_url(param["file"], file_name)
-        else :
-            file_name = None
         
     elif fu.video_file_is_a_good_choice(file_dir, param["file"]) :
         file_name = file_dir + param["file"]
@@ -1053,22 +1035,13 @@ async def handle_video_input_file(param, tmp_dir, client) :
 
 
 
-async def handle_audio_input_file(param, tmp_dir, client) :
+async def handle_audio_input_file(param, tmp_dir) :
     dir_ = bu.getBoomerAudioParamDirForFFMPEG(param)
     file_dir = AudioFilesDir.get(dir_)
 
     if bu.getBoomerAudioParamFile(param) is None :
         if isinstance(dir_, str) :
             file_name = file_dir + random.choice(fu.getValidAudioFiles(AudioFilesDir.get( dir_ )))
-        elif isinstance(dir_, int) :
-            img, valid_files, vid = await fu.getValidMediaFilesFromDiscordByChannelId(dir_, client)
-            if not valid_files :
-                raise Exception(f"channel {dir_} not found, or has no media files")            
-            url = random.choice(valid_files)
-            file_name = tmp_dir + fu.get_base_file_name_from(url)
-            download_file_from_url(param["file"], file_name)
-        else :
-            file_name = None
 
     elif fu.audio_file_is_a_good_choice(file_dir, param["file"]) :
         file_name = file_dir + param["file"]

@@ -1325,10 +1325,7 @@ def getBoomerImageParamDirForFFMPEG(param= None) :
     dir = getBoomerImageParamDir(param)
 
     if not isinstance(dir, str) or dir not in list(ImageFilesDir.keys()) :
-        if not isinstance(dir, int) :
-            return DEFAULT_IMAGE_DIR
-        else :
-            return dir
+        return DEFAULT_IMAGE_DIR
    
     else :
         return dir
@@ -1350,10 +1347,7 @@ def getBoomerAudioParamDirForFFMPEG(param= None) :
     dir = getBoomerAudioParamDir(param)
 
     if not isinstance(dir, str) or dir not in list(AudioFilesDir.keys()) :
-        if not isinstance(dir, int) :
-            return DEFAULT_AUDIO_DIR
-        else :
-            return dir
+        return DEFAULT_AUDIO_DIR
    
     else :
         return dir
@@ -1376,10 +1370,7 @@ def getBoomerVideoParamDirForFFMPEG(param= None) :
     dir = getBoomerVideoParamDir(param)
 
     if not isinstance(dir, str) or dir not in list(VideoFilesDir.keys()) :
-        if not isinstance(dir, int) :
-            return DEFAULT_VIDEO_DIR
-        else :
-            return dir
+        return DEFAULT_VIDEO_DIR
    
     else :
         return dir
