@@ -474,11 +474,10 @@ async def on_message(message) :
                         boomers= boomers
                     )
 
-                    params = await ffmpeg_utils.buildCall(
+                    params = ffmpeg_utils.buildCall(
                         full_main_clip_file_path,
                         boomers_bot + boomers_mid + boomers_top,
-                        ephemeral,
-                        client
+                        ephemeral
                     )
 
                     for p in params :

@@ -223,6 +223,16 @@ def filterBoomers(og_clip_duration= 0, boomers= []):
 
 
 
+def get_sojufile_from_path(path= None) :
+    if not path :
+        return None
+    
+    with open(path, 'r') as file :
+        return json.load(file).get("soju")
+
+
+
+
 
 def get_boomers_from_dict(sojufile= None) :
     if (

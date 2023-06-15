@@ -178,7 +178,7 @@ def cleanFilterParams(params= "", filth= ""):
     return params[:(len(filth) * -1)]
 
 
-async def buildCall(outputfilepath= "output.mp4", boomers_mid= None, tmp_dir= "./", client= None) :
+def buildCall(outputfilepath= "output.mp4", boomers_mid= None, tmp_dir= "./") :
     ffmpeg = FFMPEG_PATH
     output_specs = FFMPEG_OUTPUT_SPECS
     main_clip_params = mu.get_og_clip_params()
@@ -331,14 +331,13 @@ async def buildCall(outputfilepath= "output.mp4", boomers_mid= None, tmp_dir= ".
 
     filter_params = cleanFilterParams(filter_params, filth= separator)
 
-    media_inputs = await buildMediaInputs(
+    media_inputs = buildMediaInputs(
         video_params_compose= compose_video_params_w_words,
         image_params_compose= compose_image_params_w_words,
         audio_params= audio_params_w_words,
         video_params_concat= concat_video_params_w_words,
         image_params_concat= concat_image_params_w_words,
-        tmp_dir= tmp_dir,
-        client= client
+        tmp_dir= tmp_dir
     )
 
     ffmpegCall = [
@@ -372,35 +371,34 @@ async def buildCall(outputfilepath= "output.mp4", boomers_mid= None, tmp_dir= ".
 
 
 
-async def buildMediaInputs(
+def buildMediaInputs(
         video_params_compose= [],
         video_params_concat= [],
         image_params_compose= [],
         image_params_concat= [],
         audio_params= [],
-        tmp_dir= "./",
-        client= None
+        tmp_dir= "./"
 ):
     media_inputs = []
 
     for param in video_params_concat :
-        file_name = await handle_video_input_file(param, tmp_dir)
+        file_name = handle_video_input_file(param, tmp_dir)
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in image_params_concat:
-        file_name = await handle_image_input_file(param, tmp_dir)
+        file_name = handle_image_input_file(param, tmp_dir)
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in video_params_compose:
-        file_name = await handle_video_input_file(param, tmp_dir)
+        file_name = handle_video_input_file(param, tmp_dir)
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in image_params_compose:
-        file_name = await handle_image_input_file(param, tmp_dir)
+        file_name = handle_image_input_file(param, tmp_dir)
         media_inputs = media_inputs + ["-i"] + [file_name]
 
     for param in audio_params:
-        file_name = await handle_audio_input_file(param, tmp_dir)
+        file_name = handle_audio_input_file(param, tmp_dir)
         media_inputs = media_inputs + ["-i"] + [file_name]        
 
 
@@ -990,7 +988,7 @@ anullsrc=r=44100:cl=mono, atrim= end= {duration}
 
 
 
-async def handle_image_input_file(param, tmp_dir) :
+def handle_image_input_file(param, tmp_dir) :
     dir_ = bu.getBoomerImageParamDirForFFMPEG(param)
     file_dir = ImageFilesDir.get(dir_)
 
@@ -1013,7 +1011,7 @@ async def handle_image_input_file(param, tmp_dir) :
 
 
 
-async def handle_video_input_file(param, tmp_dir) :
+def handle_video_input_file(param, tmp_dir) :
     dir_ = bu.getBoomerVideoParamDirForFFMPEG(param)
     file_dir = VideoFilesDir.get(dir_)
 
@@ -1035,7 +1033,7 @@ async def handle_video_input_file(param, tmp_dir) :
 
 
 
-async def handle_audio_input_file(param, tmp_dir) :
+def handle_audio_input_file(param, tmp_dir) :
     dir_ = bu.getBoomerAudioParamDirForFFMPEG(param)
     file_dir = AudioFilesDir.get(dir_)
 

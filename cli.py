@@ -1,4 +1,5 @@
 import tempfile
+import asyncio
 import json
 import sys
 
@@ -259,152 +260,56 @@ async def make_it_goofy(message= None, tmp_dir= "./", sojufile= None) :
 
 
 
-def is_describe_audio_call(message= None, sojufile= None) :
-    if (
-        message is None
-        or message.reference is None
-        or message.reference.message_id is None
-    ) :
-        return False
-    
-    issojucall = message.content.startswith('!soju')
-    b_gen = bu.get_boomer_generator_from_dict(sojufile)
-
-    if issojucall or b_gen :
-        return True
-    
-    else:
-        return False
     
 
 
 
-def is_video_edit_call(message= None, sojufile= None) :
-    if (
-        message is None
-        or message.reference is None
-        or message.reference.message_id is None
-        or message.attachments is None
-    ) :
-        return False
-    
-    boomers = bu.get_boomers_from_dict(sojufile)
-    b_gen = bu.get_boomer_generator_from_dict(sojufile)
-
-    if (
-        boomers is not None
-        and b_gen is None
-    ) :
-        return True
-    
-    else :
-        return False
 
 
-
-def is_credits_call(message) :
-    if (
-        message is None
-    ) :
-        return False
-    
-    issojucall = message.content.startswith(SOJUCALL)
-
-    if issojucall :
-        return True
-    
-    else:
-        return False
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-videofilepath = sys.argv[1] if len(sys.argv) > 1 else None
-jsonfilepath = sys.argv[2] if len(sys.argv) > 2 else None
-
-
-
-if(videofilepath is not None and jsonfilepath is None):
-    print("wait a second...")
+async def audio_descriptor(videofilepath, sojufile) :
+    if videofilepath is None :
+        raise Exception("clip not found")
 
     with tempfile.TemporaryDirectory(dir="./") as tmp_dir :
         ephemeral = tmp_dir + "/"
-        main_clip_url = videofilepath
 
-        main_clip_name = file_utils.get_base_file_name_from(main_clip_url)
-        
-        if main_clip_url is None :
-            raise Exception("clip not found")
-
+        main_clip_name = file_utils.get_base_file_name_from(videofilepath)
         full_main_clip_file_path = videofilepath
+
+        moviepy_utils.init_og_clip_params(full_main_clip_file_path)
+
+
+
+
         full_aux_audio_file_path = ephemeral + main_clip_name + ".wav"
         full_new_soju_file_path = "./" + main_clip_name + ".soju.json"
 
         ffmpeg_utils.get_only_audio(full_main_clip_file_path, full_aux_audio_file_path)
 
-        moviepy_utils.init_og_clip_params(full_main_clip_file_path)
 
-        boomers = vosk_utils.describe(
-            audio_file_path= full_aux_audio_file_path
-#            generator= bu.get_boomer_generator_from_dict(sojufile)
+        boomers = await vosk_utils.describe(
+            audio_file_path= full_aux_audio_file_path,
+            generator= bu.get_boomer_generator_from_dict(sojufile)
         )
 
-        bu.build_sojufile_for_discord(full_new_soju_file_path, boomers)
+        bu.build_sojufile_for_discord(full_new_soju_file_path, boomers)    
 
 
 
-
-elif(videofilepath is not None and jsonfilepath is not None):
-    print("wait a moment...")
-
-    with open(jsonfilepath, 'r') as file:
-        sojufile = json.load(file).get("soju")
+def video_editor(videofilepath= None, boomers= []) :
+    if videofilepath is None :
+        raise Exception("clip not found")
 
     with tempfile.TemporaryDirectory(dir="./") as tmp_dir :
         ephemeral = tmp_dir + "/"
-        main_clip_url = videofilepath
 
-        boomers = bu.get_boomers_from_dict(sojufile)
-        main_clip_name = file_utils.get_base_file_name_from(main_clip_url)
-
-        if len(boomers) < 1 :
-            raise Exception("boomers list is empty")
-
-        if main_clip_url is None :
-            raise Exception("clip not found")
-
+        main_clip_name = file_utils.get_base_file_name_from(videofilepath)
         full_main_clip_file_path = videofilepath
 
         moviepy_utils.init_og_clip_params(full_main_clip_file_path)
+
+
+
 
         boomers_top, boomers_mid, boomers_bot = bu.filterBoomers(
             og_clip_duration= moviepy_utils.get_og_clip_params().get("duration"),
@@ -422,4 +327,99 @@ elif(videofilepath is not None and jsonfilepath is not None):
 
         ffmpeg_utils.executeFfmpegCall(
             params= params
-        )
+        )    
+
+
+
+
+def is_audio_descriptor_call(videofilepath= None) :
+    return True if (videofilepath) else False
+
+
+
+def is_video_editor_call(videofilepath= None, boomers= None) :
+    return True if (videofilepath and boomers is not None) else False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async def main() :
+    videofilepath = sys.argv[1] if len(sys.argv) > 1 else None
+    jsonfilepath = sys.argv[2] if len(sys.argv) > 2 else None
+    sojufile= bu.get_sojufile_from_path(jsonfilepath)
+
+    boomers = bu.get_boomers_from_dict(sojufile)
+    
+    if is_video_editor_call(videofilepath, boomers) :
+        print("wait a moment...")
+        video_editor(videofilepath, boomers)
+
+    elif is_audio_descriptor_call(videofilepath) :
+        print("wait a second...")
+        await audio_descriptor(videofilepath, sojufile)
+
+
+
+
+
+
+
+
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
