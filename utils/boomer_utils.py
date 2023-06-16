@@ -1643,7 +1643,6 @@ def prepare_boomer_generator(generator= None) :
         dgenerator = open("./assets/json/dgenerator.soju.json")
         healthy_generator = json.load(dgenerator).get("soju").get("generator")
         
-    print(healthy_generator)
     return healthy_generator
 
 
@@ -1662,9 +1661,6 @@ def create_boomer_generator_as_str(generator= None) :
     ) :
         general = generator.get("generals")
         default = generator.get("defaults")
-
-        # dapin = as_json_string(getDefaultApiNameForFFMPEG(general))
-        # dapim = as_json_string(getDefaultApiModelForFFMPEG(general))
 
         dbt = getBoomTriggerForSojufile(default)
 
