@@ -1,6 +1,5 @@
 import tempfile
 import asyncio
-import json
 import sys
 
 

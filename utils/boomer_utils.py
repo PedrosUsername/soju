@@ -1029,6 +1029,19 @@ def getBoomerBoominTime(boomer= None):
 
 
 
+def getBoomWordContentForSojufile(boomer= None) :
+    if (
+        boomer is None
+        or boomer.get("word") is None
+        or boomer.get("word").get("content") is None
+    ):
+        return None
+    
+    else:
+        return boomer.get("word").get("content")
+
+
+
 
 
 
@@ -1549,6 +1562,7 @@ def prepare_boomer_gen_defaults(boomer= None) :
     if type(boomer) is dict :
         boomer_word = {}
         if type(boomer.get("word")) is dict :
+                boomer_word["content"] = getBoomWordContentForSojufile(boomer)
                 boomer_word["trigger"] = getBoomTriggerForSojufile(boomer)
 
         boomer_image = []
@@ -1744,53 +1758,6 @@ def create_boomer_generator_as_str(generator= None) :
                 "file": variables.DEFAULT_AUDIO_FILE,
             }
         ]        
-
-    python_comment = """else :
-        addvid = True
-
-        dapin = as_json_string(variables.DEFAULT_API_NAME)
-        dapim = as_json_string(variables.DEFAULT_API_MODEL)
-
-        dbt = as_json_string(variables.DEFAULT_BOOM_TRIGGER)
-
-        boomer_image = [
-            {
-                "file": variables.DEFAULT_IMAGE_FILE,
-                "dir": DEFAULT_IMAGE_DIR,        
-                "mergestrategy": variables.DEFAULT_IMAGE_MERGE_STRATEGY,
-                "duration": variables.DEFAULT_IMAGE_DURATION,
-                "height": variables.DEFAULT_IMAGE_RESOLUTION_HEIGHT,
-                "width": variables.DEFAULT_IMAGE_RESOLUTION_WIDTH,
-                "posx": variables.DEFAULT_IMAGE_POSITION_X,
-                "posy": variables.DEFAULT_IMAGE_POSITION_Y,
-                "triggerdelay": variables.DEFAULT_IMAGE_TRIGGER_DELAY
-            }
-        ]
-
-        boomer_video = [
-            {
-                "file": variables.DEFAULT_VIDEO_FILE,
-                "dir": DEFAULT_VIDEO_DIR,
-                "mergestrategy": variables.DEFAULT_VIDEO_MERGE_STRATEGY,
-                "duration": variables.DEFAULT_VIDEO_DURATION,
-                "height": variables.DEFAULT_VIDEO_RESOLUTION_HEIGHT,
-                "width": variables.DEFAULT_VIDEO_RESOLUTION_WIDTH,
-                "posx": variables.DEFAULT_VIDEO_POSITION_X,
-                "posy": variables.DEFAULT_VIDEO_POSITION_Y,
-                "triggerdelay": variables.DEFAULT_VIDEO_TRIGGER_DELAY,
-                "volume": variables.DEFAULT_VIDEO_VOLUME
-            }
-        ]
-        
-        boomer_audio = [
-            {
-                "file": variables.DEFAULT_AUDIO_FILE,
-                "dir": DEFAULT_AUDIO_DIR,
-                "duration": variables.DEFAULT_AUDIO_DURATION,
-                "triggerdelay": variables.DEFAULT_AUDIO_TRIGGER_DELAY,
-                "volume": variables.DEFAULT_AUDIO_VOLUME        
-            }
-        ]"""
 
     if dbt :
         boomtriggerdefault = ( 
@@ -2011,8 +1978,11 @@ def buildBoomer(obj, image_file_dirs= {}, audio_file_dirs= {}, video_file_dirs= 
 
             obj["video"].append(new_b_param)
     
-    del obj["conf"]
-    del obj["end"]    
-    del obj["start"]
+    if obj.get("conf") :
+        del obj["conf"]
+    if obj.get("end") :
+        del obj["end"]
+    if obj.get("start") :        
+        del obj["start"]
 
     return obj

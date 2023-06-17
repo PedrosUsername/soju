@@ -426,8 +426,7 @@ async def on_message(message) :
 
                     boomers = await vosk_utils.describe(
                         audio_file_path= full_aux_audio_file_path,
-                        generator= bu.get_boomer_generator_from_dict(sojufile),
-                        client = client
+                        generator= bu.get_boomer_generator_from_dict(sojufile)
                     )
 
                     bu.build_sojufile_for_discord(full_new_soju_file_path, boomers)

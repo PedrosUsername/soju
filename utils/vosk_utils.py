@@ -1,9 +1,10 @@
 import wave
 import json
+import random
 
 from vosk import Model, KaldiRecognizer
 
-from . import boomer_utils as bu, file_utils as fu
+from . import boomer_utils as bu, file_utils as fu, moviepy_utils as mu
 from .enum.Enum import ImageFilesDir, VideoFilesDir, AudioFilesDir
 from .settings import variables
 
@@ -13,6 +14,127 @@ from .settings import variables
 
 
 
+INTERVAL_DIFF_NOVOSK_DESCRIBE = variables.INTERVAL_DIFF_NOVOSK_DESCRIBE
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def get_boomers_without_vosk(
+        audio_file_path= None,
+        image_files= [],
+        audio_files= [],
+        video_files= [],
+        default_boomer= {}       
+    ) :
+    if not audio_file_path :
+        return []
+    
+    g_boomers = []
+    og_clip_duration = mu.AudioFileClip( audio_file_path ).duration
+    qtd_boomers = int(og_clip_duration / INTERVAL_DIFF_NOVOSK_DESCRIBE) if og_clip_duration >= INTERVAL_DIFF_NOVOSK_DESCRIBE else 1
+
+    tmp_clip_duration = og_clip_duration
+    interval_start = 0
+    interval_diffrence = INTERVAL_DIFF_NOVOSK_DESCRIBE if og_clip_duration >= INTERVAL_DIFF_NOVOSK_DESCRIBE else og_clip_duration
+    interval_end = interval_diffrence
+    
+    for _ in range(qtd_boomers) :
+        word = default_boomer.get("word") if default_boomer.get("word") else {}
+        word["start"] = random.choice(range(interval_start, interval_end))
+        word["end"] = word["start"]
+
+        g_boomer = bu.buildBoomer(
+            obj= {
+                "word": word.get("content"),
+                "start": word["start"],
+                "end": word["end"],
+            },
+            image_file_dirs= image_files,
+            audio_file_dirs= audio_files,
+            video_file_dirs= video_files,
+            default= default_boomer
+        )
+
+        tmp_clip_duration = tmp_clip_duration - interval_diffrence
+        interval_start = interval_end
+        interval_diffrence = INTERVAL_DIFF_NOVOSK_DESCRIBE if tmp_clip_duration >= INTERVAL_DIFF_NOVOSK_DESCRIBE else tmp_clip_duration
+        interval_end = interval_end + interval_diffrence
+
+        g_boomers.append(g_boomer)
+
+    return g_boomers
+
+
+
+
+
+
+
+
+
+
+
+
+def get_boomers_with_vosk(
+        audio_file_path= None,
+        image_files= [],
+        audio_files= [],
+        video_files= [],
+        default_boomer= {}            
+    ) :
+        if not audio_file_path :
+            return []
+
+        g_boomers = []
+        model = Model(variables.PATH_MODEL)
+        wf = wave.open(audio_file_path, "rb")
+        rec = KaldiRecognizer(model, wf.getframerate())
+        rec.SetWords(True)
+
+        # recognize speech using vosk model
+        results = []
+        while True:
+            data = wf.readframes(4000)
+            if len(data) == 0:
+                break
+            if rec.AcceptWaveform(data):
+                part_result = json.loads(rec.Result())
+                results.append(part_result)
+        part_result = json.loads(rec.FinalResult())
+        results.append(part_result)
+
+        for sentence in results:
+            if len(sentence) == 1:
+                # sometimes there are bugs in recognition
+                # and it returns an empty dictionary
+                # {'text': ''}
+                continue
+
+            for obj in sentence['result']:
+                g_boomer = bu.buildBoomer(
+                    obj,
+                    image_files,
+                    audio_files,
+                    video_files,
+                    default_boomer
+                )
+
+                g_boomers.append(g_boomer)
+
+        wf.close()
+
+        return g_boomers
 
 
 
@@ -30,7 +152,17 @@ from .settings import variables
 
 
 
-async def describe(audio_file_path= "", generator= None, client= None) :
+
+
+
+
+
+
+
+
+
+
+async def describe(audio_file_path= "", generator= None) :
     generator = bu.prepare_boomer_generator(generator)
     default_boomer_structure = generator.get("defaults") if generator.get("defaults") else {}
     print(json.dumps(default_boomer_structure, indent= 4))
@@ -81,42 +213,26 @@ async def describe(audio_file_path= "", generator= None, client= None) :
                     vid_param_dir: valid_video_files
                 })
 
-    model = Model(variables.PATH_MODEL)
-    wf = wave.open(audio_file_path, "rb")
-    rec = KaldiRecognizer(model, wf.getframerate())
-    rec.SetWords(True)
+    g_boomers = []
+    if (
+        default_boomer_structure.get("word") and
+        default_boomer_structure.get("word").get("content")
+    )  :
+        g_boomers = get_boomers_without_vosk(
+            audio_file_path= audio_file_path,
+            image_files= valid_image_files_by_dir,
+            audio_files= valid_audio_files_by_dir,
+            video_files= valid_video_files_by_dir,
+            default_boomer= default_boomer_structure            
+        )
+        
+    else :
+        g_boomers = get_boomers_with_vosk(
+            audio_file_path= audio_file_path,
+            image_files= valid_image_files_by_dir,
+            audio_files= valid_audio_files_by_dir,
+            video_files= valid_video_files_by_dir,
+            default_boomer= default_boomer_structure
+        )
 
-    # recognize speech using vosk model
-    results = []
-    while True:
-        data = wf.readframes(4000)
-        if len(data) == 0:
-            break
-        if rec.AcceptWaveform(data):
-            part_result = json.loads(rec.Result())
-            results.append(part_result)
-    part_result = json.loads(rec.FinalResult())
-    results.append(part_result)
-
-    # convert list of JSON dictionaries to list of 'Word' objects
-    word_list = []
-    for sentence in results:
-        if len(sentence) == 1:
-            # sometimes there are bugs in recognition
-            # and it returns an empty dictionary
-            # {'text': ''}
-            continue
-
-        for obj in sentence['result']:
-            new_word = bu.buildBoomer(
-                obj,
-                valid_image_files_by_dir,
-                valid_audio_files_by_dir,
-                valid_video_files_by_dir,
-                default_boomer_structure
-            )
-
-            word_list.append(new_word)  # and add it to list
-
-    wf.close()  # close audiofile
-    return word_list
+    return g_boomers
