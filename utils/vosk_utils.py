@@ -166,7 +166,7 @@ def get_boomers_with_vosk(
 
 
 
-async def describe(audio_file_path= "", generator= None) :
+async def describe(audio_file_path= "", generator= None, client= None) :
     generator = bu.prepare_boomer_generator(generator)
     default_boomer_structure = generator.get("defaults") if generator.get("defaults") else {}
     print(json.dumps(default_boomer_structure, indent= 4))
@@ -182,6 +182,8 @@ async def describe(audio_file_path= "", generator= None) :
             if img_param_dir not in list(valid_image_files_by_dir.keys()) :
                 if isinstance(img_param_dir, str) :
                     valid_image_files = fu.getValidImageFiles(ImageFilesDir.get( img_param_dir ))
+                elif isinstance(img_param_dir, int) :
+                    valid_image_files, aud, vid = await fu.getValidMediaFilesFromDiscordByChannelId(img_param_dir, client)
                 else :
                     valid_image_files = []
 
@@ -196,6 +198,8 @@ async def describe(audio_file_path= "", generator= None) :
             if aud_param_dir not in list(valid_audio_files_by_dir.keys()) :
                 if isinstance(aud_param_dir, str) :
                     valid_audio_files = fu.getValidAudioFiles(AudioFilesDir.get( aud_param_dir ))
+                elif isinstance(aud_param_dir, int) :
+                    img, valid_audio_files, vid = await fu.getValidMediaFilesFromDiscordByChannelId(aud_param_dir, client)
                 else :
                     valid_audio_files = []
 
@@ -210,6 +214,8 @@ async def describe(audio_file_path= "", generator= None) :
             if vid_param_dir not in list(valid_video_files_by_dir.keys()) :
                 if isinstance(vid_param_dir, str) :
                     valid_video_files = fu.getValidVideoFiles(VideoFilesDir.get( vid_param_dir ))
+                elif isinstance(vid_param_dir, int) :
+                    img, aud, valid_video_files = await fu.getValidMediaFilesFromDiscordByChannelId(vid_param_dir, client)
                 else :
                     valid_video_files = []
 
