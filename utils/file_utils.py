@@ -1,7 +1,6 @@
 import random
 import os
 import ntpath
-import itertools
 
 
 from .settings import variables

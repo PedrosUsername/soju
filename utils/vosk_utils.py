@@ -42,11 +42,15 @@ def get_boomers_without_vosk(
     
     g_boomers = []
     og_clip_duration = mu.AudioFileClip( audio_file_path ).duration
+
+    if og_clip_duration < 1 :
+        return []
+    
     qtd_boomers = int(og_clip_duration / INTERVAL_DIFF_NOVOSK_DESCRIBE) if og_clip_duration >= INTERVAL_DIFF_NOVOSK_DESCRIBE else 1
 
     tmp_clip_duration = og_clip_duration
-    interval_start = 0
-    interval_diffrence = INTERVAL_DIFF_NOVOSK_DESCRIBE if og_clip_duration >= INTERVAL_DIFF_NOVOSK_DESCRIBE else og_clip_duration
+    interval_start = 1
+    interval_diffrence = INTERVAL_DIFF_NOVOSK_DESCRIBE if og_clip_duration >= INTERVAL_DIFF_NOVOSK_DESCRIBE else int(og_clip_duration)
     interval_end = interval_diffrence
     
     for _ in range(qtd_boomers) :
@@ -68,7 +72,7 @@ def get_boomers_without_vosk(
 
         tmp_clip_duration = tmp_clip_duration - interval_diffrence
         interval_start = interval_end
-        interval_diffrence = INTERVAL_DIFF_NOVOSK_DESCRIBE if tmp_clip_duration >= INTERVAL_DIFF_NOVOSK_DESCRIBE else tmp_clip_duration
+        interval_diffrence = INTERVAL_DIFF_NOVOSK_DESCRIBE if tmp_clip_duration >= INTERVAL_DIFF_NOVOSK_DESCRIBE else int(tmp_clip_duration)
         interval_end = interval_end + interval_diffrence
 
         g_boomers.append(g_boomer)
