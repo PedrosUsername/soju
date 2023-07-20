@@ -166,8 +166,7 @@ def get_boomers_with_vosk(
 
 
 
-async def describe(audio_file_path= "", generator= None, client= None) :
-    generator = bu.prepare_boomer_generator(generator)
+async def describe(audio_file_path= "", generator= {}, client= None) :
     default_boomer_structure = generator.get("defaults") if generator.get("defaults") else {}
     print(json.dumps(default_boomer_structure, indent= 4))
 
@@ -177,12 +176,12 @@ async def describe(audio_file_path= "", generator= None, client= None) :
 
     if default_boomer_structure.get("image") :
         for img_param in default_boomer_structure.get("image") :
-            img_param_dir = bu.getBoomerImageParamDirForFFMPEG(img_param)
+            img_param_dir = bu.getBoomerImageParamDirForSojufile(img_param)
 
             if img_param_dir not in list(valid_image_files_by_dir.keys()) :
                 if isinstance(img_param_dir, str) :
                     valid_image_files = fu.getValidImageFiles(ImageFilesDir.get( img_param_dir ))
-                elif isinstance(img_param_dir, int) :
+                elif client and isinstance(img_param_dir, int) :
                     valid_image_files, aud, vid = await fu.getValidMediaFilesFromDiscordByChannelId(img_param_dir, client)
                 else :
                     valid_image_files = []
@@ -193,12 +192,12 @@ async def describe(audio_file_path= "", generator= None, client= None) :
 
     if default_boomer_structure.get("audio") :
         for aud_param in default_boomer_structure.get("audio") :
-            aud_param_dir = bu.getBoomerAudioParamDirForFFMPEG(aud_param)
+            aud_param_dir = bu.getBoomerAudioParamDirForSojufile(aud_param)
 
             if aud_param_dir not in list(valid_audio_files_by_dir.keys()) :
                 if isinstance(aud_param_dir, str) :
                     valid_audio_files = fu.getValidAudioFiles(AudioFilesDir.get( aud_param_dir ))
-                elif isinstance(aud_param_dir, int) :
+                elif client and isinstance(aud_param_dir, int) :
                     img, valid_audio_files, vid = await fu.getValidMediaFilesFromDiscordByChannelId(aud_param_dir, client)
                 else :
                     valid_audio_files = []
@@ -209,12 +208,12 @@ async def describe(audio_file_path= "", generator= None, client= None) :
 
     if default_boomer_structure.get("video") :
         for vid_param in default_boomer_structure.get("video") :
-            vid_param_dir = bu.getBoomerVideoParamDirForFFMPEG(vid_param)
+            vid_param_dir = bu.getBoomerVideoParamDirForSojufile(vid_param)
 
             if vid_param_dir not in list(valid_video_files_by_dir.keys()) :
                 if isinstance(vid_param_dir, str) :
                     valid_video_files = fu.getValidVideoFiles(VideoFilesDir.get( vid_param_dir ))
-                elif isinstance(vid_param_dir, int) :
+                elif client and isinstance(vid_param_dir, int) :
                     img, aud, valid_video_files = await fu.getValidMediaFilesFromDiscordByChannelId(vid_param_dir, client)
                 else :
                     valid_video_files = []

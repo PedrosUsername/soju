@@ -36,7 +36,7 @@ from utils import moviepy_utils, ffmpeg_utils, file_utils, vosk_utils, boomer_ut
 
 
 
-async def audio_descriptor(videofilepath, sojufile) :
+async def audio_descriptor(videofilepath= None, generator= {}) :
     if videofilepath is None :
         raise Exception("clip not found")
 
@@ -47,26 +47,30 @@ async def audio_descriptor(videofilepath, sojufile) :
         full_main_clip_file_path = videofilepath
 
         moviepy_utils.init_og_clip_params(full_main_clip_file_path)
+        default_general_confs = generator.get("generals") if generator.get("generals") else {}
+        drop_zone = default_general_confs.get("dropzone")
+
 
 
 
 
         full_aux_audio_file_path = ephemeral + main_clip_name + ".wav"
-        full_new_soju_file_path = "./" + main_clip_name + ".soju.json"
+        full_new_soju_file_path = main_clip_name + ".soju.json"
 
         ffmpeg_utils.get_only_audio(full_main_clip_file_path, full_aux_audio_file_path)
 
 
         boomers = await vosk_utils.describe(
             audio_file_path= full_aux_audio_file_path,
-            generator= bu.get_boomer_generator_from_dict(sojufile)
+            generator= generator,
+            client= None
         )
 
-        bu.build_sojufile_for_discord(full_new_soju_file_path, boomers)    
+        bu.build_sojufile_for_discord(drop_zone + full_new_soju_file_path, boomers)    
 
 
 
-def video_editor(videofilepath= None, boomers= []) :
+def video_editor(videofilepath= None, generator= {}, boomers= []) :
     if videofilepath is None :
         raise Exception("clip not found")
 
@@ -77,6 +81,9 @@ def video_editor(videofilepath= None, boomers= []) :
         full_main_clip_file_path = videofilepath
 
         moviepy_utils.init_og_clip_params(full_main_clip_file_path)
+        default_general_confs = generator.get("generals") if generator.get("generals") else {}
+        drop_zone = default_general_confs.get("dropzone") if generator.get("generals") else "./"
+
 
 
 
@@ -86,8 +93,9 @@ def video_editor(videofilepath= None, boomers= []) :
             boomers= boomers
         )
 
+
         params = ffmpeg_utils.buildCall(
-            main_clip_name + ".mp4",
+            drop_zone + main_clip_name + ".mp4",
             boomers_bot + boomers_mid + boomers_top,
             ephemeral                        
         )
@@ -169,17 +177,18 @@ def is_video_editor_call(videofilepath= None, boomers= None) :
 async def main() :
     videofilepath = sys.argv[1] if len(sys.argv) > 1 else None
     jsonfilepath = sys.argv[2] if len(sys.argv) > 2 else None
-    sojufile= bu.get_sojufile_from_path(jsonfilepath)
 
+    sojufile= bu.get_sojufile_from_path(jsonfilepath)
     boomers = bu.get_boomers_from_dict(sojufile)
-    
+    generator = bu.prepare_boomer_generator(bu.get_boomer_generator_from_dict(sojufile))
+
     if is_video_editor_call(videofilepath, boomers) :
         print("wait a moment...")
-        video_editor(videofilepath, boomers)
+        video_editor(videofilepath, generator, boomers)
 
     elif is_audio_descriptor_call(videofilepath) :
         print("wait a second...")
-        await audio_descriptor(videofilepath, sojufile)
+        await audio_descriptor(videofilepath, generator)
 
 
 

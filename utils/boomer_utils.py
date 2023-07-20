@@ -246,6 +246,19 @@ def get_boomers_from_dict(sojufile= None) :
 
 
 
+def get_drop_zone_from_dict(sojufile= None) :
+    if (
+        not sojufile or
+        not sojufile.get("generals") or
+        not sojufile.get("generals").get("dropzone")
+    ) :
+        return "./"
+    
+    else :
+        return sojufile.get("generals").get("dropzone")
+
+
+
 
 
 def get_boomers_from_file(jsonfilepath) :
@@ -1437,6 +1450,17 @@ def getGeneralsApiModel(api= None) :
     
 
 
+def getGeneralsDropZone(generals= None) :
+    if (
+        generals is None
+    ):
+        return None
+    
+    else:
+        return generals.get("dropzone")
+    
+
+
 
 
 
@@ -1544,6 +1568,7 @@ def prepare_boomer_gen_generals(generals= None) :
 
     if type(generals) is dict :
         healthy_generals["api"] = prepare_boomer_gen_gens_api(generals.get("api"))
+        healthy_generals["dropzone"] = getGeneralsDropZone(generals)
     
     else :
         dgenerator = open("./assets/json/dgenerator.soju.json")

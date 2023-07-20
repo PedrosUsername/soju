@@ -38,7 +38,9 @@ ImageFilesDir = {
     "pettan": "./assets/image/pettan/",
     "PETTAN": "./assets/image/pettan/",        
     "scary": "./assets/image/scary/",
-    "SCARY": "./assets/image/scary/"
+    "SCARY": "./assets/image/scary/",
+    "magmo": "./assets/image/magmo/",
+    "MAGMO": "./assets/image/magmo/"
 }
 
 

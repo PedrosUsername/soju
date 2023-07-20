@@ -1,6 +1,9 @@
 {
     "soju": {
         "generator": {
+            "generals": {
+                "dropzone": "./"
+            },
 
             "defaults": {
                 "word": {

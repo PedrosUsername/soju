@@ -407,7 +407,7 @@ async def on_message(message) :
 
             with tempfile.TemporaryDirectory(dir="./") as tmp_dir :
                 ephemeral = tmp_dir + "/"
-                main_clip_url = await get_main_clip_url_from_referenced_message(message, allow_audio= True)                    
+                main_clip_url = await get_main_clip_url_from_referenced_message(message, allow_audio= True)
 
                 try :
                     main_clip_name = file_utils.get_base_file_name_from(main_clip_url)
@@ -426,7 +426,8 @@ async def on_message(message) :
 
                     boomers = await vosk_utils.describe(
                         audio_file_path= full_aux_audio_file_path,
-                        generator= bu.get_boomer_generator_from_dict(sojufile)
+                        generator= bu.get_boomer_generator_from_dict(sojufile),
+                        client= client
                     )
 
                     bu.build_sojufile_for_discord(full_new_soju_file_path, boomers)

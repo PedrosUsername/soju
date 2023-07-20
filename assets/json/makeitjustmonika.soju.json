@@ -1,0 +1,27 @@
+{
+    "soju": {
+        "generator": {
+            "defaults": {
+                "word": {
+                    "content": "...",
+                    "trigger": "end"
+                },
+                
+                "image": [
+                    {
+                        "duration": 0.3,
+                        "mergestrategy": "concat",
+                        "dir": 1119806062669860884
+                    }
+                ],
+
+                "audio": [
+                    {
+                        "duration": 0.3,
+                        "dir": "scary"
+                    }
+                ]
+            }
+        }
+    }
+}
