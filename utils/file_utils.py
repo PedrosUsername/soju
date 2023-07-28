@@ -1,6 +1,5 @@
 import random
 import os
-import ntpath
 import itertools
 
 from .settings import variables
@@ -15,7 +14,7 @@ def get_base_file_name_from(videofilepath= None) :
     if videofilepath is None :
         return None
     
-    filename = ntpath.basename(videofilepath)
+    filename = os.path.basename(videofilepath)
     _, tail = filename[::-1].split(".", 1)
     return tail[::-1]
 

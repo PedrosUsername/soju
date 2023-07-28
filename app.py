@@ -3,8 +3,11 @@ import random
 import requests
 import tempfile
 
+from utils import boomer_utils as bu
+import utils.cli as soju
+
 from interactions import Client, ContextMenuContext, File, listen, message_context_menu
-from makeitreal import makeitreal as soju
+
 
 
 bot = Client(
@@ -131,6 +134,28 @@ async def get_main_clip_url_from_referenced_message(referenced_message= None, al
 
 
 
+MAKEITREAL_GENERATOR_PATH = "./assets/json/makeitreal.soju.json"
+
+
+async def edit(params= {}) :
+    videofilepath = params.get("clip") if params.get("clip") else None
+    jsonfilepath = params.get("json") if params.get("json") else MAKEITREAL_GENERATOR_PATH
+    dropzone = params.get("outputpath") if params.get("outputpath") else "./"
+
+    sojufile= bu.get_sojufile_from_path(jsonfilepath)
+    boomers = bu.get_boomers_from_dict(sojufile)
+    generator = bu.prepare_boomer_generator(bu.get_boomer_generator_from_dict(sojufile))
+
+    generator["generals"]["dropzone"] = dropzone
+
+    print("wait a second...")
+    await soju.audio_descriptor(videofilepath, generator)
+
+    new_sojufile = soju.bu.get_sojufile_from_path(dropzone + soju.file_utils.get_base_file_name_from(videofilepath) + ".soju.json")
+    boomers = new_sojufile.get("generated") if new_sojufile.get("generated") else []
+
+    print("wait a moment...")
+    soju.video_editor(videofilepath, generator, boomers)
 
 
 
@@ -151,7 +176,7 @@ async def on_startup():
   name="make it real",
   scopes=[1100512333203259552]
 )
-async def make_it_real(ctx: ContextMenuContext):
+async def prepare_and_edit(ctx: ContextMenuContext):
   await ctx.defer()
   clip_url = await get_main_clip_url_from_referenced_message(ctx.target)
   clip_title = get_base_file_name_from(clip_url)
@@ -167,7 +192,7 @@ async def make_it_real(ctx: ContextMenuContext):
 
       download_file_from_url(clip_url, clip_path_download)
 
-      await soju({
+      await edit({
           "clip": clip_path_download,
           "json": "./assets/json/makeitreal.soju.json",
           "outputpath": outputpath
