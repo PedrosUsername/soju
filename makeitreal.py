@@ -9,10 +9,10 @@ MAKEITREAL_GENERATOR_PATH = "./assets/json/makeitreal.soju.json"
 
 
 
-async def makeitreal() :
-    videofilepath = sys.argv[1] if len(sys.argv) > 1 else None
-    jsonfilepath = MAKEITREAL_GENERATOR_PATH
-    dropzone = "./"
+async def makeitreal(params= {}) :
+    videofilepath = params.get("clip") if params.get("clip") else None
+    jsonfilepath = params.get("json") if params.get("json") else MAKEITREAL_GENERATOR_PATH
+    dropzone = params.get("outputpath") if params.get("outputpath") else "./"
 
     sojufile= soju.bu.get_sojufile_from_path(jsonfilepath)
     boomers = soju.bu.get_boomers_from_dict(sojufile)
@@ -28,8 +28,3 @@ async def makeitreal() :
 
     print("wait a moment...")
     soju.video_editor(videofilepath, generator, boomers)
-
-
-
-
-asyncio.run(makeitreal())
