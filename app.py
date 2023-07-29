@@ -10,6 +10,11 @@ from interactions import Client, ContextMenuContext, File, listen, message_conte
 
 
 
+
+MAKEITREAL_GENERATOR_PATH = "./assets/json/makeitreal.soju.json"
+
+
+
 bot = Client(
   token= os.getenv("DISCORD_SOJUBOT_TOKEN"),
   delete_unused_application_cmds= True
@@ -117,7 +122,7 @@ def get_media_input_urls(inputs= []):
 
 
 
-async def get_main_clip_url_from_referenced_message(referenced_message= None, allow_audio= False):
+def get_main_clip_url_from_referenced_message(referenced_message= None, allow_audio= False):
     if not referenced_message:
         return None
     
@@ -134,12 +139,11 @@ async def get_main_clip_url_from_referenced_message(referenced_message= None, al
 
 
 
-MAKEITREAL_GENERATOR_PATH = "./assets/json/makeitreal.soju.json"
 
 
 async def edit(params= {}) :
-    videofilepath = params.get("clip") if params.get("clip") else None
-    jsonfilepath = params.get("json") if params.get("json") else MAKEITREAL_GENERATOR_PATH
+    videofilepath = params.get("clip")
+    jsonfilepath = params.get("json")
     dropzone = params.get("outputpath") if params.get("outputpath") else "./"
 
     sojufile= bu.get_sojufile_from_path(jsonfilepath)
@@ -173,32 +177,39 @@ async def on_startup():
 
 
 @message_context_menu(
-  name="make it real",
-  scopes=[1100512333203259552]
+    name="ph'nglui mglw'nafh Cthulhu",
 )
 async def prepare_and_edit(ctx: ContextMenuContext):
-  await ctx.defer()
-  clip_url = await get_main_clip_url_from_referenced_message(ctx.target)
-  clip_title = get_base_file_name_from(clip_url)
 
-  with tempfile.TemporaryDirectory(dir="./") as tmp_dir_upload :
-    ephemeral_upload = tmp_dir_upload + "/"
+    try:
+        clip_url = get_main_clip_url_from_referenced_message(ctx.target)
+        clip_title = get_base_file_name_from(clip_url)
 
-    with tempfile.TemporaryDirectory(dir="./") as tmp_dir_download :
-      ephemeral_download = tmp_dir_download + "/"
+        if clip_title is None :
+            raise Exception("No valid video attachments were found on the message you specified")
 
-      clip_path_download = ephemeral_download + clip_title + ".mp4"
-      outputpath = ephemeral_upload
+        await ctx.defer()
+        with tempfile.TemporaryDirectory(dir="./") as tmp_dir_upload :
+            ephemeral_upload = tmp_dir_upload + "/"
 
-      download_file_from_url(clip_url, clip_path_download)
+            with tempfile.TemporaryDirectory(dir="./") as tmp_dir_download :
+                ephemeral_download = tmp_dir_download + "/"
 
-      await edit({
-          "clip": clip_path_download,
-          "json": "./assets/json/makeitreal.soju.json",
-          "outputpath": outputpath
-      })
+                clip_path_download = ephemeral_download + clip_title + ".mp4"
+                outputpath = ephemeral_upload
 
-      await ctx.send(file= File(outputpath + clip_title + ".mp4"))
+                download_file_from_url(clip_url, clip_path_download)
+
+                await edit({
+                    "clip": clip_path_download,
+                    "json": MAKEITREAL_GENERATOR_PATH,
+                    "outputpath": outputpath
+                })
+
+                await ctx.send(file= File(outputpath + clip_title + ".mp4"))
+
+    except Exception as err:
+        await ctx.respond(ephemeral= True, content= str(err))
 
 
 
