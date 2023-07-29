@@ -1,12 +1,10 @@
 import os
+import tempfile
 import random
 import requests
-import tempfile
-
-from utils import boomer_utils as bu
-import utils.cli as soju
 
 from interactions import Client, ContextMenuContext, File, listen, message_context_menu
+from utils import boomer_utils as bu, cli as soju
 
 
 
@@ -144,22 +142,22 @@ def get_main_clip_url_from_referenced_message(referenced_message= None, allow_au
 async def edit(params= {}) :
     videofilepath = params.get("clip")
     jsonfilepath = params.get("json")
-    dropzone = params.get("outputpath") if params.get("outputpath") else "./"
+    outputpath = params.get("outputpath") if params.get("outputpath") else "./"
 
     sojufile= bu.get_sojufile_from_path(jsonfilepath)
     boomers = bu.get_boomers_from_dict(sojufile)
     generator = bu.prepare_boomer_generator(bu.get_boomer_generator_from_dict(sojufile))
 
-    generator["generals"]["dropzone"] = dropzone
+    generator["generals"]["dropzone"] = outputpath
 
     print("wait a second...")
     await soju.audio_descriptor(videofilepath, generator)
 
-    new_sojufile = soju.bu.get_sojufile_from_path(dropzone + soju.file_utils.get_base_file_name_from(videofilepath) + ".soju.json")
+    new_sojufile = bu.get_sojufile_from_path(outputpath + get_base_file_name_from(videofilepath) + ".soju.json")
     boomers = new_sojufile.get("generated") if new_sojufile.get("generated") else []
 
     print("wait a moment...")
-    soju.video_editor(videofilepath, generator, boomers)
+    await soju.video_editor(videofilepath, generator, boomers)
 
 
 
@@ -177,39 +175,35 @@ async def on_startup():
 
 
 @message_context_menu(
-    name="ph'nglui mglw'nafh Cthulhu",
+    name="Ph'nglui mglw'nafh Cthulhu",
 )
 async def prepare_and_edit(ctx: ContextMenuContext):
 
-    try:
-        clip_url = get_main_clip_url_from_referenced_message(ctx.target)
-        clip_title = get_base_file_name_from(clip_url)
+    
+    clip_url = get_main_clip_url_from_referenced_message(ctx.target)
+    clip_title = get_base_file_name_from(clip_url)
 
-        if clip_title is None :
-            raise Exception("No valid video attachments were found on the message you specified")
+    if clip_title is None :
+        raise Exception("No valid video attachments were found on the message you specified")
 
-        await ctx.defer()
-        with tempfile.TemporaryDirectory(dir="./") as tmp_dir_upload :
-            ephemeral_upload = tmp_dir_upload + "/"
+    await ctx.defer()
+    with tempfile.TemporaryDirectory(dir="./") as tmp_dir_upload :
+        output_clip_folder_path = tmp_dir_upload + "/"
 
-            with tempfile.TemporaryDirectory(dir="./") as tmp_dir_download :
-                ephemeral_download = tmp_dir_download + "/"
+        with tempfile.TemporaryDirectory(dir="./") as tmp_dir_download :
+            input_clip_folder_path = tmp_dir_download + "/"
 
-                clip_path_download = ephemeral_download + clip_title + ".mp4"
-                outputpath = ephemeral_upload
+            download_file_from_url(clip_url, input_clip_folder_path + clip_title + ".mp4")
 
-                download_file_from_url(clip_url, clip_path_download)
+            await edit({
+                "clip": input_clip_folder_path + clip_title + ".mp4",
+                "json": MAKEITREAL_GENERATOR_PATH,
+                "outputpath": output_clip_folder_path
+            })
 
-                await edit({
-                    "clip": clip_path_download,
-                    "json": MAKEITREAL_GENERATOR_PATH,
-                    "outputpath": outputpath
-                })
+            await ctx.send(file= File(output_clip_folder_path + clip_title + ".mp4"))
 
-                await ctx.send(file= File(outputpath + clip_title + ".mp4"))
-
-    except Exception as err:
-        await ctx.respond(ephemeral= True, content= str(err))
+    
 
 
 

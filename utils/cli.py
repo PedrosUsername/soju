@@ -1,10 +1,9 @@
+import os
 import tempfile
 import asyncio
 import sys
-
-from utils import moviepy_utils, ffmpeg_utils, file_utils, vosk_utils, boomer_utils as bu
-
-
+import time
+from utils import moviepy_utils, ffmpeg_utils, vosk_utils, boomer_utils as bu
 
 
 
@@ -30,6 +29,14 @@ from utils import moviepy_utils, ffmpeg_utils, file_utils, vosk_utils, boomer_ut
 
 
 
+
+def get_base_file_name_from(videofilepath= None) :
+    if videofilepath is None :
+        return None
+    
+    filename = os.path.basename(videofilepath)
+    _, tail = filename[::-1].split(".", 1)
+    return tail[::-1]
     
 
 
@@ -43,7 +50,7 @@ async def audio_descriptor(videofilepath= None, generator= {}) :
     with tempfile.TemporaryDirectory(dir="./") as tmp_dir :
         ephemeral = tmp_dir + "/"
 
-        main_clip_name = file_utils.get_base_file_name_from(videofilepath)
+        main_clip_name = get_base_file_name_from(videofilepath)
         full_main_clip_file_path = videofilepath
 
         moviepy_utils.init_og_clip_params(full_main_clip_file_path)
@@ -57,7 +64,7 @@ async def audio_descriptor(videofilepath= None, generator= {}) :
         full_aux_audio_file_path = ephemeral + main_clip_name + ".wav"
         full_new_soju_file_path = main_clip_name + ".soju.json"
 
-        ffmpeg_utils.get_only_audio(full_main_clip_file_path, full_aux_audio_file_path)
+        await ffmpeg_utils.get_only_audio(full_main_clip_file_path, full_aux_audio_file_path)
 
 
         boomers = await vosk_utils.describe(
@@ -70,14 +77,14 @@ async def audio_descriptor(videofilepath= None, generator= {}) :
 
 
 
-def video_editor(videofilepath= None, generator= {}, boomers= []) :
+async def video_editor(videofilepath= None, generator= {}, boomers= []) :
     if videofilepath is None :
         raise Exception("clip not found")
 
     with tempfile.TemporaryDirectory(dir="./") as tmp_dir :
         ephemeral = tmp_dir + "/"
 
-        main_clip_name = file_utils.get_base_file_name_from(videofilepath)
+        main_clip_name = get_base_file_name_from(videofilepath)
         full_main_clip_file_path = videofilepath
 
         moviepy_utils.init_og_clip_params(full_main_clip_file_path)
@@ -103,7 +110,7 @@ def video_editor(videofilepath= None, generator= {}, boomers= []) :
         for p in params :
             print(p, end= "\n\n")
 
-        ffmpeg_utils.executeFfmpegCall(
+        await ffmpeg_utils.executeFfmpegCall(
             params= params
         )    
 

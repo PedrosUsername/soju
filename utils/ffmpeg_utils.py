@@ -1,6 +1,7 @@
 import subprocess
 import random
 import requests
+import asyncio
 
 from .settings import variables
 from . import moviepy_utils as mu, file_utils as fu, boomer_utils as bu
@@ -53,7 +54,7 @@ OVERLAY_SIZE_TOLERANCE = variables.OVERLAY_SIZE_TOLERANCE
 
 
 
-def get_only_audio(videofilepath= None, outputfilepath= "./"):
+async def get_only_audio(videofilepath= None, outputfilepath= "./"):
     ffmpeg = FFMPEG_PATH
 
     a_mapping = ["-map", "0:a?"]
@@ -69,7 +70,7 @@ def get_only_audio(videofilepath= None, outputfilepath= "./"):
         outputfilepath
     ]
 
-    executeFfmpegCall(ffmpegCall)
+    await executeFfmpegCall(ffmpegCall)
 
 
 
@@ -168,10 +169,11 @@ def extend_boomers_by_image_concaters(boomers= []) :
 
 
 
-def executeFfmpegCall(params= []):
-    subprocess.run(
-        params
+async def executeFfmpegCall(params= []):
+    process = await asyncio.create_subprocess_exec(
+        *params
     )
+    await process.wait()    
 
 
 def cleanFilterParams(params= "", filth= ""):
