@@ -179,30 +179,32 @@ async def on_startup():
 )
 async def prepare_and_edit(ctx: ContextMenuContext):
 
-    
-    clip_url = get_main_clip_url_from_referenced_message(ctx.target)
-    clip_title = get_base_file_name_from(clip_url)
+    try :
+        clip_url = get_main_clip_url_from_referenced_message(ctx.target)
+        clip_title = get_base_file_name_from(clip_url)
 
-    if clip_title is None :
-        raise Exception("No valid video attachments were found on the message you specified")
+        if clip_title is None :
+            raise Exception("No valid video attachments were found on the message you specified")
 
-    await ctx.defer()
-    with tempfile.TemporaryDirectory(dir="./") as tmp_dir_upload :
-        output_clip_folder_path = tmp_dir_upload + "/"
+        await ctx.defer()
+        with tempfile.TemporaryDirectory(dir="./") as tmp_dir_upload :
+            output_clip_folder_path = tmp_dir_upload + "/"
 
-        with tempfile.TemporaryDirectory(dir="./") as tmp_dir_download :
-            input_clip_folder_path = tmp_dir_download + "/"
+            with tempfile.TemporaryDirectory(dir="./") as tmp_dir_download :
+                input_clip_folder_path = tmp_dir_download + "/"
 
-            download_file_from_url(clip_url, input_clip_folder_path + clip_title + ".mp4")
+                download_file_from_url(clip_url, input_clip_folder_path + clip_title + ".mp4")
 
-            await edit({
-                "clip": input_clip_folder_path + clip_title + ".mp4",
-                "json": MAKEITREAL_GENERATOR_PATH,
-                "outputpath": output_clip_folder_path
-            })
+                await edit({
+                    "clip": input_clip_folder_path + clip_title + ".mp4",
+                    "json": MAKEITREAL_GENERATOR_PATH,
+                    "outputpath": output_clip_folder_path
+                })
 
-            await ctx.send(file= File(output_clip_folder_path + clip_title + ".mp4"))
+                await ctx.send(file= File(output_clip_folder_path + clip_title + ".mp4"))
 
+    except Exception as err :
+        await ctx.send(ephemeral= True, content= str(err))
     
 
 
