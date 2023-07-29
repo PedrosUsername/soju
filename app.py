@@ -3,7 +3,7 @@ import tempfile
 import random
 import requests
 
-from interactions import Client, ContextMenuContext, File, listen, message_context_menu
+from interactions import Client, ContextMenuContext, File, listen, message_context_menu, cooldown, Buckets
 from utils import boomer_utils as bu, cli as soju
 
 
@@ -173,7 +173,7 @@ async def on_startup():
     print("Bot is ready!")
 
 
-
+@cooldown(Buckets.USER, 1, 10) 
 @message_context_menu(
     name="Ph'nglui mglw'nafh Cthulhu",
 )
