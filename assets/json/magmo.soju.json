@@ -1,6 +1,10 @@
 {
     "soju": {
         "generator": {
+            "generals": {
+                "dropzone": "./"
+            },
+
             "defaults": {
                 "word": {
                     "content": "...",
@@ -11,7 +15,7 @@
                     {
                         "duration": 0.3,
                         "mergestrategy": "concat",
-                        "dir": 1119810727759323139
+                        "dir": "jesush"
                     }
                 ],
 

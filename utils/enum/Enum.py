@@ -40,7 +40,11 @@ ImageFilesDir = {
     "scary": "./assets/image/scary/",
     "SCARY": "./assets/image/scary/",
     "magmo": "./assets/image/magmo/",
-    "MAGMO": "./assets/image/magmo/"
+    "MAGMO": "./assets/image/magmo/",
+    "jesusv": "./assets/image/jesus_v/",
+    "JESUSV": "./assets/image/jesus_v/",
+    "jesush": "./assets/image/jesus_h/",
+    "JESUSH": "./assets/image/jesus_h/"
 }
 
 
