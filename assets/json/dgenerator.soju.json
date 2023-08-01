@@ -1,0 +1,21 @@
+{
+    "soju": {
+        "generator": {
+            "generals": {
+                "dropzone": "./",
+                "avoidrepetition": false,
+                "randomtimestamps": true
+            },
+
+            "defaults": {
+                "word": {
+                    "content": "...",
+                    "trigger": "end"
+                },
+
+                "image": [{"duration": 0.2, "mergestrategy": "concat"}],
+                "audio": [{"duration": 0.2}]
+            }
+        }
+    }
+}

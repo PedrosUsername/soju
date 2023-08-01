@@ -1,0 +1,33 @@
+{
+    "soju": {
+        "generator": {
+            "generals": {
+                "dropzone": "./",
+                "avoidrepetition": true,
+                "randomtimestamps": true
+            },
+
+            "defaults": {
+                "word": {
+                    "content": "...",
+                    "trigger": "start"
+                },
+                
+                "image": [
+                    {
+                        "duration": 0.3,
+                        "mergestrategy": "concat",
+                        "dir": "jesush"
+                    }
+                ],
+
+                "audio": [
+                    {
+                        "duration": 0.3,
+                        "dir": "scary"
+                    }
+                ]
+            }
+        }
+    }
+}
