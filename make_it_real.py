@@ -11,6 +11,7 @@ from utils import boomer_utils as bu, moviepy_utils as mu, cli as soju
 
 HORIZONTAL_GENERATOR_PATH = "./assets/json/generator/make_it_real/make_it_real_h.soju.json"
 VERTICAL_GENERATOR_PATH = "./assets/json/generator/make_it_real/make_it_real_v.soju.json"
+BOT_COMMAND_NAME = "Make it Real"
 
 
 
@@ -140,12 +141,12 @@ def get_main_clip_url_from_referenced_message(referenced_message= None, allow_au
 
 
 
-async def edit(params= {}) :
+async def make_it_something_edit(params= {}) :
     videofilepath = params.get("clip")
-    jsonfilepath = params.get("json")
+    sojufile= bu.get_sojufile_from_path(params.get("json"))
     outputpath = params.get("outputpath") if params.get("outputpath") else "./"
+    credits = params.get("credits") if params.get("credits") else {}
 
-    sojufile= bu.get_sojufile_from_path(jsonfilepath)
     boomers = bu.get_boomers_from_dict(sojufile)
     generator = bu.prepare_boomer_generator(bu.get_boomer_generator_from_dict(sojufile))
 
@@ -156,28 +157,7 @@ async def edit(params= {}) :
 
     new_sojufile = bu.get_sojufile_from_path(outputpath + get_base_file_name_from(videofilepath) + ".soju.json")
     boomers = new_sojufile.get("generated") if new_sojufile.get("generated") else []
-    boomers = boomers + [{
-        "word": {
-            "start": 888,
-            "end": 888,
-            "trigger": "start"
-        },        
-        "image": [
-            {
-                "duration": 0.3,
-                "mergestrategy": "concat",
-                "dir": "default",
-                "file": "logo.png"
-            }
-        ],
-
-        "audio": [
-            {
-                "duration": 0.3,
-                "dir": "scary"
-            }
-        ]
-        }]
+    boomers = boomers + [credits]
 
     print("wait a moment...")
     await soju.video_editor(videofilepath, generator, boomers)
@@ -198,7 +178,7 @@ async def on_startup():
 
 @cooldown(Buckets.USER, 1, 7) 
 @message_context_menu(
-    name="Make it Real",
+    name= BOT_COMMAND_NAME,
 )
 async def prepare_and_edit(ctx: ContextMenuContext):
 
@@ -222,10 +202,40 @@ async def prepare_and_edit(ctx: ContextMenuContext):
                 clip_h = mu.get_og_clip_params().get("height")
                 clip_w = mu.get_og_clip_params().get("width")
 
-                await edit({
+                soju_file_path = None
+                if clip_h < clip_w :
+                    soju_file_path = HORIZONTAL_GENERATOR_PATH
+                    credits_image_dir = "credits_h"
+                else :
+                    soju_file_path = VERTICAL_GENERATOR_PATH
+                    credits_image_dir = "credits_v"
+
+                credits = {
+                    "word": {
+                        "start": 888,
+                        "end": 888,
+                        "trigger": "start"
+                    },        
+                    "image": [
+                        {
+                            "duration": 0.3,
+                            "mergestrategy": "concat",
+                            "dir": credits_image_dir,
+                        }
+                    ],
+                    "audio": [
+                        {
+                            "duration": 0.3,
+                            "dir": "scary"
+                        }
+                    ]
+                }
+
+                await make_it_something_edit({
                     "clip": input_clip_folder_path + clip_title + ".mp4",
-                    "json": HORIZONTAL_GENERATOR_PATH if clip_h < clip_w else VERTICAL_GENERATOR_PATH,
-                    "outputpath": output_clip_folder_path
+                    "json": soju_file_path,
+                    "outputpath": output_clip_folder_path,
+                    "credits": credits
                 })
 
                 await ctx.send(file= File(output_clip_folder_path + clip_title + ".mp4"))

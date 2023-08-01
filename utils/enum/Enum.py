@@ -41,6 +41,11 @@ ImageFilesDir = {
     "default": "./assets/image/default/",
     "DEFAULT": "./assets/image/default/",
 
+    "credits_v": "./assets/image/credits/credits_v/",
+    "CREDITS_V": "./assets/image/credits/credits_v",
+    "credits_h": "./assets/image/credits/credits_h/",
+    "CREDITS_H": "./assets/image/credits/credits_h",    
+
     "silly_v": "./assets/image/default/silly/silly_v/",
     "SILLY_V": "./assets/image/default/silly/silly_v/",
     "silly_h": "./assets/image/default/silly/silly_h/",
@@ -56,10 +61,10 @@ ImageFilesDir = {
     "scary_h": "./assets/image/scary/scary_h/",
     "SCARY_H": "./assets/image/scary/scary_h",    
 
-    "christianh": "./assets/image/christian/christian_v/",
-    "CHRISTIANH": "./assets/image/christian/christian_v/",
-    "christianv": "./assets/image/christian/christian_h/",
-    "CHRISTIANV": "./assets/image/christian/christian_h/"
+    "christian_h": "./assets/image/christian/christian_h/",
+    "CHRISTIAN_H": "./assets/image/christian/christian_h/",
+    "christian_v": "./assets/image/christian/christian_v/",
+    "CHRISTIAN_V": "./assets/image/christian/christian_v/"
 }
 
 
@@ -75,7 +80,7 @@ AudioFilesDir = {
 
     "laughtrack": "./assets/audio/laughtrack/",
     "LAUGHTRACK": "./assets/audio/laughtrack/",
-    
+
     "scary": "./assets/audio/scary/",
     "SCARY": "./assets/audio/scary/"
 }

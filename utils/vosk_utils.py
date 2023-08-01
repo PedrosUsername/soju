@@ -15,6 +15,7 @@ from .settings import constants
 
 
 INTERVAL_DIFF_NOVOSK_DESCRIBE = constants.INTERVAL_DIFF_NOVOSK_DESCRIBE
+SUPPORT_DURATION = 1.5
 
 
 
@@ -47,7 +48,7 @@ def get_boomers_without_vosk(
     if og_clip_duration < 1 :
         return []
     
-    qtd_boomers = int(og_clip_duration / INTERVAL_DIFF_NOVOSK_DESCRIBE) if og_clip_duration >= INTERVAL_DIFF_NOVOSK_DESCRIBE else 1
+    qtd_boomers = int((og_clip_duration + SUPPORT_DURATION) / INTERVAL_DIFF_NOVOSK_DESCRIBE) if og_clip_duration >= INTERVAL_DIFF_NOVOSK_DESCRIBE else 1
 
     tmp_clip_duration = og_clip_duration
     interval_start = 1
