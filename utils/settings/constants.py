@@ -117,7 +117,8 @@ OUTPUT_RESOLUTION_WIDTH = 0                # 1920 px | -n | 0
 
 PATH_MODEL = "/home/pedro/Downloads/sojubot/models/en/lightweight"   
 DEFAULT_OUTPUT_PATH = ""
-PATH_DEFAULT_JSON_FILE = "./assets/json/"
+DEFAULT_GENERATOR_PATH = "./assets/json/generator/default/dgenerator.soju.json"
+
 
 
 

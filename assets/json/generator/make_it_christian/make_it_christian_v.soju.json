@@ -10,14 +10,14 @@
             "defaults": {
                 "word": {
                     "content": "...",
-                    "trigger": "start"
+                    "trigger": "end"
                 },
                 
                 "image": [
                     {
                         "duration": 0.3,
                         "mergestrategy": "concat",
-                        "dir": "jesush"
+                        "dir": "christianv"
                     }
                 ],
 

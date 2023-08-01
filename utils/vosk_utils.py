@@ -6,7 +6,7 @@ from vosk import Model, KaldiRecognizer
 
 from . import boomer_utils as bu, file_utils as fu, moviepy_utils as mu
 from .enum.Enum import ImageFilesDir, VideoFilesDir, AudioFilesDir
-from .settings import variables
+from .settings import constants
 
 
 
@@ -14,7 +14,7 @@ from .settings import variables
 
 
 
-INTERVAL_DIFF_NOVOSK_DESCRIBE = variables.INTERVAL_DIFF_NOVOSK_DESCRIBE
+INTERVAL_DIFF_NOVOSK_DESCRIBE = constants.INTERVAL_DIFF_NOVOSK_DESCRIBE
 
 
 
@@ -102,7 +102,7 @@ def get_boomers_with_vosk(
             return []
 
         g_boomers = []
-        model = Model(variables.PATH_MODEL)
+        model = Model(constants.PATH_MODEL)
         wf = wave.open(audio_file_path, "rb")
         rec = KaldiRecognizer(model, wf.getframerate())
         rec.SetWords(True)
@@ -224,6 +224,7 @@ async def describe(audio_file_path= "", generator= {}, client= None) :
                     vid_param_dir: valid_video_files
                 })
 
+
     g_boomers = []
     if (
         generator_general_confs.get("randomtimestamps")
@@ -235,7 +236,7 @@ async def describe(audio_file_path= "", generator= {}, client= None) :
             video_files= valid_video_files_by_dir,
             generator= generator            
         )
-        
+
     else :
         g_boomers = get_boomers_with_vosk(
             audio_file_path= audio_file_path,

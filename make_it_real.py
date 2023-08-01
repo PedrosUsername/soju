@@ -9,8 +9,8 @@ from utils import boomer_utils as bu, moviepy_utils as mu, cli as soju
 
 
 
-HORIZONTAL_GENERATOR_PATH = "./assets/json/neverforgeth.soju.json"
-VERTICAL_GENERATOR_PATH = "./assets/json/neverforgetv.soju.json"
+HORIZONTAL_GENERATOR_PATH = "./assets/json/generator/make_it_real/make_it_real_h.soju.json"
+VERTICAL_GENERATOR_PATH = "./assets/json/generator/make_it_real/make_it_real_v.soju.json"
 
 
 
@@ -198,7 +198,7 @@ async def on_startup():
 
 @cooldown(Buckets.USER, 1, 7) 
 @message_context_menu(
-    name="Make it Christian",
+    name="Make it Real",
 )
 async def prepare_and_edit(ctx: ContextMenuContext):
 

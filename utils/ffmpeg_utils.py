@@ -3,17 +3,17 @@ import random
 import requests
 import asyncio
 
-from .settings import variables
+from .settings import constants
 from . import moviepy_utils as mu, file_utils as fu, boomer_utils as bu
 from .enum.Enum import ImageFilesDir, VideoFilesDir, AudioFilesDir, MergeStrategy, Position
 
 
 
-FFMPEG_PATH = variables.FFMPEG_PATH
-FFMPEG_OUTPUT_SPECS = variables.FFMPEG_OUTPUT_SPECS
-FFMPEG_FPS = int(variables.FFMPEG_FPS)
-FFMPEG_AR = int(variables.FFMPEG_SAMPLE_RATE)
-OVERLAY_SIZE_TOLERANCE = variables.OVERLAY_SIZE_TOLERANCE
+FFMPEG_PATH = constants.FFMPEG_PATH
+FFMPEG_OUTPUT_SPECS = constants.FFMPEG_OUTPUT_SPECS
+FFMPEG_FPS = int(constants.FFMPEG_FPS)
+FFMPEG_AR = int(constants.FFMPEG_SAMPLE_RATE)
+OVERLAY_SIZE_TOLERANCE = constants.OVERLAY_SIZE_TOLERANCE
 
 
 
@@ -1061,7 +1061,7 @@ def handle_audio_input_file(param, tmp_dir) :
 def copy(from_= "", to_= ""):
     
     subprocess.run([
-        variables.FFMPEG_PATH,
+        constants.FFMPEG_PATH,
         "-y",
         "-i",
         from_,

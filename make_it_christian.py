@@ -9,8 +9,8 @@ from utils import boomer_utils as bu, moviepy_utils as mu, cli as soju
 
 
 
-HORIZONTAL_GENERATOR_PATH = "./assets/json/neverforgeth.soju.json"
-VERTICAL_GENERATOR_PATH = "./assets/json/neverforgetv.soju.json"
+HORIZONTAL_GENERATOR_PATH = "./assets/json/generator/make_it_christian/make_it_christian_h.soju.json"
+VERTICAL_GENERATOR_PATH = "./assets/json/generator/make_it_christian/make_it_christian_v.soju.json"
 
 
 
@@ -170,7 +170,6 @@ async def edit(params= {}) :
                 "file": "logo.png"
             }
         ],
-
         "audio": [
             {
                 "duration": 0.3,

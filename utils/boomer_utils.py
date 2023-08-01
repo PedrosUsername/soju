@@ -2,43 +2,43 @@ import json
 import requests
 import random
 
-from .settings import variables
+from .settings import constants
 from .enum.Enum import MergeStrategy, Trigger, Position, ImageFilesDir, VideoFilesDir, AudioFilesDir
 from . import moviepy_utils as mp
 
 
 
 
-DEFAULT_BOOMIN_TIME = variables.DEFAULT_BOOMIN_TIME
-DEFAULT_VIDEO_DURATION = variables.DEFAULT_VIDEO_DURATION
-DEFAULT_AUDIO_DURATION = variables.DEFAULT_AUDIO_DURATION
-DEFAULT_IMAGE_DURATION = variables.DEFAULT_IMAGE_DURATION
-DEFAULT_IMAGE_DIR = variables.DEFAULT_IMAGE_DIR
-DEFAULT_AUDIO_DIR = variables.DEFAULT_AUDIO_DIR
-DEFAULT_VIDEO_DIR = variables.DEFAULT_VIDEO_DIR
-MIN_RESOLUTION_SIZE = variables.MIN_RESOLUTION_SIZE
-MAX_MEDIA_DELAY = variables.MAX_MEDIA_DELAY
-MIN_MEDIA_DELAY = variables.MIN_MEDIA_DELAY
-DEFAULT_VIDEO_FILE = variables.DEFAULT_VIDEO_FILE
-DEFAULT_AUDIO_FILE = variables.DEFAULT_AUDIO_FILE
-DEFAULT_IMAGE_FILE = variables.DEFAULT_IMAGE_FILE
-DEFAULT_DELAY = variables.DEFAULT_IMAGE_TRIGGER_DELAY
+DEFAULT_BOOMIN_TIME = constants.DEFAULT_BOOMIN_TIME
+DEFAULT_VIDEO_DURATION = constants.DEFAULT_VIDEO_DURATION
+DEFAULT_AUDIO_DURATION = constants.DEFAULT_AUDIO_DURATION
+DEFAULT_IMAGE_DURATION = constants.DEFAULT_IMAGE_DURATION
+DEFAULT_IMAGE_DIR = constants.DEFAULT_IMAGE_DIR
+DEFAULT_AUDIO_DIR = constants.DEFAULT_AUDIO_DIR
+DEFAULT_VIDEO_DIR = constants.DEFAULT_VIDEO_DIR
+MIN_RESOLUTION_SIZE = constants.MIN_RESOLUTION_SIZE
+MAX_MEDIA_DELAY = constants.MAX_MEDIA_DELAY
+MIN_MEDIA_DELAY = constants.MIN_MEDIA_DELAY
+DEFAULT_VIDEO_FILE = constants.DEFAULT_VIDEO_FILE
+DEFAULT_AUDIO_FILE = constants.DEFAULT_AUDIO_FILE
+DEFAULT_IMAGE_FILE = constants.DEFAULT_IMAGE_FILE
+DEFAULT_DELAY = constants.DEFAULT_IMAGE_TRIGGER_DELAY
 DEFAULT_POSITION = Position.get("CENTER")
-DEFAULT_VIDEO_WIDTH = variables.DEFAULT_VIDEO_RESOLUTION_WIDTH
-DEFAULT_IMAGE_WIDTH = variables.DEFAULT_IMAGE_RESOLUTION_WIDTH
+DEFAULT_VIDEO_WIDTH = constants.DEFAULT_VIDEO_RESOLUTION_WIDTH
+DEFAULT_IMAGE_WIDTH = constants.DEFAULT_IMAGE_RESOLUTION_WIDTH
 DEFAULT_IMAGE_MERGESTRATEGY = MergeStrategy.get("COMPOSE")
 DEFAULT_VIDEO_MERGESTRATEGY = MergeStrategy.get("CONCAT")
 DEFAULT_BOOM_TRIGGER = Trigger.get("START")
-DEFAULT_API_NAME = variables.DEFAULT_API_NAME
-DEFAULT_API_MODEL = variables.DEFAULT_API_MODEL
-OVERLAY_SIZE_TOLERANCE = variables.OVERLAY_SIZE_TOLERANCE
-MAX_MEDIA_INSERT_DURATION = variables.MAX_MEDIA_INSERT_DURATION
-MIN_MEDIA_INSERT_DURATION = variables.MIN_MEDIA_INSERT_DURATION
-MAX_MEDIA_VOLUME = variables.MAX_MEDIA_VOLUME
-MIN_MEDIA_VOLUME = variables.MIN_MEDIA_VOLUME
-DEFAULT_VIDEO_VOL = variables.DEFAULT_VIDEO_VOLUME
-DEFAULT_AUDIO_VOL = variables.DEFAULT_AUDIO_VOLUME
-
+DEFAULT_API_NAME = constants.DEFAULT_API_NAME
+DEFAULT_API_MODEL = constants.DEFAULT_API_MODEL
+OVERLAY_SIZE_TOLERANCE = constants.OVERLAY_SIZE_TOLERANCE
+MAX_MEDIA_INSERT_DURATION = constants.MAX_MEDIA_INSERT_DURATION
+MIN_MEDIA_INSERT_DURATION = constants.MIN_MEDIA_INSERT_DURATION
+MAX_MEDIA_VOLUME = constants.MAX_MEDIA_VOLUME
+MIN_MEDIA_VOLUME = constants.MIN_MEDIA_VOLUME
+DEFAULT_VIDEO_VOL = constants.DEFAULT_VIDEO_VOLUME
+DEFAULT_AUDIO_VOL = constants.DEFAULT_AUDIO_VOLUME
+DEFAULT_GENERATOR_PATH = constants.DEFAULT_GENERATOR_PATH
 
 
 
@@ -1587,7 +1587,7 @@ def prepare_boomer_gen_gens_api(api= None) :
         healthy_api["model"] = getGeneralsApiModel(api)
     
     else :
-        dgenerator = open("./assets/json/dgenerator.soju.json")
+        dgenerator = open(DEFAULT_GENERATOR_PATH)
         healthy_api = json.load(dgenerator)["soju"]["generator"].get("generals").get("api")
 
     return healthy_api
@@ -1605,7 +1605,7 @@ def prepare_boomer_gen_generals(generals= None) :
         healthy_generals["randomtimestamps"] = getGeneralsRandomTimestamps(generals)
     
     else :
-        dgenerator = open("./assets/json/dgenerator.soju.json")
+        dgenerator = open(DEFAULT_GENERATOR_PATH)
         healthy_generals = json.load(dgenerator)["soju"]["generator"].get("generals")
 
     return healthy_generals
@@ -1681,7 +1681,7 @@ def prepare_boomer_gen_defaults(boomer= None) :
         if boomer_audio :            
             healthy_defaults["audio"] = boomer_audio
     else :
-        dgenerator = open("./assets/json/dgenerator.soju.json")
+        dgenerator = open(DEFAULT_GENERATOR_PATH)
         healthy_defaults = json.load(dgenerator)["soju"]["generator"].get("defaults")                  
 
     return healthy_defaults
@@ -1709,13 +1709,17 @@ def as_json_int(value= "") :
 def prepare_boomer_generator(generator= None) :
     healthy_generator = {}
 
+    print("**********************8 sdofufa8wu", generator)
+
     if type(generator) is dict :
         healthy_generator["generals"] = prepare_boomer_gen_generals(generator.get("generals"))
         healthy_generator["defaults"] = prepare_boomer_gen_defaults(generator.get("defaults"))
     else :
-        dgenerator = open("./assets/json/dgenerator.soju.json")
+        dgenerator = open(DEFAULT_GENERATOR_PATH)
         healthy_generator = json.load(dgenerator).get("soju").get("generator")
-        
+    
+    print("**********************8 sdofufa8wu", healthy_generator)
+
     return healthy_generator
 
 
@@ -1795,26 +1799,26 @@ def create_boomer_generator_as_str(generator= None) :
     else :
         addvid = True
 
-        dapin = as_json_string(variables.DEFAULT_API_NAME)
-        dapim = as_json_string(variables.DEFAULT_API_MODEL)
+        dapin = as_json_string(constants.DEFAULT_API_NAME)
+        dapim = as_json_string(constants.DEFAULT_API_MODEL)
 
-        dbt = variables.DEFAULT_BOOM_TRIGGER
+        dbt = constants.DEFAULT_BOOM_TRIGGER
 
         boomer_image = [
             {
-                "file": variables.DEFAULT_IMAGE_FILE,
+                "file": constants.DEFAULT_IMAGE_FILE,
             }
         ]
 
         boomer_video = [
             {
-                "file": variables.DEFAULT_VIDEO_FILE,
+                "file": constants.DEFAULT_VIDEO_FILE,
             }
         ]
         
         boomer_audio = [
             {
-                "file": variables.DEFAULT_AUDIO_FILE,
+                "file": constants.DEFAULT_AUDIO_FILE,
             }
         ]        
 
