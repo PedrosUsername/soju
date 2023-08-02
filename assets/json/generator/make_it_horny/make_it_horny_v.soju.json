@@ -15,7 +15,7 @@
                 
                 "image": [
                     {
-                        "duration": 0.3,
+                        "duration": 0.2,
                         "mergestrategy": "concat",
                         "dir": "horny_v"
                     }
@@ -23,7 +23,7 @@
 
                 "audio": [
                     {
-                        "duration": 0.3,
+                        "duration": 0.2,
                         "dir": "scary"
                     }
                 ]

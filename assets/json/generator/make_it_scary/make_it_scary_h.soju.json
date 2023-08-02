@@ -10,14 +10,14 @@
             "defaults": {
                 "word": {
                     "content": "...",
-                    "trigger": "end"
+                    "trigger": "start"
                 },
                 
                 "image": [
                     {
                         "duration": 0.2,
                         "mergestrategy": "concat",
-                        "dir": "christian_v"
+                        "dir": "scary_h"
                     }
                 ],
 

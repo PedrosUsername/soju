@@ -15,15 +15,15 @@
                 
                 "image": [
                     {
-                        "duration": 0.2,
+                        "duration": 0.3,
                         "mergestrategy": "concat",
-                        "dir": "christian_v"
+                        "dir": "scary_v"
                     }
                 ],
 
                 "audio": [
                     {
-                        "duration": 0.2,
+                        "duration": 0.3,
                         "dir": "scary"
                     }
                 ]
