@@ -23,6 +23,24 @@ SUPPORT_DURATION = INTERVAL_DIFF_NOVOSK_DESCRIBE / 3
 
 
 
+def frange(start, stop=None, step=None):
+    # if set start=0.0 and step = 1.0 if not specified
+    start = float(start)
+    if stop == None:
+        stop = start + 0.0
+        start = 0.0
+    if step == None:
+        step = 1.0
+
+    count = 0
+    while True:
+        temp = float(start + count * step)
+        if step > 0 and temp >= stop:
+            break
+        elif step < 0 and temp <= stop:
+            break
+        yield temp
+        count += 1
 
 
 
@@ -57,7 +75,7 @@ def get_boomers_without_vosk(
     
     for _ in range(qtd_boomers) :
         word = default_boomer.get("word") if default_boomer.get("word") else {}
-        word["start"] = random.choice(range(interval_start, interval_end))
+        word["start"] = random.choice(list(frange(interval_start, interval_end, 0.1)))
         word["end"] = word["start"]
 
         g_boomer = bu.buildBoomer(

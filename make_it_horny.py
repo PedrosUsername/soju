@@ -176,7 +176,11 @@ async def on_startup():
     print("Bot is ready!")
 
 
-@cooldown(Buckets.USER, 1, 7) 
+@cooldown(
+    bucket= Buckets.USER,
+    rate= 1,
+    interval= 7
+) 
 @message_context_menu(
     name= BOT_COMMAND_NAME,
 )
@@ -218,14 +222,14 @@ async def prepare_and_edit(ctx: ContextMenuContext):
                     },        
                     "image": [
                         {
-                            "duration": 0.3,
+                            "duration": 0.2,
                             "mergestrategy": "concat",
                             "dir": credits_image_dir,
                         }
                     ],
                     "audio": [
                         {
-                            "duration": 0.3,
+                            "duration": 0.2,
                             "dir": "scary"
                         }
                     ]
